@@ -1,0 +1,15 @@
+*.img
+*.xz
+*.iso
+*.raw
+*.tar.gz
+*.box
+xbps-cache
+xbps-cachedir*
+base-custom*
+base-minimal*
+base-basesystem*
+base-voidstrap*
+stamps*
+!dracut/*/*.sh
+!packer/scripts/*.sh
