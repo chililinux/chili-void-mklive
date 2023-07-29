@@ -160,6 +160,7 @@ install_packages() {
 	 install -Dm755 void-gitclone "$ROOTFS"/usr/bin/void-gitclone
 	 install -Dm755 void-xrandr "$ROOTFS"/usr/bin/void-xrandr
 	 install -Dm755 void-runimage "$ROOTFS"/usr/bin/void-runimage
+	 install -Dm755 void-maketar "$ROOTFS"/usr/bin/void-maketar
 	 install -Dm755 fetch "$ROOTFS"/usr/bin/fetch
     if [ -x installer.sh ]; then
         install -Dm755 installer.sh "$ROOTFS"/usr/sbin/void-installer

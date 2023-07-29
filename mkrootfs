@@ -275,6 +275,7 @@ main() {
 	[ -e void-wifi           ] && install -Dm755 void-wifi       "$ROOTFS"/usr/bin/
 	[ -e void-xrandr         ] && install -Dm755 void-xrandr     "$ROOTFS"/usr/bin/
 	[ -e void-runimage       ] && install -Dm755 void-runimage   "$ROOTFS"/usr/bin/
+	[ -e void-maketar        ] && install -Dm755 void-maketar    "$ROOTFS"/usr/bin/
 	[ -e fetch		          ] && install -Dm755 fetch           "$ROOTFS"/usr/bin/
 
 	# At this point we're done running things in the chroot and we can
