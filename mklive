@@ -178,7 +178,8 @@ install_packages() {
     [ -e bashrc.sh           ] && install -Dm755 bashrc.sh      "$ROOTFS"/etc/skel/.bashrc
     [ -e bashrc.sh           ] && install -Dm755 bashrc.sh      "$ROOTFS"/root/.bashrc
     [ -e bashrc.sh           ] && install -Dm755 bashrc.sh      "$ROOTFS"/etc/bash/bashrc.d/bashrc.sh
-    [ -e .bash_profile      ] && install -Dm755 .bash_profile   "$ROOTFS"/root/.bash_profile
+    [ -e .bashrc             ] && install -Dm755 .bashrc        "$ROOTFS"/root/.bashrc
+    [ -e .bash_profile       ] && install -Dm755 .bash_profile   "$ROOTFS"/root/.bash_profile
     [ -e .bashrckali         ] && install -Dm755 .bashrckali    "$ROOTFS"/root/.bashrckali
     [ -e .bashrckali         ] && install -Dm755 .bashrckali    "$ROOTFS"/etc/skel/.bashrckali
 
