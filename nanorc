@@ -19,7 +19,7 @@
 ## Automatically indent a newly created line to the same number of
 ## tabs and/or spaces as the preceding line -- or as the next line
 ## if the preceding line is the beginning of a paragraph.
-set autoindent
+# set autoindent
 
 ## Back up files to the current filename plus a tilde.
 # set backup
@@ -28,7 +28,7 @@ set autoindent
 # set backupdir ""
 
 ## Use bold text instead of reverse video text.
-# set boldtext
+set boldtext
 
 ## Treat any line with leading whitespace as the beginning of a paragraph.
 # set bookstyle
@@ -80,7 +80,7 @@ set historylog
 # set locking
 
 ## Fall back to slow libmagic to try and determine an applicable syntax.
-# set magic
+set magic
 
 ## The opening and closing brackets that are found by a matching-bracket
 ## search.  This may not contain blank characters.  The opening brackets
@@ -142,7 +142,7 @@ set positionlog
 
 ## Do regular-expression searches by default.
 ## Regular expressions are of the extended type (ERE).
-#set regexp
+# set regexp
 
 ## Save a changed buffer automatically on exit; don't prompt.
 # set saveonexit
