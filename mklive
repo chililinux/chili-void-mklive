@@ -150,37 +150,46 @@ install_packages() {
     fi
     chroot "$ROOTFS" env -i xbps-reconfigure -a
 
-	 install -Dm755 void-install "$ROOTFS"/usr/bin/void-install
-	 install -Dm755 void-clonedisk "$ROOTFS"/usr/bin/void-clonedisk
-	 install -Dm755 void-remove-vg "$ROOTFS"/usr/bin/void-remove-vg
-	 install -Dm755 void-mirror "$ROOTFS"/usr/bin/void-mirror
-	 install -Dm755 void-testmirror "$ROOTFS"/usr/bin/void-testmirror
-	 install -Dm755 void-wifi "$ROOTFS"/usr/bin/void-wifi
-	 install -Dm755 void-services "$ROOTFS"/usr/bin/void-services
-	 install -Dm755 void-gitclone "$ROOTFS"/usr/bin/void-gitclone
-	 install -Dm755 void-xrandr "$ROOTFS"/usr/bin/void-xrandr
-	 install -Dm755 void-runimage "$ROOTFS"/usr/bin/void-runimage
-	 install -Dm755 void-maketar "$ROOTFS"/usr/bin/void-maketar
-	 install -Dm755 fetch "$ROOTFS"/usr/bin/fetch
+	print_step "Ajustando bashrc into the rootfs:"
+
+	[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
+   [ -e .bashrc             ] && install -Dm755 .bashrc        "$ROOTFS"/etc/skel/.bashrc
+   [ -e .bashrc             ] && install -Dm755 .bashrc        "$ROOTFS"/root/.bashrc
+   [ -e .ps1                ] && install -Dm755 .ps1           "$ROOTFS"/etc/skel/.ps1
+   [ -e .ps1                ] && install -Dm755 .ps1           "$ROOTFS"/root/.ps1
+   [ -e .git-prompt.sh      ] && install -Dm755 .git-prompt.sh "$ROOTFS"/etc/skel/.git-prompt.sh
+   [ -e .git-prompt.sh      ] && install -Dm755 .git-prompt.sh "$ROOTFS"/root/.git-prompt.sh
+   [ -e .dircolors          ] && install -Dm755 .dircolors     "$ROOTFS"/etc/skel/.dircolors
+   [ -e .dircolors          ] && install -Dm755 .dircolors     "$ROOTFS"/root/.dircolors
+   [ -e bashrc.sh           ] && install -Dm755 bashrc.sh      "$ROOTFS"/etc/bash/bashrc.d/bashrc.sh
+   [ -e .bash_profile       ] && install -Dm755 .bash_profile  "$ROOTFS"/etc/skel/.bash_profile
+   [ -e .bash_profile       ] && install -Dm755 .bash_profile  "$ROOTFS"/root/.bash_profile
+   [ -e .bashrckali         ] && install -Dm755 .bashrckali    "$ROOTFS"/root/.bashrckali
+   [ -e .bashrckali         ] && install -Dm755 .bashrckali    "$ROOTFS"/etc/skel/.bashrckali
+   [ -e .bashrcfull         ] && install -Dm755 .bashrcfull    "$ROOTFS"/root/.bashrcfull
+   [ -e .bashrcfull         ] && install -Dm755 .bashrcfull    "$ROOTFS"/etc/skel/.bashrcfull
+
+   [ -e nanorc              ] && install -Dm755 .nanorc        "$ROOTFS"/etc/nanorc
+
+   [ -e void-install        ] && install -Dm755 void-install    "$ROOTFS"/usr/bin/
+   [ -e void-clonedisk      ] && install -Dm755 void-clonedisk  "$ROOTFS"/usr/bin/
+   [ -e void-gitclone       ] && install -Dm755 void-gitclone   "$ROOTFS"/usr/bin/
+   [ -e void-mirror         ] && install -Dm755 void-mirror     "$ROOTFS"/usr/bin/
+   [ -e void-remove-vg      ] && install -Dm755 void-remove-vg  "$ROOTFS"/usr/bin/
+   [ -e void-services       ] && install -Dm755 void-services   "$ROOTFS"/usr/bin/
+   [ -e void-testmirror     ] && install -Dm755 void-testmirror "$ROOTFS"/usr/bin/
+   [ -e void-wifi           ] && install -Dm755 void-wifi       "$ROOTFS"/usr/bin/
+   [ -e void-xrandr         ] && install -Dm755 void-xrandr     "$ROOTFS"/usr/bin/
+   [ -e void-runimage       ] && install -Dm755 void-runimage   "$ROOTFS"/usr/bin/
+   [ -e void-maketar        ] && install -Dm755 void-maketar    "$ROOTFS"/usr/bin/
+   [ -e fetch               ] && install -Dm755 fetch           "$ROOTFS"/usr/bin/
+
+
     if [ -x installer.sh ]; then
         install -Dm755 installer.sh "$ROOTFS"/usr/sbin/void-installer
     else
         install -Dm755 /usr/sbin/void-installer "$ROOTFS"/usr/sbin/void-installer
     fi
-
-	print_step "Ajustando bashrc into the rootfs:"
-
-    [ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
-    [ -e .ps1                ] && install -Dm755 .ps1           "$ROOTFS"/etc/skel/.ps1
-    [ -e .git-prompt.sh      ] && install -Dm755 .git-prompt.sh "$ROOTFS"/etc/skel/.git-prompt.sh
-    [ -e .dircolors          ] && install -Dm755 .dircolors     "$ROOTFS"/etc/skel/.dircolors
-    [ -e .dircolors          ] && install -Dm755 .dircolors     "$ROOTFS"/root/.dircolors
-    [ -e bashrc.sh           ] && install -Dm755 bashrc.sh      "$ROOTFS"/etc/skel/.bashrc
-    [ -e bashrc.sh           ] && install -Dm755 bashrc.sh      "$ROOTFS"/root/.bashrc
-    [ -e bashrc.sh           ] && install -Dm755 bashrc.sh      "$ROOTFS"/etc/bash/bashrc.d/bashrc.sh
-    [ -e .bash_profile      ] && install -Dm755 .bash_profile   "$ROOTFS"/root/.bash_profile
-    [ -e .bashrckali         ] && install -Dm755 .bashrckali    "$ROOTFS"/root/.bashrckali
-    [ -e .bashrckali         ] && install -Dm755 .bashrckali    "$ROOTFS"/etc/skel/.bashrckali
 
     # Cleanup and remove useless stuff.
     rm -rf "$ROOTFS"/var/cache/* "$ROOTFS"/run/* "$ROOTFS"/var/run/*
