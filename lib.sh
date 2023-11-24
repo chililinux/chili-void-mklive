@@ -348,8 +348,12 @@ rk33xx_flash_uboot() {
 #                      --repository=https://repo-default.voidlinux.org/current/musl \
 #                      --repository=https://repo-default.voidlinux.org/current/aarch64}"
 
-: "${XBPS_REPOSITORY:=--repository=https://void.chililinux.com/voidlinux/current \
-							 --repository=https://void.chililinux.com/voidlinux/current/extras}"
+#: "${XBPS_REPOSITORY:=--repository=https://void.chililinux.com/voidlinux/current \
+#					 --repository=https://void.chililinux.com/voidlinux/current/extras}"
+
+: "${XBPS_REPOSITORY:=--repository=http://localhost:92/voidlinux/current \
+					  --repository=http://localhost:92/voidlinux/current/extras}"
+
 
 # This library is the authoritative source of the platform map,
 # because of this we may need to get this information from the command
