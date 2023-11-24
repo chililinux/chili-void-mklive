@@ -42,7 +42,7 @@ pink=$(tput setaf 5)
 trap 'error_out $? $LINENO' INT TERM 0
 umask 022
 
-readonly ADDITIONAL_PKGS="bash dialog lynx curl wget pv nano parted efivar efibootmgr grub grub-x86_64-efi grub-utils curl wget xz zstd \
+readonly ADDITIONAL_PKGS="bash dialog gettext lynx curl wget pv nano parted efivar efibootmgr grub grub-x86_64-efi grub-utils curl wget xz zstd \
 git bc geoip geoip-data geoipupdate iputils \
 lvm2 cryptsetup \
 xtools vpm vsv neofetch pfetch inxi \
@@ -371,7 +371,9 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:v:h" opt; do
 done
 shift $((OPTIND - 1))
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-default.voidlinux.org/current --repository=https://repo-default.voidlinux.org/current/musl"
-XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://void.chililinux.com/voidlinux/current"
+#XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://void.chililinux.com/voidlinux/current"
+XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://100.97.0.15:92/voidlinux/current --repository=http://100.97.0.15:92/voidlinux/current/extras"
+
 # Configure dracut to use overlayfs for the writable overlay.
 BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "
 ARCH=$(xbps-uhelper arch)
