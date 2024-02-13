@@ -218,6 +218,9 @@ install_packages() {
 		install -Dm755 /usr/sbin/void-installer "$ROOTFS"/usr/sbin/void-installer
 	fi
 
+	[ -e void-install-pkexec ] && install -Dm755 void-install-pkexec "$ROOTFS"/usr/bin/
+	[ -e install.desktop     ] && install -Dm755 install.desktop "$ROOTFS"/etc/skel/Desktop/install.desktop
+
 	# Cleanup and remove useless stuff.
 	rm -rf "$ROOTFS"/var/cache/* "$ROOTFS"/run/* "$ROOTFS"/var/run/*
 }
