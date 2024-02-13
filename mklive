@@ -69,12 +69,13 @@ ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bl
 ADDITIONAL_PKGS+=" NetworkManager network-manager-applet gvfs gvfs-smb gvfs-cdda inetutils iputils"
 ADDITIONAL_PKGS+=" setxkbmap numlockx nitrogen ristretto mate-notification-daemon"
 ADDITIONAL_PKGS+=" lxterminal rxvt-unicode xfce4-terminal"
-ADDITIONAL_PKGS+=" nano vim kate5"
+ADDITIONAL_PKGS+=" nano vim mousepad"
 ADDITIONAL_PKGS+=" wget curl git"
 ADDITIONAL_PKGS+=" gettext binutils sed grep tree pv parted gparted"
 ADDITIONAL_PKGS+=" neofetch pfetch bc bat bash-completion vsv vpm xtools geoip geoipupdate irqbalance"
 ADDITIONAL_PKGS+=" intel-ucode linux-firmware-amd"
 ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver brother-brlaser cups-pdf"
+ADDITIONAL_PKGS+=" vlc mate-calc"
 #ADDITIONAL_PKGS+=" nano-syntax-highlighting"
 
 #pacman
@@ -197,9 +198,7 @@ install_packages() {
 	[ -e .bashrckali ] && install -Dm755 .bashrckali "$ROOTFS"/etc/skel/.bashrckali
 	[ -e .bashrcfull ] && install -Dm755 .bashrcfull "$ROOTFS"/root/.bashrcfull
 	[ -e .bashrcfull ] && install -Dm755 .bashrcfull "$ROOTFS"/etc/skel/.bashrcfull
-
-	[ -e nanorc ] && install -Dm755 .nanorc "$ROOTFS"/etc/nanorc
-
+	[ -e nanorc ] && install -Dm755 nanorc "$ROOTFS"/etc/nanorc
 	[ -e void-install ] && install -Dm755 void-install "$ROOTFS"/usr/bin/
 	[ -e void-clonedisk ] && install -Dm755 void-clonedisk "$ROOTFS"/usr/bin/
 	[ -e void-gitclone ] && install -Dm755 void-gitclone "$ROOTFS"/usr/bin/
@@ -431,7 +430,8 @@ if [ "$(id -u)" -ne 0 ]; then
 	die "Must be run as root, exiting..."
 fi
 
-ROOTDIR='/tmp'
+#ROOTDIR='/tmp'
+ROOTDIR='/dev/shm'
 
 if [ -n "$ROOTDIR" ]; then
 	BUILDDIR=$(mktemp --tmpdir="$ROOTDIR" -d)
