@@ -53,10 +53,16 @@ ADDITIONAL_PKGS+=" wifi-firmware rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
 
 #xfce
 ADDITIONAL_PKGS+=" xorg xorg-video-drivers xorg-fonts xfce4"
-ADDITIONAL_PKGS+=" xfce4"
 ADDITIONAL_PKGS+=" lxdm lxappearance lxinput lxrandr lxtask"
 ADDITIONAL_PKGS+=" xinit xterm dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
 ADDITIONAL_PKGS+=" plank xfce4-whiskermenu-plugin"
+ADDITIONAL_PKGS+=" xfce4 xfce4-appfinder xfce4-battery-plugin xfce4-clipman-plugin xfce4-cpufreq-plugin"
+ADDITIONAL_PKGS+=" xfce4-cpugraph-plugin xfce4-datetime-plugin xfce4-dict xfce4-diskperf-plugin xfce4-fsguard-plugin"
+ADDITIONAL_PKGS+=" xfce4-genmon-plugin xfce4-mailwatch-plugin xfce4-mpc-plugin xfce4-netload-plugin xfce4-notifyd"
+ADDITIONAL_PKGS+=" xfce4-panel xfce4-pulseaudio-plugin xfce4-power-manager xfce4-screensaver xfce4-session"
+ADDITIONAL_PKGS+=" xfce4-settings xfce4-screenshooter xfce4-sensors-plugin xfce4-systemload-plugin xfce4-taskmanager"
+ADDITIONAL_PKGS+=" xfce4-time-out-plugin xfce4-timer-plugin xfce4-verve-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin"
+ADDITIONAL_PKGS+=" xfce4-wavelan-plugin xfce4-xkb-plugin"
 
 ADDITIONAL_PKGS+=" xarchiver zip p7zip unzip bzip2"
 ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR lynx"
@@ -507,7 +513,7 @@ install_packages
 : ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd dhcpcd}
 : ${ADDITIONAL_SERVICE_LIST:=dbus polkitd elogind udevd irqbalance lxdm NetworkManager}
 print_step "Enabling services: ${SERVICE_LIST} ..."
-enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST ${ADDITIONAL_SERVICE_LIST}}
+enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST} ${ADDITIONAL_SERVICE_LIST}
 
 if [ -n "${INCLUDE_DIRECTORY}" ]; then
 	print_step "Copying directory structure into the rootfs: ${INCLUDE_DIRECTORY} ..."
