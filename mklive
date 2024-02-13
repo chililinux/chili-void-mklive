@@ -502,8 +502,9 @@ install_packages
 
 #: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd}
 : ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd dhcpcd}
+: ${ADDITIONAL_SERVICE_LIST:=dbus polkitd elogind udevd irqbalance lxdm NetworkManager}
 print_step "Enabling services: ${SERVICE_LIST} ..."
-enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST}
+enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST ${ADDITIONAL_SERVICE_LIST}}
 
 if [ -n "${INCLUDE_DIRECTORY}" ]; then
 	print_step "Copying directory structure into the rootfs: ${INCLUDE_DIRECTORY} ..."
