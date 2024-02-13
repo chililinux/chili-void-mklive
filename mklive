@@ -51,10 +51,34 @@ ADDITIONAL_PKGS+=" git bc geoip geoipupdate iputils lvm2 cryptsetup"
 ADDITIONAL_PKGS+=" xtools vpm vsv neofetch pfetch inxi"
 ADDITIONAL_PKGS+=" wifi-firmware rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
 
+#xfce
 ADDITIONAL_PKGS+=" xorg xorg-video-drivers xorg-fonts xfce4"
 ADDITIONAL_PKGS+=" xfce4"
 ADDITIONAL_PKGS+=" lxdm lxappearance lxinput lxrandr lxtask"
 ADDITIONAL_PKGS+=" xinit xterm dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
+ADDITIONAL_PKGS+=" plank xfce4-whiskermenu-plugin"
+
+ADDITIONAL_PKGS+=" xarchiver zip p7zip unzip bzip2"
+ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR lynx"
+ADDITIONAL_PKGS+=" gnome-backgrounds mate-backgrounds"
+ADDITIONAL_PKGS+=" bluez bluez-alsa bluedevil blueman bluez-cups"
+ADDITIONAL_PKGS+=" Thunar pcmanfm octoxbps"
+ADDITIONAL_PKGS+=" liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font noto-fonts-emoji font-emoji-one-color ttf-ubuntu-font-family"
+ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
+ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
+ADDITIONAL_PKGS+=" NetworkManager network-manager-applet gvfs gvfs-smb gvfs-cdda inetutils iputils"
+ADDITIONAL_PKGS+=" setxkbmap numlockx nitrogen ristretto mate-notification-daemon"
+ADDITIONAL_PKGS+=" lxterminal rxvt-unicode xfce4-terminal"
+ADDITIONAL_PKGS+=" nano vim kate5"
+ADDITIONAL_PKGS+=" wget curl git"
+ADDITIONAL_PKGS+=" gettext binutils sed grep tree pv parted gparted"
+ADDITIONAL_PKGS+=" neofetch pfetch bc bat bash-completion vsv vpm xtools geoip geoipupdate irqbalance"
+ADDITIONAL_PKGS+=" intel-ucode linux-firmware-amd"
+ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver brother-brlaser cups-pdf"
+#ADDITIONAL_PKGS+=" nano-syntax-highlighting"
+
+#pacman
+ADDITIONAL_PKGS+=" pacman fakeroot bsdtar"
 
 info_msg() {
 	printf "\033[1m$@\n\033[m"
@@ -377,7 +401,10 @@ shift $((OPTIND - 1))
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-default.voidlinux.org/current --repository=https://repo-default.voidlinux.org/current/musl"
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://void.chililinux.com/voidlinux/current"
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://100.97.0.15:92/voidlinux/current --repository=http://100.97.0.15:92/voidlinux/current/extras"
-XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-fastly.voidlinux.org/current"
+XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-fastly.voidlinux.org/current"\
+" --repository=https://repo-fastly.voidlinux.org/current/nonfree"\
+" --repository=https://repo-fastly.voidlinux.org/current/multilib"\
+" --repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree"
 
 # Configure dracut to use overlayfs for the writable overlay.
 BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "
