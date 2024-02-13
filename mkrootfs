@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #-
 # Copyright (c) 2013-2015 Juan Romero Pardines.
 # Copyright (c) 2017 Google
@@ -29,10 +29,15 @@ readonly PROGNAME=$(basename "$0")
 readonly ARCH=$(uname -m)
 readonly REQTOOLS="xbps-install xbps-reconfigure tar xz"
 readonly aSysPkg=(base-minimal base-voidstrap base-system base-custom)
-declare ADDITIONAL_PKGS="gettext dbus grub wireless_tools xz wpa_supplicant dialog grub-void-theme nano nano-syntax-highlighting neofetch pfetch wget curl lvm2 cryptsetup zstd lynx vsv vpm opendoas openntpd pv"\
-" cpio kpartx dracut ipw2100-firmware ipw2200-firmware zd1211-firmware wifi-firmware linux-firmware-broadcom"
+declare ADDITIONAL_PKGS="gettext dbus grub wireless_tools xz wpa_supplicant"
+ADDITIONAL_PKGS+=" dialog nano neofetch pfetch wget curl lvm2 cryptsetup zstd lynx vsv vpm opendoas"
+ADDITIONAL_PKGS+=" openntpd pv cpio kpartx dracut ipw2100-firmware ipw2200-firmware zd1211-firmware"
+ADDITIONAL_PKGS+=" wifi-firmware linux-firmware-broadcom"
+#ADDITIONAL_PKGS+=" grub-void-theme"
+#ADDITIONAL_PKGS+=" nano-syntax-highlighting"
 declare -i quiet=0
-declare -i njobs=11 ncontador=0
+declare -i njobs=12
+declare -i ncontador=0
 
 # This source pulls in all the functions from lib.sh.  This set of
 # functions makes it much easier to work with chroots and abstracts

@@ -351,8 +351,15 @@ rk33xx_flash_uboot() {
 #: "${XBPS_REPOSITORY:=--repository=https://void.chililinux.com/voidlinux/current \
 #					 --repository=https://void.chililinux.com/voidlinux/current/extras}"
 
-: "${XBPS_REPOSITORY:=--repository=http://100.97.0.15:92/voidlinux/current \
-					  --repository=http://100.97.0.15:92/voidlinux/current/extras}"
+#: "${XBPS_REPOSITORY:=--repository=http://100.97.0.15:92/voidlinux/current \
+#					  --repository=http://100.97.0.15:92/voidlinux/current/extras}"
+
+: "${XBPS_REPOSITORY:=--repository=https://repo-fastly.voidlinux.org/current \
+    --repository=https://repo-fastly.voidlinux.org/current\
+    --repository=https://repo-fastly.voidlinux.org/current/nonfree\
+    --repository=https://repo-fastly.voidlinux.org/current/multilib\
+    --repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree}"
+
 
 
 # This library is the authoritative source of the platform map,
