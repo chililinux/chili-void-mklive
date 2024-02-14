@@ -85,7 +85,7 @@ ADDITIONAL_PKGS+=" gettext binutils sed grep tree pv parted gparted"
 ADDITIONAL_PKGS+=" neofetch pfetch bc bat bash-completion vsv vpm xtools geoip geoipupdate irqbalance"
 ADDITIONAL_PKGS+=" intel-ucode linux-firmware-amd"
 ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver brother-brlaser cups-pdf"
-ADDITIONAL_PKGS+=" vlc celluloid mate-calc avahi htop cmatrix tmate xkill evince menulibre"
+ADDITIONAL_PKGS+=" vlc celluloid mate-calc avahi htop cmatrix tmate xkill evince menulibre ocs-url"
 #ADDITIONAL_PKGS+=" nano-syntax-highlighting"
 
 #office
