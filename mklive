@@ -234,6 +234,10 @@ install_packages() {
 	[ -e void-install-pkexec ] && install -Dm755 void-install-pkexec "$ROOTFS"/usr/bin/
 	[ -e install.desktop     ] && install -Dm755 install.desktop "$ROOTFS"/etc/skel/Desktop/install.desktop
 
+    #skel
+	print_step "Copiando skel"
+    cp -Rpva etc/skel/. "$ROOTFS/etc/skel/"
+
 	# Cleanup and remove useless stuff.
 	rm -rf "$ROOTFS"/var/cache/* "$ROOTFS"/run/* "$ROOTFS"/var/run/*
 }

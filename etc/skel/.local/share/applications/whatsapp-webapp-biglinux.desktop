@@ -1,0 +1,16 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Terminal=false
+Type=Application
+Name=WhatsApp
+Exec=/usr/bin/biglinux-webapp --class="web.whatsapp.com,Chromium-browser" --profile-directory=Default --app=https://web.whatsapp.com
+Icon=webapp-whatsapp
+StartupWMClass=web.whatsapp.com
+Categories=Webapps;
+
+Actions=SoftwareRender;
+
+[Desktop Action SoftwareRender]
+Name=Software Render
+Exec=SoftwareRender /usr/bin/biglinux-webapp --class="web.whatsapp.com,Chromium-browser" --profile-directory=Default --app=https://web.whatsapp.com

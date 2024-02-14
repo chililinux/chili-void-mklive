@@ -1,0 +1,92 @@
+2019-03-03 19:26:14.542 (0x7fff6bb3ff10) Debug: New PolkitAgentListener  0x55d390405880
+2019-03-03 19:26:14.599 (0x7fff6bb3ff10) Debug: Adding new listener  PolkitQt1::Agent::Listener(0x7fff6bb3ff20) for  0x55d390405880
+2019-03-03 19:26:14.791 (0x7ffdcbc810b0) Debug: ()
+2019-03-03 19:26:14.946 (0x7fffb0d31d20) Debug: systemd: "CanHibernate" = "na"
+2019-03-03 19:26:14.947 (0x7fffb0d31d20) Warning: ** Dbus error **************************
+2019-03-03 19:26:14.947 (0x7fffb0d31d20) Warning: Error name  "org.freedesktop.DBus.Error.InvalidArgs"
+2019-03-03 19:26:14.947 (0x7fffb0d31d20) Warning: Error msg   "Nenhuma interface “org.freedesktop.DBus.Properties”"
+2019-03-03 19:26:14.947 (0x7fffb0d31d20) Warning: ****************************************
+2019-03-03 19:26:14.948 (0x7fffb0d31d20) Warning: dbusCall: QDBusInterface is invalid "org.freedesktop.ConsoleKit" "/org/freedesktop/ConsoleKit/Manager" "org.freedesktop.ConsoleKit.Manager" "CanHibernate"
+2019-03-03 19:26:14.951 (0x7fffb0d31d20) Debug: systemd: "CanSuspend" = "yes"
+2019-03-03 19:26:14.968 (0x7ffea4207fc0) Debug: systemd: "CanReboot" = "yes"
+2019-03-03 19:26:14.970 (0x7ffea4207fc0) Debug: systemd: "CanPowerOff" = "yes"
+2019-03-03 19:26:14.996 (0x7ffdcbc810b0) Debug: WinIdChange 1800008 handle QWidgetWindow(0x5622a22a8e10, name="LXQtPanel panel1Window") QScreen(0x5622a2096c00, name="VGA-1")
+2019-03-03 19:26:15.007 (0x7ffdcbc810b0) Debug: Systray started
+2019-03-03 19:26:15.224 (0x7ffc7c5d1790) Warning: Empty filename passed to function
+2019-03-03 19:26:15.322 (0x7ffd11454130) Debug: BatteryChanged discharging: true chargeLevel: nan actionTime: QTime(Invalid)
+2019-03-03 19:26:15.328 (0x7ffd11454130) Debug: Inhibit got: 25
+2019-03-03 19:26:15.439 (0x7ffd11454130) Debug: Starting idlenesswatcher
+2019-03-03 19:27:24.044 (0x7ffc702c8ec0) Warning: The X11 connection broke (error 1). Did the X11 server die?
+2019-03-03 19:27:27.733 (0x7ffc39d05080) Debug: New PolkitAgentListener  0x55f9ba3e7280
+2019-03-03 19:27:27.740 (0x7ffc39d05080) Debug: Adding new listener  PolkitQt1::Agent::Listener(0x7ffc39d05090) for  0x55f9ba3e7280
+2019-03-03 19:27:27.829 (0x7ffd6e6632c0) Debug: ()
+2019-03-03 19:27:28.034 (0x7ffefadf1cb0) Debug: systemd: "CanHibernate" = "na"
+2019-03-03 19:27:28.035 (0x7ffefadf1cb0) Warning: ** Dbus error **************************
+2019-03-03 19:27:28.035 (0x7ffefadf1cb0) Warning: Error name  "org.freedesktop.DBus.Error.InvalidArgs"
+2019-03-03 19:27:28.035 (0x7ffefadf1cb0) Warning: Error msg   "Nenhuma interface “org.freedesktop.DBus.Properties”"
+2019-03-03 19:27:28.035 (0x7ffefadf1cb0) Warning: ****************************************
+2019-03-03 19:27:28.036 (0x7ffefadf1cb0) Warning: dbusCall: QDBusInterface is invalid "org.freedesktop.ConsoleKit" "/org/freedesktop/ConsoleKit/Manager" "org.freedesktop.ConsoleKit.Manager" "CanHibernate"
+2019-03-03 19:27:28.039 (0x7ffefadf1cb0) Debug: systemd: "CanSuspend" = "yes"
+2019-03-03 19:27:28.057 (0x7ffd6e6632c0) Debug: WinIdChange 1e00008 handle QWidgetWindow(0x55738f2db240, name="LXQtPanel panel1Window") QScreen(0x55738f0c1c00, name="VGA-1")
+2019-03-03 19:27:28.077 (0x7ffd6e6632c0) Debug: Systray started
+2019-03-03 19:27:28.243 (0x7fff98506840) Debug: systemd: "CanReboot" = "yes"
+2019-03-03 19:27:28.245 (0x7fff98506840) Debug: systemd: "CanPowerOff" = "yes"
+2019-03-03 19:27:28.319 (0x7ffd57302830) Debug: Starting idlenesswatcher
+2019-03-03 19:30:27.816 (0x7ffdded1ccd0) Warning: Icon theme "oxygen" not found.
+2019-03-03 19:30:27.826 (0x7ffe4c8a6bd0) Warning: Icon theme "oxygen" not found.
+2019-03-03 19:30:48.555 (0x7ffe12913250) Debug: New PolkitAgentListener  0x563acbdfac80
+2019-03-03 19:30:48.558 (0x7ffe12913250) Debug: Adding new listener  PolkitQt1::Agent::Listener(0x7ffe12913260) for  0x563acbdfac80
+2019-03-03 19:30:48.627 (0x7ffdd63dce50) Debug: ()
+2019-03-03 19:30:48.831 (0x7ffe4b6b0ba0) Debug: systemd: "CanHibernate" = "na"
+2019-03-03 19:30:48.831 (0x7ffe4b6b0ba0) Warning: ** Dbus error **************************
+2019-03-03 19:30:48.832 (0x7ffe4b6b0ba0) Warning: Error name  "org.freedesktop.DBus.Error.InvalidArgs"
+2019-03-03 19:30:48.832 (0x7ffe4b6b0ba0) Warning: Error msg   "Nenhuma interface “org.freedesktop.DBus.Properties”"
+2019-03-03 19:30:48.832 (0x7ffe4b6b0ba0) Warning: ****************************************
+2019-03-03 19:30:48.832 (0x7ffe4b6b0ba0) Warning: dbusCall: QDBusInterface is invalid "org.freedesktop.ConsoleKit" "/org/freedesktop/ConsoleKit/Manager" "org.freedesktop.ConsoleKit.Manager" "CanHibernate"
+2019-03-03 19:30:48.836 (0x7ffe4b6b0ba0) Debug: systemd: "CanSuspend" = "yes"
+2019-03-03 19:30:48.840 (0x7ffd9fb90e60) Debug: systemd: "CanReboot" = "yes"
+2019-03-03 19:30:48.844 (0x7ffd9fb90e60) Debug: systemd: "CanPowerOff" = "yes"
+2019-03-03 19:30:48.861 (0x7ffdd63dce50) Debug: WinIdChange 1c00028 handle QWidgetWindow(0x55eea3b46a40, name="LXQtPanel panel1Window") QScreen(0x55eea38bac00, name="VGA-1")
+2019-03-03 19:30:48.896 (0x7ffdd63dce50) Debug: Systray started
+2019-03-03 19:30:49.292 (0x7ffe65e40a00) Debug: Starting idlenesswatcher
+2019-03-03 19:32:59.795 (0x7ffdd63dce50) Warning: QXcbConnection: XCB error: 3 (BadWindow), sequence: 8506, resource id: 20971663, major code: 18 (ChangeProperty), minor code: 0
+2019-03-03 19:35:50.992 (0x7ffdd63dce50) Debug: Desktop count changed from 2 to 1
+2019-03-03 19:55:40.189 (0x7ffe02116730) Debug: Connecting to KScreen...
+2019-03-03 19:55:55.451 (0x7ffda1c62fd0) Warning: Empty filename passed to function
+2019-03-03 19:55:55.513 (0x7ffe65e40a00) Debug: BatteryChanged discharging: true chargeLevel: nan actionTime: QTime(Invalid)
+2019-03-03 19:56:06.215 (0x7ffe65e40a00) Debug: Inhibit got: 26
+2019-03-03 19:56:24.985 (0x7ffe718bead0) Debug: add "br" ""
+2019-03-03 19:56:25.005 (0x7ffe718bead0) Debug: Detected "VirtualBox mouse integration" on "/dev/input/event6"
+2019-03-03 19:56:25.006 (0x7ffe718bead0) Debug: Detected "VirtualBox USB Tablet" on "/dev/input/event5"
+2019-03-03 19:56:25.007 (0x7ffe718bead0) Debug: Detected "ImExPS/2 Generic Explorer Mouse" on "/dev/input/event4"
+2019-03-03 20:01:27.800 (0x7ffdd63dce50) Warning: QXcbConnection: XCB error: 3 (BadWindow), sequence: 19337, resource id: 39845927, major code: 18 (ChangeProperty), minor code: 0
+2019-03-03 20:01:37.739 (0x7ffdd63dce50) Warning: QXcbConnection: XCB error: 3 (BadWindow), sequence: 20770, resource id: 29361726, major code: 18 (ChangeProperty), minor code: 0
+2019-03-03 20:02:41.732 (0x7ffdd63dce50) Warning: QXcbConnection: XCB error: 3 (BadWindow), sequence: 37983, resource id: 29361756, major code: 18 (ChangeProperty), minor code: 0
+2019-03-03 20:02:43.884 (0x7ffdd63dce50) Debug: Service "org.freedesktop.StatusNotifierItem-4393-1" unregistered
+2019-03-03 20:03:14.055 (0x7ffdd63dce50) Warning: QXcbConnection: XCB error: 3 (BadWindow), sequence: 45157, resource id: 29363135, major code: 18 (ChangeProperty), minor code: 0
+2019-03-03 20:03:49.062 (0x7ffdd63dce50) Warning: QXcbConnection: XCB error: 3 (BadWindow), sequence: 65107, resource id: 29363600, major code: 18 (ChangeProperty), minor code: 0
+2019-03-03 20:07:47.403 (0x7ffdd63dce50) Debug: execAction "/usr/share/applications/firefox.desktop"
+2019-03-03 20:09:56.631 (0x7ffdd63dce50) Warning: QFont::setPointSize: Point size <= 0 (0), must be greater than 0
+2019-03-03 21:09:41.046 (0x7ffee295b140) Debug: New PolkitAgentListener  0x56080c240480
+2019-03-03 21:09:41.049 (0x7ffee295b140) Debug: Adding new listener  PolkitQt1::Agent::Listener(0x7ffee295b150) for  0x56080c240480
+2019-03-03 21:09:41.156 (0x7ffeefe9e930) Debug: ()
+2019-03-03 21:09:41.342 (0x7ffd1b1999e0) Debug: systemd: "CanHibernate" = "na"
+2019-03-03 21:09:41.343 (0x7ffd1b1999e0) Warning: ** Dbus error **************************
+2019-03-03 21:09:41.343 (0x7ffd1b1999e0) Warning: Error name  "org.freedesktop.DBus.Error.InvalidArgs"
+2019-03-03 21:09:41.343 (0x7ffd1b1999e0) Warning: Error msg   "Nenhuma interface “org.freedesktop.DBus.Properties”"
+2019-03-03 21:09:41.343 (0x7ffd1b1999e0) Warning: ****************************************
+2019-03-03 21:09:41.343 (0x7ffd1b1999e0) Warning: dbusCall: QDBusInterface is invalid "org.freedesktop.ConsoleKit" "/org/freedesktop/ConsoleKit/Manager" "org.freedesktop.ConsoleKit.Manager" "CanHibernate"
+2019-03-03 21:09:41.346 (0x7ffd1b1999e0) Debug: systemd: "CanSuspend" = "yes"
+2019-03-03 21:09:41.379 (0x7ffeefe9e930) Debug: WinIdChange 1c00028 handle QWidgetWindow(0x55ab7043d5d0, name="LXQtPanel panel1Window") QScreen(0x55ab70199c00, name="VGA-1")
+2019-03-03 21:09:41.397 (0x7ffeefe9e930) Debug: Systray started
+2019-03-03 21:09:41.544 (0x7ffc2ef5fc60) Debug: systemd: "CanReboot" = "yes"
+2019-03-03 21:09:41.546 (0x7ffc2ef5fc60) Debug: systemd: "CanPowerOff" = "yes"
+2019-03-03 21:09:41.685 (0x7ffffaf195d0) Warning: Empty filename passed to function
+2019-03-03 21:09:41.765 (0x7ffd426960d0) Debug: BatteryChanged discharging: true chargeLevel: nan actionTime: QTime(Invalid)
+2019-03-03 21:09:41.769 (0x7ffd426960d0) Debug: Inhibit got: 23
+2019-03-03 21:09:41.769 (0x7ffd426960d0) Debug: Starting idlenesswatcher
+2019-03-03 21:09:49.250 (0x7ffeefe9e930) Debug: execAction "/usr/share/applications/pcmanfm-qt.desktop"
+2019-03-03 21:09:51.151 (0x7ffeefe9e930) Warning: QXcbConnection: XCB error: 3 (BadWindow), sequence: 2414, resource id: 16777359, major code: 18 (ChangeProperty), minor code: 0
+2019-03-03 21:28:07.160 (0x7ffeefe9e930) Debug: Service "org.freedesktop.StatusNotifierItem-7649-1" unregistered
+2019-03-03 21:28:48.355 (0x7ffeefe9e930) Debug: execAction "/usr/share/applications/firefox.desktop"
+2019-03-03 21:31:33.673 (0x7ffeefe9e930) Debug: execAction "/usr/share/applications/pcmanfm-qt.desktop"

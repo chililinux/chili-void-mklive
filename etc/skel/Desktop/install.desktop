@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Instalar Void Linux
+Comment=Alministrador Bluetooth Blueman
+Icon=blueman
+Exec=/usr/bin/void-install-pkexec %f
+
+Terminal=true
+Type=Application
+Categories=
+Path=
+StartupNotify=false

@@ -1,0 +1,16 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Terminal=false
+Type=Application
+Name=Youtube
+Exec=/usr/bin/biglinux-webapp --class="youtube.com,Chromium-browser" --profile-directory=Default --app=https://youtube.com
+Icon=webapp-g-youtube
+StartupWMClass=youtube.com
+Categories=Google;
+
+Actions=SoftwareRender;
+
+[Desktop Action SoftwareRender]
+Name=Software Render
+Exec=SoftwareRender /usr/bin/biglinux-webapp --class="youtube.com,Chromium-browser" --profile-directory=Default --app=https://youtube.com
