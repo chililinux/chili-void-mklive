@@ -68,7 +68,7 @@ ADDITIONAL_PKGS+=" xfce4-settings xfce4-screenshooter xfce4-sensors-plugin xfce4
 ADDITIONAL_PKGS+=" xfce4-time-out-plugin xfce4-timer-plugin xfce4-verve-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin"
 ADDITIONAL_PKGS+=" xfce4-wavelan-plugin xfce4-xkb-plugin"
 
-ADDITIONAL_PKGS+=" xarchiver zip p7zip unzip bzip2"
+ADDITIONAL_PKGS+=" xarchiver unrar zip unzip p7zip bzip2 file-roller"
 ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR lynx"
 ADDITIONAL_PKGS+=" gnome-backgrounds mate-backgrounds"
 ADDITIONAL_PKGS+=" bluez bluez-alsa bluedevil blueman bluez-cups"
@@ -85,8 +85,11 @@ ADDITIONAL_PKGS+=" gettext binutils sed grep tree pv parted gparted"
 ADDITIONAL_PKGS+=" neofetch pfetch bc bat bash-completion vsv vpm xtools geoip geoipupdate irqbalance"
 ADDITIONAL_PKGS+=" intel-ucode linux-firmware-amd"
 ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver brother-brlaser cups-pdf"
-ADDITIONAL_PKGS+=" vlc mate-calc avahi htop cmatrix"
+ADDITIONAL_PKGS+=" vlc celluloid mate-calc avahi htop cmatrix tmate xkill evince menulibre"
 #ADDITIONAL_PKGS+=" nano-syntax-highlighting"
+
+#office
+ADDITIONAL_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
 
 #pacman
 ADDITIONAL_PKGS+=" pacman fakeroot bsdtar"
