@@ -32,12 +32,33 @@ export PS4='${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 #set -x
 #set -e
 
-bold=$(tput bold)
 reset=$(tput sgr0)
-red=$(tput setaf 1)
-green=$(tput setaf 2)
+# Definir os estilos de texto como variáveis
+bold=$(tput bold)
+underline=$(tput smul)   # Início do sublinhado
+nounderline=$(tput rmul) # Fim do sublinhado
+reverse=$(tput rev)      # Inverte as cores de fundo e texto
+# Definir as cores ANSI como variáveis
+black=$(tput bold)$(tput setaf 0)
+red=$(tput bold)$(tput setaf 196)
+green=$(tput bold)$(tput setaf 2)
 yellow=$(tput bold)$(tput setaf 3)
+blue=$(tput setaf 4)
 pink=$(tput setaf 5)
+magenta=$(tput setaf 5)
+cyan=$(tput setaf 6)
+white=$(tput setaf 7)
+gray=$(tput setaf 8)
+orange=$(tput setaf 202)
+purple=$(tput setaf 125)
+violet=$(tput setaf 61)
+light_red=$(tput setaf 9)
+light_green=$(tput setaf 10)
+light_yellow=$(tput setaf 11)
+light_blue=$(tput setaf 12)
+light_magenta=$(tput setaf 13)
+light_cyan=$(tput setaf 14)
+bright_white=$(tput setaf 15)
 
 trap 'error_out $? $LINENO' INT TERM 0
 umask 022
@@ -49,7 +70,7 @@ declare ADDITIONAL_PKGS="bash dialog gettext lynx curl wget pv nano parted efiva
 ADDITIONAL_PKGS+=" efibootmgr grub grub-x86_64-efi grub-utils curl wget xz zstd"
 ADDITIONAL_PKGS+=" git bc geoip geoipupdate iputils lvm2 cryptsetup"
 ADDITIONAL_PKGS+=" xtools vpm vsv neofetch pfetch inxi"
-ADDITIONAL_PKGS+=" wifi-firmware rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
+#ADDITIONAL_PKGS+=" wifi-firmware rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
 
 #xfce
 ADDITIONAL_PKGS+=" xorg xorg-video-drivers xorg-fonts xfce4"
@@ -103,7 +124,7 @@ die() {
 }
 print_step() {
 	CURRENT_STEP=$((CURRENT_STEP + 1))
-	info_msg "[${CURRENT_STEP}/${STEP_COUNT}] $@"
+	info_msg "$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
 }
 mount_pseudofs() {
 	for f in sys dev proc; do
@@ -152,78 +173,100 @@ _EOF
 	exit 1
 }
 
+sh_chroot_job() {
+    local cmsg="$1"
+    local cjob="$2"
+    local shell='/bin/bash'
+
+    print_step "$cmsg"
+#    chroot "$ROOTFS" "$shell" -c "$cjob" 2>&1
+    chroot "$ROOTFS" "$shell" -c "$cjob"  >/dev/null 2>&1
+}
+
 copy_void_keys() {
-	mkdir -p "$1"/var/db/xbps/keys
-	cp keys/*.plist "$1"/var/db/xbps/keys
+	mkdir -p "$1"/var/db/xbps/keys  >/dev/null 2>&1
+	cp keys/*.plist "$1"/var/db/xbps/keys  >/dev/null 2>&1
 }
 
 copy_dracut_files() {
-	mkdir -p "$1"/usr/lib/dracut/modules.d/01vmklive
-	cp dracut/vmklive/* "$1"/usr/lib/dracut/modules.d/01vmklive/
+	mkdir -p "$1"/usr/lib/dracut/modules.d/01vmklive  >/dev/null 2>&1
+	cp dracut/vmklive/* "$1"/usr/lib/dracut/modules.d/01vmklive/  >/dev/null 2>&1
 }
 
 copy_autoinstaller_files() {
-	mkdir -p "$1"/usr/lib/dracut/modules.d/01autoinstaller
-	cp dracut/autoinstaller/* "$1"/usr/lib/dracut/modules.d/01autoinstaller/
+	mkdir -p "$1"/usr/lib/dracut/modules.d/01autoinstaller  >/dev/null 2>&1
+	cp dracut/autoinstaller/* "$1"/usr/lib/dracut/modules.d/01autoinstaller/  >/dev/null 2>&1
 }
 
 install_prereqs() {
 	XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} \
-		-c "$XBPS_HOST_CACHEDIR" -y $REQUIRED_PKGS
+		-c "$XBPS_HOST_CACHEDIR" -y $REQUIRED_PKGS  >/dev/null 2>&1
 	[ $? -ne 0 ] && die "Failed to install required software, exiting..."
 }
 
 install_packages() {
 	XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" \
-		${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS
+		${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS  >/dev/null 2>&1
 	[ $? -ne 0 ] && die "Missing required binary packages, exiting..."
 
 	mount_pseudofs
 
 	LANG=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" \
-		${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $PACKAGE_LIST $INITRAMFS_PKGS
+		${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $PACKAGE_LIST $INITRAMFS_PKGS  >/dev/null 2>&1
 	[ $? -ne 0 ] && die "Failed to install $PACKAGE_LIST"
 
+	print_step "Reconfigurando o ambiente - pass 1"
 	xbps-reconfigure -r "$ROOTFS" -f base-files >/dev/null 2>&1
-	chroot "$ROOTFS" env -i xbps-reconfigure -f base-files
+	chroot "$ROOTFS" env -i xbps-reconfigure -f base-files  >/dev/null 2>&1
 
 	# Enable choosen UTF-8 locale and generate it into the target rootfs.
 	if [ -f "$ROOTFS"/etc/default/libc-locales ]; then
 		sed -e "s/\#\(${LOCALE}.*\)/\1/g" -i "$ROOTFS"/etc/default/libc-locales
 	fi
-	chroot "$ROOTFS" env -i xbps-reconfigure -a
 
-	print_step "Ajustando bashrc into the rootfs:"
+#	chroot "$ROOTFS" env -i xbps-reconfigure -a
+	sh_chroot_job "Reconfigurando o ambiente - pass 2" 'xbps-reconfigure -a'
 
+	print_step "Ajustando bashrc into the ROOTFS/root"
+	bash_files=(.bashrc
+            	.bash_profile
+            	.bashrckali
+            	.bashrcfull
+            	.ps1
+	            .ps1ok
+	            .ps1powerline
+	            .git-prompt.sh
+	            .dircolors
+            )
+
+    for x in "${bash_files[@]}"; do
+        install -Dm755 etc/skel/$x "$ROOTFS"/root/$x
+    done
+
+    #skel
+	print_step "Copiando skel into $ROOTFS/etc/skel"
 	[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
-	[ -e .bashrc ] && install -Dm755 .bashrc "$ROOTFS"/etc/skel/.bashrc
-	[ -e .bashrc ] && install -Dm755 .bashrc "$ROOTFS"/root/.bashrc
-	[ -e .ps1 ] && install -Dm755 .ps1 "$ROOTFS"/etc/skel/.ps1
-	[ -e .ps1 ] && install -Dm755 .ps1 "$ROOTFS"/root/.ps1
-	[ -e .git-prompt.sh ] && install -Dm755 .git-prompt.sh "$ROOTFS"/etc/skel/.git-prompt.sh
-	[ -e .git-prompt.sh ] && install -Dm755 .git-prompt.sh "$ROOTFS"/root/.git-prompt.sh
-	[ -e .dircolors ] && install -Dm755 .dircolors "$ROOTFS"/etc/skel/.dircolors
-	[ -e .dircolors ] && install -Dm755 .dircolors "$ROOTFS"/root/.dircolors
-	[ -e bashrc.sh ] && install -Dm755 bashrc.sh "$ROOTFS"/etc/bash/bashrc.d/bashrc.sh
-	[ -e .bash_profile ] && install -Dm755 .bash_profile "$ROOTFS"/etc/skel/.bash_profile
-	[ -e .bash_profile ] && install -Dm755 .bash_profile "$ROOTFS"/root/.bash_profile
-	[ -e .bashrckali ] && install -Dm755 .bashrckali "$ROOTFS"/root/.bashrckali
-	[ -e .bashrckali ] && install -Dm755 .bashrckali "$ROOTFS"/etc/skel/.bashrckali
-	[ -e .bashrcfull ] && install -Dm755 .bashrcfull "$ROOTFS"/root/.bashrcfull
-	[ -e .bashrcfull ] && install -Dm755 .bashrcfull "$ROOTFS"/etc/skel/.bashrcfull
-	[ -e nanorc ] && install -Dm755 nanorc "$ROOTFS"/etc/nanorc
-	[ -e void-install ] && install -Dm755 void-install "$ROOTFS"/usr/bin/
-	[ -e void-clonedisk ] && install -Dm755 void-clonedisk "$ROOTFS"/usr/bin/
-	[ -e void-gitclone ] && install -Dm755 void-gitclone "$ROOTFS"/usr/bin/
-	[ -e void-mirror ] && install -Dm755 void-mirror "$ROOTFS"/usr/bin/
-	[ -e void-remove-vg ] && install -Dm755 void-remove-vg "$ROOTFS"/usr/bin/
-	[ -e void-services ] && install -Dm755 void-services "$ROOTFS"/usr/bin/
+    cp -Rpa etc/skel/. "$ROOTFS/etc/skel/"
+
+	print_step "Ajustando skel into ROOTFS/etc/skel"
+	[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
+	[ -e bashrc    ] && install -Dm755 bashrc    "$ROOTFS"/etc/bashrc
+	[ -e bashrc.sh ] && install -Dm755 bashrc.sh "$ROOTFS"/etc/bashrc.d/bashrc.sh
+	[ -e nanorc    ] && install -Dm755 nanorc    "$ROOTFS"/etc/nanorc
+
+	print_step "Copiando aplicativos para ROOTFS/usr/bin"
+	[ -e void-install    ] && install -Dm755 void-install "$ROOTFS"/usr/bin/
+	[ -e void-clonedisk  ] && install -Dm755 void-clonedisk "$ROOTFS"/usr/bin/
+	[ -e void-gitclone   ] && install -Dm755 void-gitclone "$ROOTFS"/usr/bin/
+	[ -e void-mirror     ] && install -Dm755 void-mirror "$ROOTFS"/usr/bin/
+	[ -e void-remove-vg  ] && install -Dm755 void-remove-vg "$ROOTFS"/usr/bin/
+	[ -e void-services   ] && install -Dm755 void-services "$ROOTFS"/usr/bin/
 	[ -e void-testmirror ] && install -Dm755 void-testmirror "$ROOTFS"/usr/bin/
-	[ -e void-wifi ] && install -Dm755 void-wifi "$ROOTFS"/usr/bin/
-	[ -e void-xrandr ] && install -Dm755 void-xrandr "$ROOTFS"/usr/bin/
-	[ -e void-runimage ] && install -Dm755 void-runimage "$ROOTFS"/usr/bin/
-	[ -e void-maketar ] && install -Dm755 void-maketar "$ROOTFS"/usr/bin/
-	[ -e fetch ] && install -Dm755 fetch "$ROOTFS"/usr/bin/
+	[ -e void-wifi       ] && install -Dm755 void-wifi "$ROOTFS"/usr/bin/
+	[ -e void-xrandr     ] && install -Dm755 void-xrandr "$ROOTFS"/usr/bin/
+	[ -e void-runimage   ] && install -Dm755 void-runimage "$ROOTFS"/usr/bin/
+	[ -e void-maketar    ] && install -Dm755 void-maketar "$ROOTFS"/usr/bin/
+	[ -e fetch           ] && install -Dm755 fetch "$ROOTFS"/usr/bin/
 
 	if [ -x installer.sh ]; then
 		install -Dm755 installer.sh "$ROOTFS"/usr/sbin/void-installer
@@ -231,12 +274,12 @@ install_packages() {
 		install -Dm755 /usr/sbin/void-installer "$ROOTFS"/usr/sbin/void-installer
 	fi
 
-	[ -e void-install-pkexec ] && install -Dm755 void-install-pkexec "$ROOTFS"/usr/bin/
-	[ -e install.desktop     ] && install -Dm755 install.desktop "$ROOTFS"/etc/skel/Desktop/install.desktop
-
-    #skel
-	print_step "Copiando skel"
-    cp -Rpva etc/skel/. "$ROOTFS/etc/skel/"
+    #ajustando instalador
+	print_step "Copiando instalador"
+	[ -e void-install-pkexec   ] && install -Dm755 void-install-pkexec "$ROOTFS"/usr/bin/
+	[ -e void-install.desktop  ] && install -Dm755 void-install.desktop "$ROOTFS"/etc/skel/Desktop/void-install.desktop
+    [ -e icon-void-install.svg ] && install -Dm755 icon-void-install.svg "$ROOTFS"/usr/share/icons/hicolor/scalable/apps/icon-void-install.svg
+	sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/Desktop/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print $1}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true'
 
 	# Cleanup and remove useless stuff.
 	rm -rf "$ROOTFS"/var/cache/* "$ROOTFS"/run/* "$ROOTFS"/var/run/*
@@ -450,6 +493,7 @@ if [ "$(id -u)" -ne 0 ]; then
 	die "Must be run as root, exiting..."
 fi
 
+sudo mount -t tmpfs -o size=24G,mode=1777 tmpfs /dev/shm
 #ROOTDIR='/tmp'
 ROOTDIR='/dev/shm'
 
@@ -483,10 +527,10 @@ STEP_COUNT=9
 mkdir -p "$ROOTFS" "$VOIDHOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR"
 
 print_step "Synchronizing XBPS repository data..."
-copy_void_keys "$ROOTFS"
-copy_void_keys "$VOIDHOSTDIR"
-XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -r "$ROOTFS" ${XBPS_REPOSITORY} -S
-XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -S
+copy_void_keys "$ROOTFS"  >/dev/null 2>&1
+copy_void_keys "$VOIDHOSTDIR"  >/dev/null 2>&1
+XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -r "$ROOTFS" ${XBPS_REPOSITORY} -S  >/dev/null 2>&1
+XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -S  >/dev/null 2>&1
 
 # Get linux version for ISO
 # If linux version option specified use
@@ -510,14 +554,16 @@ fi
 
 : ${OUTPUT_FILE="void-live-${BASE_ARCH}-${KERNELVERSION}-$(date +%Y%m%d).iso"}
 
-print_step "Installing software to generate the image: ${REQUIRED_PKGS} ..."
+#print_step "Installing software to generate the image: ${REQUIRED_PKGS} ..."
+print_step "Installing software to generate the image..."
 install_prereqs
 
 mkdir -p "$ROOTFS"/etc
 [ -s data/motd ] && cp data/motd "$ROOTFS"/etc
 [ -s data/issue ] && cp data/issue "$ROOTFS"/etc
 
-print_step "Installing void pkgs into the rootfs: ${PACKAGE_LIST} ..."
+#print_step "Installing void pkgs into the rootfs: ${PACKAGE_LIST} ..."
+print_step "Installing void pkgs into the rootfs..."
 install_packages
 
 #: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd}
