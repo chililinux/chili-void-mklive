@@ -119,25 +119,30 @@ ADDITIONAL_PKGS+=" pacman fakeroot bsdtar"
 info_msg() {
 	printf "\033[1m$@\n\033[m"
 }
+
 die() {
 	info_msg "ERROR: $@"
 	error_out 1 $LINENO
 }
+
 print_step() {
 	CURRENT_STEP=$((CURRENT_STEP + 1))
 	info_msg "$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
 }
+
 mount_pseudofs() {
 	for f in sys dev proc; do
 		mkdir -p "$ROOTFS"/$f
 		mount --rbind /$f "$ROOTFS"/$f
 	done
 }
+
 umount_pseudofs() {
 	umount -R -f "$ROOTFS"/sys >/dev/null 2>&1
 	umount -R -f "$ROOTFS"/dev >/dev/null 2>&1
 	umount -R -f "$ROOTFS"/proc >/dev/null 2>&1
 }
+
 error_out() {
 	umount_pseudofs
 	[ -d "$BUILDDIR" -a -z "$KEEP_BUILDDIR" ] && rm -rf "$BUILDDIR"
@@ -180,7 +185,6 @@ sh_chroot_job() {
     local shell='/bin/bash'
 
     print_step "$cmsg"
-#    chroot "$ROOTFS" "$shell" -c "$cjob" 2>&1
     chroot "$ROOTFS" "$shell" -c "$cjob"  >/dev/null 2>&1
 }
 
@@ -228,57 +232,19 @@ install_packages() {
 #	chroot "$ROOTFS" env -i xbps-reconfigure -a
 	sh_chroot_job "Reconfigurando o ambiente - pass 2" 'xbps-reconfigure -a'
 
-	print_step "Ajustando bashrc into the ROOTFS/root"
-	bash_files=(.bashrc
-            	.bash_profile
-            	.bashrckali
-            	.bashrcfull
-            	.ps1
-	            .ps1ok
-	            .ps1powerline
-	            .git-prompt.sh
-	            .dircolors
-            )
-
-    for x in "${bash_files[@]}"; do
-        install -Dm755 etc/skel/$x "$ROOTFS"/root/$x
-    done
-
     #skel
 	print_step "Copiando skel into $ROOTFS/etc/skel"
-	[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
-    cp -Rpa etc/skel/. "$ROOTFS/etc/skel/"
+	[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/ >/dev/null 2>&1
+    cp -Rpa pkgbuild/etc/skel/. "$ROOTFS/etc/skel/" >/dev/null 2>&1
 
-	print_step "Ajustando skel into ROOTFS/etc/skel"
-	[ -e bashrc    ] && install -Dm755 bashrc    "$ROOTFS"/etc/bashrc
-	[ -e bashrc.sh ] && install -Dm755 bashrc.sh "$ROOTFS"/etc/bash/bashrc.d/bashrc.sh
-	[ -e nanorc    ] && install -Dm755 nanorc    "$ROOTFS"/etc/nanorc
+	print_step "Copiando configuracoes into $ROOTFS/etc"
+    cp -Rpa pkgbuild/etc/. "$ROOTFS/etc/" >/dev/null 2>&1
 
-	print_step "Copiando aplicativos para ROOTFS/usr/bin"
-	[ -e void-install    ] && install -Dm755 void-install "$ROOTFS"/usr/bin/
-	[ -e void-clonedisk  ] && install -Dm755 void-clonedisk "$ROOTFS"/usr/bin/
-	[ -e void-gitclone   ] && install -Dm755 void-gitclone "$ROOTFS"/usr/bin/
-	[ -e void-mirror     ] && install -Dm755 void-mirror "$ROOTFS"/usr/bin/
-	[ -e void-remove-vg  ] && install -Dm755 void-remove-vg "$ROOTFS"/usr/bin/
-	[ -e void-services   ] && install -Dm755 void-services "$ROOTFS"/usr/bin/
-	[ -e void-testmirror ] && install -Dm755 void-testmirror "$ROOTFS"/usr/bin/
-	[ -e void-wifi       ] && install -Dm755 void-wifi "$ROOTFS"/usr/bin/
-	[ -e void-xrandr     ] && install -Dm755 void-xrandr "$ROOTFS"/usr/bin/
-	[ -e void-runimage   ] && install -Dm755 void-runimage "$ROOTFS"/usr/bin/
-	[ -e void-maketar    ] && install -Dm755 void-maketar "$ROOTFS"/usr/bin/
-	[ -e fetch           ] && install -Dm755 fetch "$ROOTFS"/usr/bin/
-
-#	if [ -x installer.sh ]; then
-#		install -Dm755 installer.sh "$ROOTFS"/usr/sbin/void-installer
-#	else
-#		install -Dm755 /usr/sbin/void-installer "$ROOTFS"/usr/sbin/void-installer
-#	fi
+	print_step "Copiando aplicativos into $ROOTFS/usr/bin"
+	[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/ >/dev/null 2>&1
+    cp -Rpa pkgbuild/usr/bin/. "$ROOTFS/usr/bin/" >/dev/null 2>&1
 
     #ajustando instalador
-	print_step "Copiando instalador"
-	[ -e void-install-pkexec   ] && install -Dm755 void-install-pkexec "$ROOTFS"/usr/bin/
-	[ -e void-install.desktop  ] && install -Dm755 void-install.desktop "$ROOTFS"/etc/skel/Desktop/void-install.desktop
-    [ -e icon-void-install.svg ] && install -Dm755 icon-void-install.svg "$ROOTFS"/usr/share/icons/hicolor/scalable/apps/icon-void-install.svg
 	sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/Desktop/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print $1}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true'
 
 	# Cleanup and remove useless stuff.
@@ -291,7 +257,7 @@ enable_services() {
 		if ! [ -e $ROOTFS/etc/sv/$service ]; then
 			die "service $service not in /etc/sv"
 		fi
-		ln -sf /etc/sv/$service $ROOTFS/etc/runit/runsvdir/default/
+		ln -sf /etc/sv/$service $ROOTFS/etc/runit/runsvdir/default/ >/dev/null 2>&1
 	done
 }
 
@@ -305,35 +271,35 @@ generate_initramfs() {
 	copy_dracut_files "$ROOTFS"
 	copy_autoinstaller_files "$ROOTFS"
 	chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" \
-		--add-drivers "ahci" --force-add "vmklive autoinstaller" --omit systemd "/boot/initrd" $KERNELVERSION
+		--add-drivers "ahci" --force-add "vmklive autoinstaller" --omit systemd "/boot/initrd" $KERNELVERSION >/dev/null 2>&1
 	[ $? -ne 0 ] && die "Failed to generate the initramfs"
 
-	mv "$ROOTFS"/boot/initrd "$BOOT_DIR"
-	cp "$ROOTFS"/boot/vmlinuz-$KERNELVERSION "$BOOT_DIR"/vmlinuz
+	mv "$ROOTFS"/boot/initrd "$BOOT_DIR" >/dev/null 2>&1
+	cp "$ROOTFS"/boot/vmlinuz-$KERNELVERSION "$BOOT_DIR"/vmlinuz >/dev/null 2>&1
 }
 
 cleanup_rootfs() {
 	for f in ${INITRAMFS_PKGS}; do
 		revdeps=$(xbps-query -r "$ROOTFS" -X $f)
 		if [ -n "$revdeps" ]; then
-			xbps-pkgdb -r "$ROOTFS" -m auto $f
+			xbps-pkgdb -r "$ROOTFS" -m auto $f >/dev/null 2>&1
 		else
 			xbps-remove -r "$ROOTFS" -Ry ${f} >/dev/null 2>&1
 		fi
 	done
-	rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01vmklive
-	rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01autoinstaller
+	rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01vmklive >/dev/null 2>&1
+	rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01autoinstaller >/dev/null 2>&1
 }
 
 generate_isolinux_boot() {
-	cp -f "$SYSLINUX_DATADIR"/isolinux.bin "$ISOLINUX_DIR"
-	cp -f "$SYSLINUX_DATADIR"/ldlinux.c32 "$ISOLINUX_DIR"
-	cp -f "$SYSLINUX_DATADIR"/libcom32.c32 "$ISOLINUX_DIR"
-	cp -f "$SYSLINUX_DATADIR"/vesamenu.c32 "$ISOLINUX_DIR"
-	cp -f "$SYSLINUX_DATADIR"/libutil.c32 "$ISOLINUX_DIR"
-	cp -f "$SYSLINUX_DATADIR"/chain.c32 "$ISOLINUX_DIR"
-	cp -f isolinux/isolinux.cfg.in "$ISOLINUX_DIR"/isolinux.cfg
-	cp -f ${SPLASH_IMAGE} "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/isolinux.bin "$ISOLINUX_DIR" >/dev/null 2>&1
+	cp -f "$SYSLINUX_DATADIR"/ldlinux.c32 "$ISOLINUX_DIR" >/dev/null 2>&1
+	cp -f "$SYSLINUX_DATADIR"/libcom32.c32 "$ISOLINUX_DIR" >/dev/null 2>&1
+	cp -f "$SYSLINUX_DATADIR"/vesamenu.c32 "$ISOLINUX_DIR" >/dev/null 2>&1
+	cp -f "$SYSLINUX_DATADIR"/libutil.c32 "$ISOLINUX_DIR" >/dev/null 2>&1
+	cp -f "$SYSLINUX_DATADIR"/chain.c32 "$ISOLINUX_DIR" >/dev/null 2>&1
+	cp -f isolinux/isolinux.cfg.in "$ISOLINUX_DIR"/isolinux.cfg >/dev/null 2>&1
+	cp -f ${SPLASH_IMAGE} "$ISOLINUX_DIR" >/dev/null 2>&1
 
 	sed -i -e "s|@@SPLASHIMAGE@@|$(basename "${SPLASH_IMAGE}")|" \
 		-e "s|@@KERNVER@@|${KERNELVERSION}|" \
@@ -342,7 +308,7 @@ generate_isolinux_boot() {
 		-e "s|@@LOCALE@@|${LOCALE}|" \
 		-e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
 		-e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
-		"$ISOLINUX_DIR"/isolinux.cfg
+		"$ISOLINUX_DIR"/isolinux.cfg >/dev/null 2>&1
 }
 
 generate_grub_efi_boot() {
@@ -477,8 +443,8 @@ ARCH=$(xbps-uhelper arch)
 : ${XBPS_CACHEDIR:="$(pwd -P)"/xbps-cachedir-${BASE_ARCH}}
 : ${XBPS_HOST_CACHEDIR:="$(pwd -P)"/xbps-cachedir-${ARCH}}
 #: ${KEYMAP:=us}
-: ${KEYMAP:=br-abnt2}
 #: ${LOCALE:=en_US.UTF-8}
+: ${KEYMAP:=br-abnt2}
 : ${LOCALE:=pt_BR.UTF-8}
 : ${INITRAMFS_COMPRESSION:=xz}
 : ${SQUASHFS_COMPRESSION:=xz}
