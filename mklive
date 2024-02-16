@@ -186,7 +186,8 @@ sh_chroot_job() {
     local shell='/bin/bash'
 
     print_step "$cmsg"
-    chroot "$ROOTFS" "$shell" -c "$cjob"  >/dev/null 2>&1
+#   chroot "$ROOTFS" "$shell" -c "$cjob"  >/dev/null 2>&1
+    chroot "$ROOTFS" "$shell" -c "$cjob"
 }
 
 copy_void_keys() {
@@ -250,13 +251,12 @@ install_packages() {
 	[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/ >/dev/null 2>&1
     cp -Rpva pkgbuild/usr/share/backgrounds -t "$ROOTFS"/usr/share/ >/dev/null 2>&1
 
-    #ajustando instalador
+    #instalando browsers
 	sh_chroot_job "Instalando navegador Chrome" 'sudo pacman -Sy; sudo pacman -Sdd paru;'
 	sh_chroot_job "Instalando navegador Chrome" 'sudo pacman -Sy; sudo pacman -Sdd brave-browser;'
 	sh_chroot_job "Instalando navegador Chrome" 'sudo pacman -Sy; paru -Sdd google-chrome;'
 
-    #instalando browsers
-    justando instalador
+    #ajustando instalador
 	sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/Desktop/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print $1}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true'
 
 	# Cleanup and remove useless stuff.
