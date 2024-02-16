@@ -235,15 +235,14 @@ install_packages() {
     #skel
 	print_step "Copiando skel into $ROOTFS/etc/skel"
 	[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/ >/dev/null 2>&1
-    cp -Rpa pkgbuild/etc/skel/. "$ROOTFS/etc/skel/" >/dev/null 2>&1
-
-	print_step "Copiando configuracoes into $ROOTFS/etc"
+#   cp -Rpa pkgbuild/etc/skel/. "$ROOTFS/etc/skel/" >/dev/null 2>&1
+#   print_step "Copiando configuracoes into $ROOTFS/etc"
     cp -Rpa pkgbuild/etc/. "$ROOTFS/etc/" >/dev/null 2>&1
 
 	print_step "Copiando aplicativos into $ROOTFS/usr/bin"
 	[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/ >/dev/null 2>&1
     for x in pkgbuild/usr/bin/*; do
-        install -Dm755 $x "$ROOTFS"/usr/bin/$x >/dev/null 2>&1
+        install -Dm755 $x "$ROOTFS"/usr/bin/ >/dev/null 2>&1
     done
 
     #ajustando instalador
