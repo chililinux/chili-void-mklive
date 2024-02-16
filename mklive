@@ -92,7 +92,7 @@ ADDITIONAL_PKGS+=" xfce4-wavelan-plugin xfce4-xkb-plugin"
 
 ADDITIONAL_PKGS+=" xarchiver unrar zip unzip p7zip bzip2 file-roller"
 ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR lynx"
-ADDITIONAL_PKGS+=" gnome-backgrounds mate-backgrounds"
+#ADDITIONAL_PKGS+=" gnome-backgrounds mate-backgrounds"
 ADDITIONAL_PKGS+=" bluez bluez-alsa bluedevil blueman bluez-cups"
 ADDITIONAL_PKGS+=" Thunar pcmanfm octoxbps"
 ADDITIONAL_PKGS+=" fonts-roboto-ttf liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font noto-fonts-emoji font-emoji-one-color ttf-ubuntu-font-family google-fonts-ttf font-iosevka"
@@ -223,8 +223,8 @@ install_packages() {
 	[ $? -ne 0 ] && die "Failed to install $PACKAGE_LIST"
 
 	print_step "Reconfigurando o ambiente - pass 1"
-	xbps-reconfigure -r "$ROOTFS" -f base-files >/dev/null 2>&1
-	chroot "$ROOTFS" env -i xbps-reconfigure -f base-files  >/dev/null 2>&1
+#	xbps-reconfigure -r "$ROOTFS" -f base-files >/dev/null 2>&1
+#	chroot "$ROOTFS" env -i xbps-reconfigure -f base-files  >/dev/null 2>&1
 
 	# Enable choosen UTF-8 locale and generate it into the target rootfs.
 	if [ -f "$ROOTFS"/etc/default/libc-locales ]; then
@@ -232,7 +232,7 @@ install_packages() {
 	fi
 
 #	chroot "$ROOTFS" env -i xbps-reconfigure -a
-	sh_chroot_job "Reconfigurando o ambiente - pass 2" 'xbps-reconfigure -a'
+#	sh_chroot_job "Reconfigurando o ambiente - pass 2" 'xbps-reconfigure -a'
 
     #skel
 	print_step "Copiando skel into $ROOTFS/etc/skel"
@@ -252,13 +252,15 @@ install_packages() {
     cp -Rpva pkgbuild/usr/share/backgrounds -t "$ROOTFS"/usr/share/ >/dev/null 2>&1
 
     #instalando browsers
-#	sh_chroot_job "Atualizando repositorios Pacman" 'pacman -Sy'
-#	sh_chroot_job "Instalando Paru" 'pacman -Sdd paru'
-#	sh_chroot_job "Instalando navegador Brave" 'pacman -Sdd brave-browser'
-#	sh_chroot_job "Instalando navegador Google Chrome" 'paru -Sdd google-chrome'
+	sh_chroot_job "Atualizando repositorios Pacman" 'pacman -Sy --noconfirm'
+	sh_chroot_job "Instalando Paru" 'pacman -Sdd paru --noconfirm'
+	sh_chroot_job "Instalando navegador Brave" 'pacman -Sdd brave-browser --noconfirm'
+	sh_chroot_job "Instalando navegador Google Chrome" 'paru -Sdd google-chrome --noconfirm'
 
     #ajustando instalador
-	sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print $1}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true;'
+	sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print "$1"}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true;'
+
+	sh_chroot_job "Reconfigurando o ambiente - pass 2" 'xbps-reconfigure -a'
 
 	# Cleanup and remove useless stuff.
 	rm -rf "$ROOTFS"/var/cache/* "$ROOTFS"/run/* "$ROOTFS"/var/run/*
@@ -391,7 +393,7 @@ generate_squashfs() {
 	umount -f "$BUILDDIR/tmp-rootfs"
 	mkdir -p "$IMAGEDIR/LiveOS"
 
-	"$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR/tmp" "$IMAGEDIR/LiveOS/squashfs.img" \
+	"$VOIDHOSTDIR"/usr/bin/mksquashfs -processors 2 "$BUILDDIR/tmp" "$IMAGEDIR/LiveOS/squashfs.img" \
 		-comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
 	chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
 
@@ -400,7 +402,8 @@ generate_squashfs() {
 }
 
 generate_iso_image() {
-	"$VOIDHOSTDIR"/usr/bin/xorriso -as mkisofs \
+    "$VOIDHOSTDIR"/usr/bin/xorriso \
+	    -as mkisofs \
 		-iso-level 3 -rock -joliet \
 		-max-iso9660-filenames -omit-period \
 		-omit-version-number -relaxed-filenames -allow-lowercase \
@@ -472,9 +475,10 @@ if [ "$(id -u)" -ne 0 ]; then
 	die "Must be run as root, exiting..."
 fi
 
-sudo mount -t tmpfs -o size=24G,mode=1777 tmpfs /dev/shm
+#sudo mount -t tmpfs -o size=12G,mode=1777 tmpfs /dev/shm
 #ROOTDIR='/tmp'
-ROOTDIR='/dev/shm'
+#ROOTDIR='/dev/shm'
+ROOTDIR='/lixo'
 
 if [ -n "$ROOTDIR" ]; then
 	BUILDDIR=$(mktemp --tmpdir="$ROOTDIR" -d)
