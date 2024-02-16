@@ -32,6 +32,7 @@ export PS4='${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 #set -x
 #set -e
 
+STEP_COUNT=16
 reset=$(tput sgr0)
 # Definir os estilos de texto como variáveis
 bold=$(tput bold)
@@ -244,6 +245,10 @@ install_packages() {
     for x in pkgbuild/usr/bin/*; do
         install -Dm755 $x "$ROOTFS"/usr/bin/ >/dev/null 2>&1
     done
+
+    print_step "Copiando wallpapers into $ROOTFS/usr/share/backgrounds"
+	[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/ >/dev/null 2>&1
+    cp -Rpva pkgbuild/usr/share/backgrounds -t "$ROOTFS"/usr/share/ >/dev/null 2>&1
 
     #ajustando instalador
 	sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/Desktop/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print $1}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true'
@@ -478,7 +483,7 @@ ISOLINUX_DIR="$BOOT_DIR/isolinux"
 GRUB_DIR="$BOOT_DIR/grub"
 ISOLINUX_CFG="$ISOLINUX_DIR/isolinux.cfg"
 CURRENT_STEP=0
-STEP_COUNT=16
+#STEP_COUNT=16
 [ -n "${INCLUDE_DIRECTORY}" ] && STEP_COUNT=$((STEP_COUNT + 1))
 
 : ${SYSLINUX_DATADIR:="$VOIDHOSTDIR"/usr/lib/syslinux}
