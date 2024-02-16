@@ -1,6 +1,0 @@
-2024/02/14-08:35:24.151 4 Reusing MANIFEST /home/vcatafesta/.config/BraveSoftware/Brave-Browser/Default/Local Storage/leveldb/MANIFEST-000001
-2024/02/14-08:35:24.156 4 Recovering log #3
-2024/02/14-08:35:24.165 4 Reusing old log /home/vcatafesta/.config/BraveSoftware/Brave-Browser/Default/Local Storage/leveldb/000003.log 
-2024/02/14-08:35:38.056 4 Level-0 table #5: started
-2024/02/14-08:35:38.081 4 Level-0 table #5: 55014 bytes OK
-2024/02/14-08:35:38.097 4 Delete type=0 #3
