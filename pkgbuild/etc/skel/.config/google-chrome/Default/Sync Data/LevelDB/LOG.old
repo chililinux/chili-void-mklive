@@ -1,6 +1,0 @@
-2024/02/15-09:19:03.833 718 Reusing MANIFEST /home/vcatafesta/.config/google-chrome/Default/Sync Data/LevelDB/MANIFEST-000001
-2024/02/15-09:19:04.379 718 Recovering log #44
-2024/02/15-09:19:04.428 718 Reusing old log /home/vcatafesta/.config/google-chrome/Default/Sync Data/LevelDB/000044.log 
-2024/02/15-10:05:02.729 718 Level-0 table #48: started
-2024/02/15-10:05:02.750 718 Level-0 table #48: 100010 bytes OK
-2024/02/15-10:05:02.756 718 Delete type=0 #44

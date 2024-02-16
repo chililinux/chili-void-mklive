@@ -251,6 +251,12 @@ install_packages() {
     cp -Rpva pkgbuild/usr/share/backgrounds -t "$ROOTFS"/usr/share/ >/dev/null 2>&1
 
     #ajustando instalador
+	sh_chroot_job "Instalando navegador Chrome" 'sudo pacman -Sy; sudo pacman -Sdd paru;'
+	sh_chroot_job "Instalando navegador Chrome" 'sudo pacman -Sy; sudo pacman -Sdd brave-browser;'
+	sh_chroot_job "Instalando navegador Chrome" 'sudo pacman -Sy; paru -Sdd google-chrome;'
+
+    #instalando browsers
+    justando instalador
 	sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/Desktop/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print $1}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true'
 
 	# Cleanup and remove useless stuff.
