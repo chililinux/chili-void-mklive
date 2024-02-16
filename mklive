@@ -94,7 +94,7 @@ ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR lynx"
 ADDITIONAL_PKGS+=" gnome-backgrounds mate-backgrounds"
 ADDITIONAL_PKGS+=" bluez bluez-alsa bluedevil blueman bluez-cups"
 ADDITIONAL_PKGS+=" Thunar pcmanfm octoxbps"
-ADDITIONAL_PKGS+=" fonts-roboto-ttf liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font noto-fonts-emoji font-emoji-one-color ttf-ubuntu-font-family"
+ADDITIONAL_PKGS+=" fonts-roboto-ttf liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font noto-fonts-emoji font-emoji-one-color ttf-ubuntu-font-family google-fonts-ttf"
 ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
 ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
 ADDITIONAL_PKGS+=" NetworkManager network-manager-applet gvfs gvfs-smb gvfs-cdda inetutils iputils"
@@ -107,6 +107,7 @@ ADDITIONAL_PKGS+=" neofetch pfetch bc bat bash-completion vsv vpm xtools geoip g
 ADDITIONAL_PKGS+=" intel-ucode linux-firmware-amd"
 ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver brother-brlaser cups-pdf"
 ADDITIONAL_PKGS+=" vlc celluloid mate-calc avahi htop cmatrix tmate xkill evince menulibre ocs-url"
+ADDITIONAL_PKGS+=" mugshot"
 #ADDITIONAL_PKGS+=" nano-syntax-highlighting"
 
 #office
@@ -249,9 +250,8 @@ install_packages() {
     cp -Rpa etc/skel/. "$ROOTFS/etc/skel/"
 
 	print_step "Ajustando skel into ROOTFS/etc/skel"
-	[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
 	[ -e bashrc    ] && install -Dm755 bashrc    "$ROOTFS"/etc/bashrc
-	[ -e bashrc.sh ] && install -Dm755 bashrc.sh "$ROOTFS"/etc/bashrc.d/bashrc.sh
+	[ -e bashrc.sh ] && install -Dm755 bashrc.sh "$ROOTFS"/etc/bash/bashrc.d/bashrc.sh
 	[ -e nanorc    ] && install -Dm755 nanorc    "$ROOTFS"/etc/nanorc
 
 	print_step "Copiando aplicativos para ROOTFS/usr/bin"
@@ -268,11 +268,11 @@ install_packages() {
 	[ -e void-maketar    ] && install -Dm755 void-maketar "$ROOTFS"/usr/bin/
 	[ -e fetch           ] && install -Dm755 fetch "$ROOTFS"/usr/bin/
 
-	if [ -x installer.sh ]; then
-		install -Dm755 installer.sh "$ROOTFS"/usr/sbin/void-installer
-	else
-		install -Dm755 /usr/sbin/void-installer "$ROOTFS"/usr/sbin/void-installer
-	fi
+#	if [ -x installer.sh ]; then
+#		install -Dm755 installer.sh "$ROOTFS"/usr/sbin/void-installer
+#	else
+#		install -Dm755 /usr/sbin/void-installer "$ROOTFS"/usr/sbin/void-installer
+#	fi
 
     #ajustando instalador
 	print_step "Copiando instalador"
@@ -511,7 +511,7 @@ ISOLINUX_DIR="$BOOT_DIR/isolinux"
 GRUB_DIR="$BOOT_DIR/grub"
 ISOLINUX_CFG="$ISOLINUX_DIR/isolinux.cfg"
 CURRENT_STEP=0
-STEP_COUNT=9
+STEP_COUNT=16
 [ -n "${INCLUDE_DIRECTORY}" ] && STEP_COUNT=$((STEP_COUNT + 1))
 
 : ${SYSLINUX_DATADIR:="$VOIDHOSTDIR"/usr/lib/syslinux}
@@ -568,7 +568,7 @@ install_packages
 
 #: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd}
 : ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd dhcpcd}
-: ${ADDITIONAL_SERVICE_LIST:=NetworkManager avahi-daemon bluetoothd cupsd dbus elogind irqbalance lxdm polkitd sshd uuidd }
+: ${ADDITIONAL_SERVICE_LIST:=NetworkManager avahi-daemon bluetoothd cupsd dbus elogind lxdm irqbalance polkitd sshd uuidd }
 print_step "Enabling services: ${SERVICE_LIST} ..."
 enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST} ${ADDITIONAL_SERVICE_LIST}
 

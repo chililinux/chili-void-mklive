@@ -1,0 +1,16 @@
+<svg id="icon_success" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="linear-gradient" x1="0.369" y1="0.238" x2="0.13" y2="0.861" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#ebebeb"/>
+    </linearGradient>
+  </defs>
+  <g id="Ellipse_18" data-name="Ellipse 18" stroke="#48b603" stroke-width="4" fill="url(#linear-gradient)">
+    <circle cx="32" cy="32" r="32" stroke="none"/>
+    <circle cx="32" cy="32" r="30" fill="none"/>
+  </g>
+  <g id="check" transform="translate(-456.798 -355.419)">
+    <rect id="Rectangle_126" data-name="Rectangle 126" width="3.805" height="30.439" rx="1.902" transform="translate(502.923 376) rotate(45)" fill="#48b603"/>
+    <rect id="Rectangle_128" data-name="Rectangle 128" width="4" height="17.219" rx="2" transform="translate(486.988 397.454) rotate(135)" fill="#48b603"/>
+  </g>
+</svg>

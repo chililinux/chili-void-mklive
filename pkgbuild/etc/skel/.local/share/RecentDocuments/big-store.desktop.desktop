@@ -1,0 +1,6 @@
+[Desktop Entry]
+Icon=big-store
+Name=big-store.desktop
+Type=Link
+URL[$e]=file:///usr/share/applications/big-store.desktop
+X-KDE-LastOpenedWith=org.xfce.mousepad

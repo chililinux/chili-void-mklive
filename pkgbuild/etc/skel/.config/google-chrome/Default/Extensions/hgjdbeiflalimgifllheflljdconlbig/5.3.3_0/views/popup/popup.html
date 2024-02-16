@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="./css/styles.css">
+    <link href="./css/Montserrat.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- MAIN SECTION -->
+    <div id="mainSection" class="popup-wrap standar">
+        <header>
+            <div class="title-wrap">
+                <img height="22" src="../common/img/logo.svg" alt="">
+            </div>
+            <div>
+                <img profile-toggle width="35px" src="./img/user.svg" class="gear-icon">
+                <span settings-toggle style="cursor: pointer;">
+                    <img id="settings-no-dot" src="./img/settings.svg" class="gear-icon">
+                    <img id="settings-dot" src="./img/settings-with-dot.svg" class="gear-icon update-alert hidden">
+                </span>
+            </div>
+        </header>
+        <!-- HEADER -->
+        <!-- LOADER -->
+        <section id="loader">
+            <div class="loader">
+                <img src="./img/loading.gif">
+            </div>
+        </section>
+        <!-- LOADER -->
+        <!-- SECCION DESACTIVADO -->
+        <section id="disabled-1" class="adblock-off hidden">
+            <div class="system-off-title">
+                <div class="flex-center">
+                    <img height="19px" width="22px" src="./img/alert-triangle.svg" alt=""> <span tkey="main_not_protected"></span><br>
+                </div>
+
+                <p tkey="main_switch_on_trustnav"></p>
+            </div>
+        </section>
+        <section id="disabled-2" class="power-off hidden">
+            <div class="grey-box">
+                <div class="circular-btn" id="enableButton">
+                    <div class="circular-btn-fill">
+                        <img src="./img/prower.svg" alt="">
+                    </div>
+                </div>
+                <p class="switch-on" tkey="main_switch_on"></p>
+            </div>
+        </section>
+        <!-- SECCION DESACTIVADO -->
+        <!-- SECCION ESTADO DE SITIO -->
+        <section id="safebrowsingStatus" class="hidden">
+            <div class="box status orange" id="unknownSite">
+                <div class="circle white">
+                    <img src="img/help-circle.svg" class="circle-icon">
+                </div>
+                <span class="status-text" tkey="main_unknown_site"></span>
+            </div>
+            <div class="box status green" id="safeSite">
+                <div class="circle white">
+                    <img src="img/field.svg" class="circle-icon">
+                </div>
+                <span class="status-text" tkey="main_safe_site"></span>
+            </div>
+            <div class="box status red" id="unsafeSite">
+                <div class="circle white">
+                    <img src="img/alert-octagon.svg" class="circle-icon">
+                </div>
+                <span class="status-text" tkey="main_unsafe_site"></span>
+            </div>
+        </section>
+        <!-- SECCION ESTADO DE SITIO -->
+        <!-- TEXTO EXPLICATIVO DEL VOTO -->
+        <section id="voteText" class="hidden">
+            <div class="vote-text">
+                <span tkey="main_help_us_vote"></span>
+                <span class="caption-text" tkey="main_help_us_vote-highlight"></span>
+            </div>
+        </section>
+        <section id="alreadyVotedText" class="hidden">
+            <div class="vote-text">
+                <span tkey="main_you_voted"></span> <span id="userVote"></span><br>
+                <span tkey="main_you_voted-thank-you"></span>
+            </div>
+        </section>
+        <!-- TEXTO EXPLICATIVO DEL VOTO -->
+        <!-- SECCION DE VOTOS -->
+        <section id="vote" class="hidden">
+            <!-- SIN VOTACION -->
+            <div class="votes-wrap" id="unvoted">
+                <!-- Voto negativo -->
+                <div class="box votes pointer negative" id="voteUnsafe">
+                    <div class="">
+                        <img src="img/shape.svg" class="vote-down-logo">
+                    </div>
+                    <span class="box-vote-text" tkey="main_unsafe"></span>
+                </div>
+                <!-- Voto positivo -->
+                <div class="box votes pointer safe" id="voteSafe">
+                    <div class="">
+                        <img src="img/shape-up.svg" class="vote-down-logo">
+                    </div>
+                    <span class="box-vote-text" tkey="main_safe"></span>
+                </div>
+            </div>
+            <!-- VOTACION POSITIVA -->
+            <div class="votes-wrap" id="safeVoted">
+                <!-- Voto positivo  realizado -->
+
+                <div class="undue-vote pointer">
+                    <img src="img/undue.svg"> <span tkey="main_undo"></span>
+                </div>
+
+                <div class="box votes safe-done" id="voteSafe" style="width: 70%;">
+                    <div class="">
+                        <img src="img/shape-up-green.svg" class="vote-down-logo">
+                    </div>
+                    <span class="box-vote-text" tkey="main_safe"></span>
+                </div>
+            </div>
+            <!-- VOTACION NEGATIVA -->
+            <div class="votes-wrap" id="unsafeVoted">
+                <div class="undue-vote pointer">
+                    <img src="img/undue.svg"> <span tkey="main_undo"></span>
+                </div>
+
+                <div class="box votes negative-done" id="voteSafe" style="width: 70%;">
+                    <div class="">
+                        <img src="img/shape-red.svg" class="vote-down-logo">
+                    </div>
+                    <span class="box-vote-text" tkey="main_unsafe"></span>
+                </div>
+            </div>
+        </section>
+        <!-- SECCION DE VOTOS -->
+        <section id="share" class="hidden">
+            <div class="share-space">
+                <div class="">
+                    <div class="share-icon-wrap">
+                        <img src="./img/adblocker.svg" alt="">
+                    </div>
+                </div>
+                <div class="share-wrap">
+                    <span tkey="main_recommend_trustnav"></span>
+                    <button type="button" id="update" class="share-button" tkey="main_share"></button>
+                </div>
+                <div id="closeShare" class="share-close">
+                    <img src="./img/close.svg" alt="">
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- SETTINGS SECTION -->
+    <div id="settingsSection" class="popup-wrap settings" style="display: none;">
+        <!-- HEADER -->
+        <header>
+            <div class="title-wrap">
+                <img height="22" src="../common/img/logo.svg" alt="">
+            </div>
+        </header>
+        <!-- HEADER -->
+        <!-- SETTINGS HEADER  -->
+        <section>
+            <div class="settings-head">
+                <img go-back class="go-back-arrow" style="cursor:pointer;" src="./img/arrow-left.svg" alt="">
+                <p tkey="settings_settings"></p>
+            </div>
+        </section>
+        <!-- SETTINGS HEADER  -->
+        <!-- CONTENIDO PRINCIPAL -->
+        <main>
+            <!-- HEADER DE TABS -->
+            <section>
+                <div class="tabs-triggers">
+                    <div id="setAlert" class="selected" tkey="settings_alerts"></div>
+                    <div id="setSearchEngine" tkey="settings_search_engine"></div>
+                    <div id="setAbout">
+                        <span tkey="settings_about"></span>
+                        <div class='dot update-alert hidden'></div>
+                    </div>
+                </div>
+            </section>
+            <!-- HEADER DE TABS -->
+            <!-- TEXTO EXPLICATIVO -->
+            <!-- TEXTO EXPLICATIVO -->
+            <!-- SECCION PRINCIPAL CONFIGURACION DE ALERTAS -->
+
+            <section id="setAlertSection">
+                <p class="settings-info" tkey="settings_notified_visit_website"></p>
+                <div id="showMeAlerts" class="option-wrap on">
+                    <div class="option-name bold" tkey="settings_show_me_alerts"></div>
+                    <div class="option-switch">
+                        <div class="track"></div>
+                        <div class="knob"></div>
+                    </div>
+                </div>
+                <p class="settings-info" style="margin-top: 32px" tkey="settings_websites_with_disabled"></p>
+                <div class="options-group custom-scrollbar"></div>
+
+            </section>
+            <!-- SECCION PRINCIPAL CONFIGURACION DE SEARCH ENGINE -->
+            <section id="setSearchEngineSection" style="display:none;">
+                <p class="settings-info">
+                    <span tkey="settings_notified_search_engine" style="display: none;" js-search-provider-enabled></span>
+                    <span tkey="settings_notified_search_engine_disabled" style="display: none;" js-search-provider-disabled></span>
+                </p>
+                <div class="options-group search custom-scrollbar"></div>
+            </section>
+            <!-- ABOUT -->
+            <section id="setAboutSection" style="display:none;">
+                <div class="about-wrap">
+                    <p class="settings-info" style="padding: 0 23px;" tkey="settings_install_suite"></p>
+
+                    <div class="install-suite-wrap">
+                        <div class="item">
+                            <div class="">
+                                <img src="./img/safesearch.svg" alt="">
+                                <p>Safesearch</p>
+                            </div>
+                            <button type="button" class="install-btn disabled" tkey="settings_installed"></button>
+                        </div>
+                        <div class="item">
+                            <div class="">
+                                <img src="./img/adblocker-logo.svg" alt="">
+                                <p tkey="settings_adblocker"></p>
+                            </div>
+                            <button id="installAdblock" type="button" class="install-btn update-alert" style="display: none;"
+                                tkey="settings_install"></button>
+                            <button id="installedBtn" type="button" class="install-btn disabled  " tkey="settings_installed"></button>
+                        </div>
+                        <div class="item">
+                            <div class="">
+                                <img style="width: 34px;" src="./img/antivirus.svg" alt="">
+                                <p>Antivirus</p>
+                            </div>
+                            <button type="button" class="install-btn disabled" tkey="settings_coming_soon"></button>
+                        </div>
+                    </div>
+
+                </div>
+                <p class="settings-info" style="padding: 0 23px; margin-top: 23px;"><span tkey="settings_learn_more"></span>
+                    <a class="bold" target="_blank" style="color:black; text-decoration:none;" href="https://www.trustnav.com?about=1">trustnav.com</a>
+                    <span tkey="settings_social"></span></p>
+
+                <div class="center-flex" style="margin: 18px 0;">
+                    <div class="followUs">
+                        <div>
+                            <a href="https://www.facebook.com/TrustnavAntivirus/" title="Facebook" target="_blank">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <g fill="none" fill-rule="evenodd">
+                                        <path fill="#395185" d="M22.631 23.95c.729 0 1.32-.59 1.32-1.319V1.37c0-.73-.591-1.32-1.32-1.32H1.37C.639.05.049.64.049 1.37V22.63c0 .729.59 1.32 1.32 1.32H22.63" />
+                                        <path fill="#FFFFFE" d="M16.54 23.95v-9.255h3.107l.466-3.607H16.54V8.785c0-1.045.29-1.756 1.787-1.756l1.91-.001V3.8c-.33-.043-1.464-.142-2.783-.142-2.754 0-4.64 1.681-4.64 4.768v2.66H9.702v3.608h3.115v9.255h3.725" />
+                                    </g>
+                                </svg>
+                            </a>
+                        </div>
+                        <div>
+                            <a href="https://twitter.com/trustnav" title="Twitter" target="_blank">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <g fill="none" fill-rule="nonzero">
+                                        <path fill="#1DA1F2" d="M21 24H3c-1.656 0-3-1.344-3-3V3c0-1.656 1.344-3 3-3h18c1.656 0 3 1.344 3 3v18c0 1.656-1.344 3-3 3z" />
+                                        <path fill="#FFF" d="M9.216 18.096c5.658 0 8.754-4.692 8.754-8.754 0-.132 0-.264-.006-.396A6.268 6.268 0 0 0 19.5 7.35a6.236 6.236 0 0 1-1.77.486 3.095 3.095 0 0 0 1.356-1.704 6.12 6.12 0 0 1-1.956.744 3.07 3.07 0 0 0-2.244-.972 3.08 3.08 0 0 0-3 3.78 8.737 8.737 0 0 1-6.342-3.216 3.085 3.085 0 0 0 .954 4.11 3.112 3.112 0 0 1-1.392-.384v.042a3.083 3.083 0 0 0 2.466 3.018 3 3 0 0 1-.81.108c-.198 0-.39-.018-.576-.054a3.077 3.077 0 0 0 2.874 2.136 6.17 6.17 0 0 1-3.822 1.32 5.92 5.92 0 0 1-.732-.042 8.752 8.752 0 0 0 4.71 1.374" />
+                                    </g>
+                                </svg>
+                            </a>
+
+                        </div>
+                        <div>
+                            <a href="https://medium.com/@trustnav" title="Medium" target="_blank">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <g fill="none" fill-rule="nonzero">
+                                        <rect width="24" height="24" fill="#12100E" rx="2" />
+                                        <path fill="#FFF" d="M5.727 8.027a.624.624 0 0 0-.203-.527L4.019 5.686v-.27h4.674l3.613 7.923 3.176-7.924h4.456v.271L18.651 6.92a.376.376 0 0 0-.143.362v9.067a.376.376 0 0 0 .143.361l1.257 1.234v.271h-6.322v-.27l1.302-1.265c.128-.128.128-.165.128-.36V8.99l-3.62 9.195h-.49L6.69 8.99v6.163a.85.85 0 0 0 .233.707l1.694 2.054v.271H3.815v-.27L5.51 15.86a.82.82 0 0 0 .218-.707V8.027z" />
+                                    </g>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="madeWith">
+                    <div>
+                        <span tkey="settings_made_with"></span>
+                        <img src="img/heart.png" />
+                        <span tkey="settings_in_andorra"></span>
+                    </div>
+                </div>
+
+                <div class="about-footer">
+                    <p>
+                        <span tkey="settings_using_site_agree"></span>
+                        <span tkey="settings_to_our"></span> <a class="bold" href="https://www.trustnav.com/tos/"
+                            target="_blank" tkey="settings_terms_conditions" style="text-decoration: none; color: black;"></a>
+                        <span tkey="settings_and"></span> <a style="text-decoration: none; color: black;" href="https://www.trustnav.com/privacy/"
+                            target="_blank"><span class="bold" tkey="settings_privacy_policy"></span></a>
+                    </p>
+                    <p><span tkey="settings_all_rights"></span> | <a class="bold" style="color: black; text-decoration: none;"
+                            target="_blank" href="https://www.trustnav.com/?contact=1" tkey="settings_contact"></a></p>
+                </div>
+            </section>
+        </main>
+        <!-- CONTENIDO PRINCIPAL -->
+    </div>
+
+    <!-- PROFILE NOT LOGGED -->
+    <div id="login" class="popup-wrap advance-section profile-height settings" style="display : none;">
+        <!-- HEADER -->
+        <header>
+            <div class="title-wrap">
+                <img height="22" src="../common/img/logo.svg" alt="">
+            </div>
+        </header>
+        <!-- HEADER -->
+
+        <!-- PROFILE HEADER  -->
+        <section>
+            <div class="settings-head">
+                <img go-back class="go-back-arrow" src="./img/arrow-left.svg" alt="">
+                <p tkey-="popup_profile"></p>
+            </div>
+        </section>
+        <!-- PROFILE HEADER  -->
+
+        <!-- MAIN -->
+        <main class="alert-main">
+            <div class="profile-main-wrap">
+                <div class="profile-caption-container center-text">
+                    <span class="profile-caption" tkey="popup_login"></span>
+                </div>
+
+                <form id="login-form">
+                    <div class="profile-input-container">
+                        <input type="email" id="login-email" placeholder="email@gmail.com" class="profile-input"
+                            required>
+                    </div>
+                    <button type="submit" class="profile-green-btn" tkey="popup_login_button_email"></button>
+                </form>
+
+                <div class="profile-divider">
+                    or
+                </div>
+
+                <button class="facebook-btn">
+                    <img src="./img/facebook.svg" alt="">
+                    <span tkey="popup_login_button_facebook"></span>
+                </button>
+
+                <button class="google-btn">
+                    <img src="./img/google.svg" alt="">
+                    <span tkey="popup_login_button_gmail"></span>
+                </button>
+
+                <div class="signup-message">
+                    <span tkey="popup_login_need_account"></span>
+                    <br><br>
+                    <a js-account-url-prefix href="/login?action=signup" target="_blank" tkey="popup_login_signup"></a>
+                </div>
+            </div>
+        </main>
+        <!-- MAIN -->
+    </div>
+    <!-- PROFILE NOT LOGGED -->
+
+    <!-- PROFILE LOGGED -->
+    <div id="account" class="popup-wrap advance-section my-account-height settings" style="padding:0 !important; display: none;">
+        <!-- HEADER -->
+        <header>
+            <div class="title-wrap">
+                <img height="22" src="../common/img/logo.svg" alt="">
+            </div>
+            <div class="logout-wrap" title="Logout">
+                <img src="./img/log-out.svg" alt="">
+            </div>
+        </header>
+        <!-- HEADER -->
+
+        <!-- NAVBAR  -->
+        <section>
+            <div class="settings-head">
+                <img go-back class="go-back-arrow" src="./img/arrow-left.svg" alt="">
+                <p tkey="popup_profile"></p>
+            </div>
+        </section>
+        <!-- NAVBAR  -->
+
+        <!-- MAIN -->
+        <main class="my-account-main-wrap">
+            <header class="my-account-degree">
+                <img id="account-avatar" class="circle-img-container">
+                <div id="placeholder-avatar" class="circle-img-container"><span>?</span></div>
+            </header>
+
+            <section class="my-account-data-container">
+                <p class="my-account-name"></p>
+                <div class="my-account-logged">
+                    <div class="my-account-edit-field">
+                        <span></span>
+                    </div>
+                </div>
+                <div class="my-account-edit-field my-account-logout">
+                    <span class="shimmer logout-text" tkey="popup_profile_logging_out"></span>
+                </div>
+            </section>
+
+        </main>
+        <!-- MAIN -->
+        <a class="manage-subscription-link" js-account-url-prefix target="_blank" href="/dashboard/" tkey="popup_profile_manage_account"></a>
+    </div>
+    <!-- PROFILE LOGGED -->
+</body>
+<script src="../../config/config.js" charset="utf-8"></script>
+<script src="../../utils/utils.js"></script>
+<script src="../../vendors/jquery.min.js"></script>
+<script src="../../translations/translate.js"></script>
+<script src="./js/popup.js"></script>
+<script src="./js/settings.js"></script>
+
+</html>

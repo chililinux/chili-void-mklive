@@ -1,0 +1,23 @@
+<svg id="icon.Key" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="radial-gradient" cx="0.5" cy="0.5" r="0.5" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#e8e7e1"/>
+      <stop offset="1" stop-color="#fff"/>
+    </radialGradient>
+    <linearGradient id="linear-gradient" x1="0.5" y1="0.238" x2="0.273" y2="0.697" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#f9c93c"/>
+      <stop offset="1" stop-color="#d9a300"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="0.5" x2="1.315" y2="1.307" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#dda20a"/>
+      <stop offset="1" stop-color="#664a00"/>
+    </linearGradient>
+  </defs>
+  <rect id="Rectangle_90" data-name="Rectangle 90" width="64" height="64" transform="translate(0 0)" fill="#f2f2f2" opacity="0"/>
+  <circle id="Ellipse_17" data-name="Ellipse 17" cx="29.5" cy="29.5" r="29.5" transform="translate(3 2)" fill="url(#radial-gradient)"/>
+  <g id="Group_135" data-name="Group 135" transform="translate(0 0)">
+    <path id="Path_8" data-name="Path 8" d="M60.055,50.058c-.374-.344-4.061-.106-4.061-.106l-.042-3.9-1.8-2.062-4.275-.07,0-.006h0c-.018.058,0-4.291,0-4.291l-2-1.446s-3.882-.114-3.914-.144l-.312-3.987L40.051,29.79A21.092,21.092,0,1,0,29.984,39.929L53.871,63.96s10.113.028,10.113.024L64,53.777s-1.588-1.548-3.946-3.72ZM17,22.021a5.008,5.008,0,1,1,4.979-5.007A4.992,4.992,0,0,1,17,22.021Z" transform="translate(0 0)" fill="url(#linear-gradient)"/>
+    <path id="Path_9" data-name="Path 9" d="M12,5a7,7,0,1,0,7,7A7,7,0,0,0,12,5Zm0,10a3,3,0,1,1,3-3A3,3,0,0,1,12,15Z" transform="translate(4.999 4.999)" fill="#ca9f30"/>
+    <path id="Path_10" data-name="Path 10" d="M20.667,18.4a21.031,21.031,0,0,1-6.541,3.872L37.873,45.6h10Z" transform="translate(14.122 18.393)" fill="url(#linear-gradient-2)"/>
+  </g>
+</svg>

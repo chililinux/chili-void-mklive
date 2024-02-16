@@ -1,0 +1,4 @@
+[TimeZones]
+LocalZone=America/Porto_Velho
+ZoneinfoDir=/usr/share/zoneinfo
+Zonetab=/usr/share/zoneinfo/zone.tab

@@ -1,0 +1,251 @@
+{
+   "add_to_chrome": {
+      "message": "Ajouter à Chrome"
+   },
+   "add_to_chrome_extend": {
+      "message": "Ajoutez Trustnav Adblock à Chrome pour le protéger!"
+   },
+   "after_blocking_ads": {
+      "message": "Après le blocage des annonces"
+   },
+   "app_description": {
+      "description": "Extension short description on Store",
+      "message": "Trustnav vous empêche d'accéder à des sites Web dangereux et à des publicités indésirables."
+   },
+   "app_long_description": {
+      "description": "Extension long description on Store",
+      "message": "\nSafeSearch by Trustnav vérifie chaque résultat de recherche ou site Web, vous permettant de surfer sur Internet en toute sécurité et sans souci. Si le domaine ou le site Web dans les résultats de votre recherche est considéré comme dangereux, cette extension vous en avertira avant de visiter le site. Cela vous aide à vous protéger contre le vol de cartes de crédit ou le partage accidentel du mot de passe avec des pirates informatiques et ne vous permet pas de télécharger des ransomwares ou des logiciels malveillants. Cette extension vous protège en modifiant la recherche par défaut dans Google Chrome ™. En installant SafeSearch by Trustnav, vous acceptez les conditions suivantes et la politique de confidentialité : www.trustnav.com/privacy"
+   },
+   "app_name": {
+      "description": "Extension name on Store",
+      "message": "Trustnav Safesearch"
+   },
+   "before_blocking_ads": {
+      "message": "Avant de bloquer les annonces "
+   },
+   "chrome_can_block_ads": {
+      "message": "Google Chrome peut maintenant bloquer les annonces"
+   },
+   "chrome_can_block_ads_info": {
+      "message": "Ajoutez Trustnav Adblocker à Google Chrome pour commencer à bloquer les annonces."
+   },
+   "chrome_not_blocking_ads": {
+      "message": "Google Chrome ne bloque pas les annonces."
+   },
+   "complete_installation": {
+      "message": "Terminez l'installation avec Trustnav Adblocker"
+   },
+   "complete_installation_text": {
+      "message": "S'il vous plaît, complète l'installation du complète Security Suite et navige libre de publicité à nouveau. "
+   },
+   "continue": {
+      "message": "Continuer "
+   },
+   "dismiss": {
+      "message": "Annuler"
+   },
+   "dont_show": {
+      "message": "Ne plus afficher"
+   },
+   "main_help_us_vote": {
+      "message": "Aidez-nous à rester en sécurité sur les sites contenant des logiciels malveillants et du pishing."
+   },
+   "main_help_us_vote_highlight": {
+      "message": "¿Ce site est-il fiable?"
+   },
+   "main_not_protected": {
+      "message": "Vous n'êtes pas protégé"
+   },
+   "main_recommend_trustnav": {
+      "message": "Installez Trustnav Adblocker pour être protégé contre les logiciels malveillants et les publicités."
+   },
+   "main_safe": {
+      "message": "fiable"
+   },
+   "main_safe_site": {
+      "message": "Ce site est fiable"
+   },
+   "main_share": {
+      "message": "Installer l'extension"
+   },
+   "main_switch_on": {
+      "message": "Activer"
+   },
+   "main_switch_on_trustnav": {
+      "message": "Activer Trustnav pour naviguer en toute sécurité"
+   },
+   "main_undo": {
+      "message": "Défaire"
+   },
+   "main_unknown_site": {
+      "message": "Site inconnu"
+   },
+   "main_unsafe": {
+      "message": "dangereux"
+   },
+   "main_unsafe_site": {
+      "message": "Ce site est dangereux "
+   },
+   "main_you_voted": {
+      "message": "Vous avez choisi ce site comme"
+   },
+   "main_you_voted_thank_you": {
+      "message": "¡Merci pour votre contribution!"
+   },
+   "newtab_add": {
+      "message": "Ajouter"
+   },
+   "newtab_add_marker": {
+      "message": "Ajouter un signet "
+   },
+   "newtab_cancel": {
+      "message": "Annuler"
+   },
+   "newtab_marker_preview": {
+      "message": "Prévisualiser "
+   },
+   "newtab_marker_thumbnail": {
+      "message": "URL miniature"
+   },
+   "newtab_marker_title": {
+      "message": "Titre "
+   },
+   "newtab_marker_url": {
+      "message": "URL"
+   },
+   "newtab_search": {
+      "message": "Rechercher dans"
+   },
+   "newtab_search_button": {
+      "message": "Recherche"
+   },
+   "newtab_secured": {
+      "message": "Sécurisé par Trustnav pour Google Chrome ™ "
+   },
+   "notification_continue": {
+      "message": "Continuer"
+   },
+   "notification_disable": {
+      "message": "Désactiver les alertes sur ce site"
+   },
+   "notification_disable_all": {
+      "message": "Désactiver les alertes de tous les sites"
+   },
+   "notification_leave": {
+      "message": "¡Sors-moi d'ici!"
+   },
+   "notification_text": {
+      "message": "Notre communauté a marqué ce site comme peu fiable.\u003Cbr> \u003Cspan>Nous ne recommandons pas de naviguer sur ce site\u003C/ span>"
+   },
+   "notification_unsafe": {
+      "message": "Ce site est dangereux"
+   },
+   "popup_login": {
+      "message": "S'inscrire"
+   },
+   "popup_login_button_email": {
+      "message": "Continuer"
+   },
+   "popup_login_button_facebook": {
+      "message": "Continuer avec Facebook"
+   },
+   "popup_login_button_gmail": {
+      "message": "Continuer avec Google"
+   },
+   "popup_login_need_account": {
+      "message": "Avez-vous besoin d'un compte?"
+   },
+   "popup_login_signup": {
+      "message": "Inscrivez-vous maintenant!"
+   },
+   "popup_profile": {
+      "message": "Profil"
+   },
+   "popup_profile_logging_out": {
+      "message": "Déconnecter..."
+   },
+   "popup_profile_manage_account": {
+      "message": "Gérer mon compte"
+   },
+   "settings_about": {
+      "message": "À propos de"
+   },
+   "settings_adblocker": {
+      "message": "Bloqueur de pubs"
+   },
+   "settings_alerts": {
+      "message": "Alertes"
+   },
+   "settings_all_rights": {
+      "message": "Droit d'auteur © 2018"
+   },
+   "settings_and": {
+      "message": "et"
+   },
+   "settings_coming_soon": {
+      "message": "Prochainement"
+   },
+   "settings_contact": {
+      "message": "Contactez-nous"
+   },
+   "settings_follow_us_on": {
+      "message": "Suivez nous"
+   },
+   "settings_in_andorra": {
+      "message": "en Andorre"
+   },
+   "settings_install": {
+      "message": "Installer"
+   },
+   "settings_install_suite": {
+      "message": "Pour une meilleure performance de Trustnav Security Suite, nous vous recommandons d'installer toutes les extensions. "
+   },
+   "settings_installed": {
+      "message": "Installé"
+   },
+   "settings_learn_more": {
+      "message": "En savoir plus dans"
+   },
+   "settings_made_with": {
+      "message": "Fait avec"
+   },
+   "settings_notified_search_engine": {
+      "message": "Choisissez le moteur de recherche que vous souhaitez utiliser lors de la recherche dans un nouvel onglet ou dans la barre d'adresse: "
+   },
+   "settings_notified_search_engine_disabled": {
+      "message": "Vous ne pouvez pas modifier votre moteur de recherche, car vous utilisez le mode illimité pour votre Adblocker."
+   },
+   "settings_notified_visit_website": {
+      "message": "Vous serez averti lorsque vous visiterez un site web jugé non fiable."
+   },
+   "settings_privacy_policy": {
+      "message": "Politiques de confidentialité"
+   },
+   "settings_recommended": {
+      "message": "(Recommandé)"
+   },
+   "settings_search_engine": {
+      "message": "Moteur de recherche"
+   },
+   "settings_settings": {
+      "message": "Configuration"
+   },
+   "settings_show_me_alerts": {
+      "message": "Montrez-moi les alertes"
+   },
+   "settings_social": {
+      "message": "ou visitez nos réseaux sociaux, suivez-nous pour être mis à jour"
+   },
+   "settings_terms_conditions": {
+      "message": "Termes et Conditions"
+   },
+   "settings_to_our": {
+      "message": "notre"
+   },
+   "settings_using_site_agree": {
+      "message": "En utilisant Trustnav, vous acceptez"
+   },
+   "settings_websites_with_disabled": {
+      "message": "Sites actuels avec des notifications désactivées"
+   }
+}

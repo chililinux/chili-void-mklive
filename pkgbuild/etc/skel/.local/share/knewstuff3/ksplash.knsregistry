@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE khotnewstuff3>
+<hotnewstuffregistry>
+ <stuff category="488">
+  <name>Plasma Blue</name>
+  <providerid>https://api.kde-look.org/ocs/v1/</providerid>
+  <author>MrMaire</author>
+  <homepage>https://store.kde.org/p/1259985</homepage>
+  <licence></licence>
+  <version>1.1</version>
+  <rating>65</rating>
+  <downloads>19051</downloads>
+  <installedfile>/home/vcatafesta/.local/share/plasma/look-and-feel/plasmablue</installedfile>
+  <id>1259985</id>
+  <releasedate>2019-04-15</releasedate>
+  <summary>Plasma Blue Splashscreen</summary>
+  <changelog></changelog>
+  <preview>https://images.pling.com/cache/100x100-0/img/00/00/00/34/53/1259985/d48a5252d28374c734734b940f768668891f.png</preview>
+  <previewBig>https://images.pling.com/cache/770x540-0/img/00/00/00/34/53/1259985/d48a5252d28374c734734b940f768668891f.png</previewBig>
+  <payload>https://files03.pling.com/api/files/download/j/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjE1MzY1MDY5ODQiLCJvIjoiMSIsInMiOiI3ZDEyODdkMmU5N2MyMTc5OTNjZDY0NGU5MmJlODM5ZWJhYzgzMjE3ODQ4MTQ0MTY0ZjkwNTgyZGU5ZGExMmUzNjY0NDY0NTUwMDZjNWMzNTY2MGM2ZTFmNjAwZGExMDc5ZWNiMTRkYzlkNTc4YTA3YzQzYTI2ZjljOWYxNzZlOCIsInQiOjE2ODcwNTYxMTIsInN0ZnAiOm51bGwsInN0aXAiOiIxNjguMjI4LjI0NC4xMDUifQ.omMsk2mM7n_YfiocmeUx5cDkjhI6LdHaQNtZfv8YGbI/plasmablue-1.0.tar.gz</payload>
+  <tags>desktop,gplv3,kde,splashscreen,splash,plasma##majorversion=5,plasma,theme,linux,blue,unix</tags>
+  <status>installed</status>
+ </stuff>
+</hotnewstuffregistry>

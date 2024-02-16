@@ -1,0 +1,47 @@
+{
+   "action": {
+      "default_icon": {
+         "16": "images/icons/icon-default-16.png",
+         "19": "images/icons/icon-default-19.png",
+         "32": "images/icons/icon-default-32.png",
+         "38": "images/icons/icon-default-38.png"
+      },
+      "default_popup": "popup/popup.html",
+      "default_title": "Méliuz"
+   },
+   "background": {
+      "service_worker": "background.js"
+   },
+   "content_scripts": [ {
+      "css": [ "content-scripts/fonts-loader/loader.css" ],
+      "matches": [ "*://*/*" ],
+      "run_at": "document_idle"
+   }, {
+      "js": [ "content-scripts/logger/sentry.js" ],
+      "matches": [ "http://*/*", "https://*/*" ],
+      "run_at": "document_start"
+   } ],
+   "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+   },
+   "description": "Ganhe cashback e ative cupons de desconto nas suas lojas favoritas!",
+   "differential_fingerprint": "1.d77f4d10f5aca9d894f523d7aab9e122a25b4e15f0588e8404f5d6e4304b58a6",
+   "host_permissions": [ "*://*/*" ],
+   "icons": {
+      "128": "images/icons/icon-web-store.png",
+      "16": "images/icons/icon-default-16.png",
+      "19": "images/icons/icon-default-19.png",
+      "32": "images/icons/icon-default-32.png",
+      "38": "images/icons/icon-default-38.png"
+   },
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDR8TWyqzkeqmzoLmeXgP9uzLdDZ1xttw0MKJZTBNjaE8OyYmgY/3RKVkSQ5oL1n3JW6H5KK8fSJdOK+lbPXW/O1bhqMd5r6/wahTWzWv1lADq4h7e9ZA5WZzSBMJD2bHxv1KwbVTrPKtp3mwt7/GJ/kcA0NJR0BA6kDUreXp47lQIDAQAB",
+   "manifest_version": 3,
+   "name": "Méliuz: Cashback e cupons em suas compras",
+   "permissions": [ "scripting", "alarms", "cookies", "storage" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "10.4.1",
+   "web_accessible_resources": [ {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "*.html", "*.css", "images/*" ]
+   } ]
+}

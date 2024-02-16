@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_69" data-name="Rectangle 69" width="32" height="32" fill="#f2f2f2"/>
+    </clipPath>
+    <radialGradient id="radial-gradient" cx="0.5" cy="0.5" r="0.5" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#00c00a"/>
+      <stop offset="1" stop-color="#00a709"/>
+    </radialGradient>
+  </defs>
+  <g id="TSFree-logo-32" transform="translate(-1408 -485)">
+    <g id="icon-bg" transform="translate(1408 485)" clip-path="url(#clip-path)">
+      <path id="Path_54" data-name="Path 54" d="M12.856.817a3.978,3.978,0,0,1,4.83,0L28.98,9.444a3.978,3.978,0,0,1,1.386,4.336L25.973,27.995a3.978,3.978,0,0,1-3.8,2.8H8.371a3.978,3.978,0,0,1-3.8-2.8L.178,13.78A3.978,3.978,0,0,1,1.563,9.444Z" transform="matrix(0.966, -0.259, 0.259, 0.966, -2.249, 4.099)" fill="url(#radial-gradient)"/>
+    </g>
+    <g id="magnet" transform="translate(1415.607 490.947)">
+      <path id="Path_31" data-name="Path 31" d="M321.811,399.548l-3.029,3.029a3.14,3.14,0,1,1-4.441-4.441l3.029-3.029-3.231-3.231-3.029,3.029a7.709,7.709,0,1,0,10.9,10.9l3.029-3.029Zm0,0" transform="translate(-308.856 -388.957)" fill="#fff"/>
+      <rect id="Rectangle_19" data-name="Rectangle 19" width="3.997" height="4.569" transform="translate(13.047 10.499) rotate(-45)" fill="#c9ffcc"/>
+      <rect id="Rectangle_20" data-name="Rectangle 20" width="3.997" height="4.569" transform="translate(5.375 2.826) rotate(-45)" fill="#c9ffcc"/>
+    </g>
+  </g>
+</svg>

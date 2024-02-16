@@ -1,0 +1,300 @@
+[2024-01-27 15:16:16.190812 -04:00] INFO [src/core_main.rs:158] main start args:[]
+[2024-01-27 15:16:16.191651 -04:00] INFO [src/server.rs:362] DISPLAY=Ok(":0.0")
+[2024-01-27 15:16:16.191724 -04:00] INFO [src/server.rs:363] XAUTHORITY=Ok("/home/vcatafesta/.Xauthority")
+[2024-01-27 15:16:16.191841 -04:00] INFO [src/server.rs:409] server not started (will try to start): No such file or directory (os error 2)
+[2024-01-27 15:16:16.192082 -04:00] INFO [src/server.rs:362] DISPLAY=Ok(":0.0")
+[2024-01-27 15:16:16.192118 -04:00] INFO [src/server.rs:363] XAUTHORITY=Ok("/home/vcatafesta/.Xauthority")
+[2024-01-27 15:16:16.192317 -04:00] INFO [src/ipc.rs:279] Started ipc server at path: /tmp/RustDesk/ipc
+[2024-01-27 15:16:16.208250 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk.toml
+[2024-01-27 15:16:16.208593 -04:00] DEBUG [src/server.rs:471] #tries of ipc service connection: 3
+[2024-01-27 15:16:16.223391 -04:00] INFO [src/common.rs:560] Testing nat ...
+[2024-01-27 15:16:16.223486 -04:00] INFO [src/lan.rs:30] lan discovery listener started
+[2024-01-27 15:16:16.223532 -04:00] INFO [src/rendezvous_mediator.rs:114] start rendezvous mediator of rs-ny.rustdesk.com
+[2024-01-27 15:16:16.510061 -04:00] INFO [src/server.rs:523] #1 try: failed to connect to ipc_service
+[2024-01-27 15:16:16.531978 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 15:16:16.533173 -04:00] INFO [src/rendezvous_mediator.rs:463] register_pk of rs-ny due to key not confirmed
+[2024-01-27 15:16:16.533209 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk.toml
+[2024-01-27 15:16:16.767777 -04:00] DEBUG [libs/hbb_common/src/config.rs:689] Update rendezvous_server in config to rs-ny.rustdesk.com:21116
+[2024-01-27 15:16:16.767828 -04:00] DEBUG [libs/hbb_common/src/config.rs:690] {"rs-ny.rustdesk.com:21116": 234599}
+[2024-01-27 15:16:16.768225 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 234.599ms
+[2024-01-27 15:16:16.768257 -04:00] INFO [src/rendezvous_mediator.rs:447] UUID_MISMATCH received from rs-ny.rustdesk.com:21116
+[2024-01-27 15:16:16.768611 -04:00] INFO [libs/hbb_common/src/config.rs:875] id updated from 47449163 to 1018681092
+[2024-01-27 15:16:16.769542 -04:00] DEBUG [src/common.rs:597] Got nat response from rs-ny.rustdesk.com:21116: port=37227
+[2024-01-27 15:16:17.111968 -04:00] INFO [src/server.rs:523] #2 try: failed to connect to ipc_service
+[2024-01-27 15:16:17.193530 -04:00] DEBUG [libs/scrap/src/common/hwcodec.rs:383] Error { kind: InvalidInput, message: "invalid argument: can't kill an exited process" }, scrap::common::hwcodec:libs/scrap/src/common/hwcodec.rs:383:21
+[2024-01-27 15:16:17.223793 -04:00] INFO [libs/scrap/src/common/hwcodec.rs:387] Check hwcodec config, exit with: exit status: 0
+[2024-01-27 15:16:17.224268 -04:00] DEBUG [src/common.rs:597] Got nat response from rs-ny.rustdesk.com:21115: port=37227
+[2024-01-27 15:16:17.224828 -04:00] INFO [src/common.rs:623] Tested nat type: ASYMMETRIC in 1.001221564s
+[2024-01-27 15:16:18.013356 -04:00] INFO [src/server.rs:523] #3 try: failed to connect to ipc_service
+[2024-01-27 15:16:18.013443 -04:00] WARN [src/server.rs:527] skipped config sync
+[2024-01-27 15:16:22.411005 -04:00] INFO [src/ipc.rs:279] Started ipc_pa server at path: /tmp/RustDesk/ipc_pa
+[2024-01-27 15:16:22.413671 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_local.toml
+[2024-01-27 15:17:32.427340 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:17:32.495673 -04:00] ERROR [src/ipc.rs:289] Failed to start ipc_pa server at path /tmp/RustDesk/ipc_pa: Endereço já em uso (os error 98)
+[2024-01-27 15:17:32.495790 -04:00] ERROR [src/ipc.rs:564] Failed to start pa ipc server: Endereço já em uso (os error 98)
+[2024-01-27 15:17:32.496679 -04:00] INFO [src/ipc.rs:524] pa monitor: "alsa_output.pci-0000_00_1b.0.analog-stereo.monitor"
+[2024-01-27 15:17:32.650700 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:17:32.701124 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:17:32.708176 -04:00] INFO [src/flutter.rs:794] Session 1700358878 start, render by flutter texture rgba plugin
+[2024-01-27 15:17:32.723935 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:17:32.802522 -04:00] INFO [libs/scrap/src/common/codec.rs:549] cpu num:4, cpu loadavg:1.22, codec thread:1
+[2024-01-27 15:17:32.932311 -04:00] INFO [src/client.rs:280] rendezvous server: rs-ny.rustdesk.com:21116
+[2024-01-27 15:17:32.932891 -04:00] INFO [src/client.rs:297] #1 punch attempt with 192.168.100.5:44071, id: 1700358878
+[2024-01-27 15:17:33.051870 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:17:33.559713 -04:00] INFO [src/client.rs:344] Hole Punched 1700358878 = 181.222.1.171:27273
+[2024-01-27 15:17:33.559834 -04:00] INFO [src/client.rs:379] 627 ms used to punch hole, relay_server: 5.161.65.208, nat_type: ASYMMETRIC
+[2024-01-27 15:17:33.560066 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:17:33.560105 -04:00] INFO [src/client.rs:457] peer address: 181.222.1.171:27273, timeout: 18000
+[2024-01-27 15:17:34.684348 -04:00] ERROR [src/ipc.rs:546] Failed to send audio data:Pipe quebrado (os error 32)
+[2024-01-27 15:17:35.848718 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:17:51.787426 -04:00] INFO [src/client.rs:604] #1 request relay attempt, id: 1700358878, uuid: 45c24c81-ccdf-4ab7-9679-83f4b693d7f2, relay_server: 5.161.65.208, secure: true
+[2024-01-27 15:17:52.415404 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:17:52.445313 -04:00] INFO [src/client.rs:488] direct_failures updated to 1
+[2024-01-27 15:17:52.445937 -04:00] INFO [src/client.rs:492] 18.885814183s used to establish connection
+[2024-01-27 15:17:52.905467 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:17:52.922537 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:17:56.769892 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:17:56.769949 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:17:56.771632 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:17:57.239847 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:17:59.955405 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:18:03.094658 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:18:34.138470 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:18:36.380574 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:18:36.380682 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:18:36.388632 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:18:36.856360 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:18:38.072048 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:18:40.393468 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:19:05.390144 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:19:07.036801 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:21:03.190935 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:21:10.511851 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:21:36.406223 -04:00] DEBUG [src/ui_session_interface.rs:1099] handle_peer_info :PeerInfo { username: "luskaedivinsky", hostname: "luska-pc", platform: "Linux", displays: [DisplayInfo { x: 0, y: 0, width: 1366, height: 768, name: "HDMI-1", online: true, cursor_embedded: false, original_resolution: MessageField(Some(Resolution { width: 1366, height: 768, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } })), special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }], current_display: 0, sas_enabled: false, version: "1.2.2", features: MessageField(Some(Features { privacy_mode: false, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } })), encoding: MessageField(Some(SupportedEncoding { h264: false, h265: false, vp8: true, av1: true, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } })), resolutions: MessageField(Some(SupportedResolutions { resolutions: [Resolution { width: 1366, height: 768, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 1920, height: 1080, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 1360, height: 768, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 1280, height: 720, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 1024, height: 768, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 832, height: 624, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 800, height: 600, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 720, height: 480, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 640, height: 480, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 720, height: 400, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }], special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } })), platform_additions: "", special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }
+[2024-01-27 15:21:36.406937 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:21:36.411738 -04:00] INFO [src/common.rs:175] clipboard update found on client
+[2024-01-27 15:21:36.411994 -04:00] INFO [src/client.rs:701] Start text clipboard loop
+[2024-01-27 15:21:36.422393 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:21:36.689850 -04:00] DEBUG [src/client.rs:1887] recved audio format, sample rate=48000
+[2024-01-27 15:21:36.804462 -04:00] DEBUG [src/common.rs:251] clipboard updated on client
+[2024-01-27 15:21:37.471299 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:21:42.123943 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:21:52.511340 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:21:54.024382 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:21:55.572679 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:21:55.589452 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:22:01.221052 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:22:14.668276 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:22:20.487678 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:22:20.489256 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 15:22:21.552516 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:22:37.871136 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:22:38.884341 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:22:48.055201 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:22:49.135694 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:24:23.437707 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:24:24.450260 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:24:26.686055 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:24:28.755504 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:24:30.145401 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:24:32.102217 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:24:37.094588 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:24:44.420801 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:24:46.527579 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:24:49.952145 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:24:55.249012 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:24:59.780576 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:25:04.708092 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:25:08.753616 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:25:09.938744 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:25:10.966416 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:26:59.788139 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:27:00.867881 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:27:06.271491 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:27:07.298066 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:27:09.521269 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:27:10.584098 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:27:44.554175 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:27:45.564960 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:37:31.071553 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:37:32.152161 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:37:35.889741 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:37:44.957432 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:37:49.787242 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:37:53.091204 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:37:54.687499 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:38:08.087558 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:38:09.594694 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:38:14.687771 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:38:19.155380 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 15:38:20.157221 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 16:05:50.905177 -04:00] DEBUG [src/client/io_loop.rs:249] Exit io_loop of id=1700358878
+[2024-01-27 16:05:50.905338 -04:00] INFO [src/client/io_loop.rs:853] sync transfer job status
+[2024-01-27 16:05:50.905838 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 16:05:50.905960 -04:00] INFO [src/client/io_loop.rs:864] meta: TransferSerde { write_jobs: [], read_jobs: [] }
+[2024-01-27 16:05:50.906058 -04:00] INFO [src/client.rs:1868] Video decoder loop exits
+[2024-01-27 16:05:50.906061 -04:00] INFO [src/client.rs:1896] Audio decoder loop exits
+[2024-01-27 16:05:51.126661 -04:00] INFO [src/client.rs:723] Stop text clipboard loop
+[2024-01-27 16:05:54.337335 -04:00] INFO [libs/scrap/src/common/codec.rs:549] cpu num:4, cpu loadavg:0.22, codec thread:2
+[2024-01-27 16:05:54.505532 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 16:05:54.553560 -04:00] INFO [src/client.rs:280] rendezvous server: rs-ny.rustdesk.com:21116
+[2024-01-27 16:05:54.554463 -04:00] INFO [src/client.rs:297] #1 punch attempt with 192.168.100.5:44451, id: 1700358878
+[2024-01-27 16:05:55.066335 -04:00] INFO [src/client.rs:344] Hole Punched 1700358878 = 181.222.1.171:27333
+[2024-01-27 16:05:55.066462 -04:00] INFO [src/client.rs:379] 512 ms used to punch hole, relay_server: 5.161.65.208, nat_type: ASYMMETRIC
+[2024-01-27 16:05:55.066913 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 16:05:55.067012 -04:00] INFO [src/client.rs:457] peer address: 181.222.1.171:27333, timeout: 3072
+[2024-01-27 16:05:58.357688 -04:00] INFO [src/client.rs:604] #1 request relay attempt, id: 1700358878, uuid: cf4e606a-21fc-4f4a-b3e8-bf65856db310, relay_server: 5.161.65.208, secure: true
+[2024-01-27 16:05:59.116976 -04:00] INFO [src/client.rs:492] 4.049939691s used to establish connection
+[2024-01-27 16:05:59.573662 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 16:05:59.573904 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 16:16:57.067536 -04:00] DEBUG [src/ui_session_interface.rs:1099] handle_peer_info :PeerInfo { username: "luskaedivinsky", hostname: "luska-pc", platform: "Linux", displays: [DisplayInfo { x: 0, y: 0, width: 1366, height: 768, name: "HDMI-1", online: true, cursor_embedded: false, original_resolution: MessageField(Some(Resolution { width: 1366, height: 768, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } })), special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }], current_display: 0, sas_enabled: false, version: "1.2.2", features: MessageField(Some(Features { privacy_mode: false, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } })), encoding: MessageField(Some(SupportedEncoding { h264: false, h265: false, vp8: true, av1: true, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } })), resolutions: MessageField(Some(SupportedResolutions { resolutions: [Resolution { width: 1366, height: 768, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 1920, height: 1080, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 1360, height: 768, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 1280, height: 720, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 1024, height: 768, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 832, height: 624, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 800, height: 600, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 720, height: 480, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 640, height: 480, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }, Resolution { width: 720, height: 400, special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }], special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } })), platform_additions: "", special_fields: SpecialFields { unknown_fields: UnknownFields { fields: None }, cached_size: CachedSize { size: 0 } } }
+[2024-01-27 16:16:57.068263 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 16:16:57.070060 -04:00] INFO [src/client.rs:701] Start text clipboard loop
+[2024-01-27 16:16:57.686726 -04:00] DEBUG [src/common.rs:251] clipboard updated on client
+[2024-01-27 16:16:57.686820 -04:00] DEBUG [src/client.rs:1887] recved audio format, sample rate=48000
+[2024-01-27 16:17:02.739005 -04:00] INFO [src/common.rs:175] clipboard update found on client
+[2024-01-27 16:44:01.199224 -04:00] DEBUG [src/common.rs:251] clipboard updated on client
+[2024-01-27 16:58:38.537650 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:00:03.887876 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:00:04.948825 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:00:20.771204 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 229.939ms
+[2024-01-27 17:00:28.688496 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:00:29.714729 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:00:45.536813 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:01:36.292475 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 247.574ms
+[2024-01-27 17:01:36.292527 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:02:04.744365 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:02:18.854638 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:02:44.282371 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 264.288ms
+[2024-01-27 17:03:05.551926 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 256.098ms
+[2024-01-27 17:03:05.552034 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:03:27.789546 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:03:39.421101 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:04:27.834544 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:04:51.746410 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:05:06.663674 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:05:32.206534 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:05:56.535924 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:06:16.315614 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:06:18.600311 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:06:38.170903 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:06:57.562042 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:07:17.264283 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 271.909ms
+[2024-01-27 17:07:17.264373 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:07:22.444514 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:07:39.137897 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:08:03.821556 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:08:14.026663 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:08:49.504008 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 295.184ms
+[2024-01-27 17:08:49.504064 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:09:10.974560 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 300.039ms
+[2024-01-27 17:09:10.974653 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:09:39.741429 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:09:49.405103 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 319.077ms
+[2024-01-27 17:09:49.405182 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:09:50.643786 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:10:22.026135 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 324.873ms
+[2024-01-27 17:10:22.026261 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:10:51.752483 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:11:25.948224 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 327.864ms
+[2024-01-27 17:11:25.948303 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:11:58.757077 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:12:13.638678 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:12:14.728536 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:12:17.461659 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:12:17.964703 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:12:40.967359 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 331.391ms
+[2024-01-27 17:13:01.086736 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 338.775ms
+[2024-01-27 17:13:26.958395 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 341.642ms
+[2024-01-27 17:13:30.805251 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:13:31.884631 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:14:09.794844 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:14:17.185232 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 351.966ms
+[2024-01-27 17:15:10.757512 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:16:06.839287 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 350.423ms
+[2024-01-27 17:16:06.839376 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:16:11.152856 -04:00] INFO [src/rendezvous_mediator.rs:183] request_pk received from rs-ny.rustdesk.com:21116
+[2024-01-27 17:16:41.750567 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:16:47.395079 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 367.46ms
+[2024-01-27 17:17:12.114331 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 374.553ms
+[2024-01-27 17:17:30.809538 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 371.253ms
+[2024-01-27 17:18:07.087370 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:18:08.119514 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:18:58.267621 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 383.346ms
+[2024-01-27 17:20:14.829363 -04:00] DEBUG [libs/hbb_common/src/udp.rs:35] Receive buf size of udp 0.0.0.0:0: Ok(212992)
+[2024-01-27 17:20:19.007507 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 406.325ms
+[2024-01-27 17:21:03.788703 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 397.791ms
+[2024-01-27 17:22:34.387369 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:22:35.469739 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:29:39.755655 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 329.408ms
+[2024-01-27 17:34:33.752760 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 273.857ms
+[2024-01-27 17:38:07.354585 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:38:08.382023 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:47:04.905415 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:47:05.983626 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:48:46.253975 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:48:47.266768 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:50:20.614397 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:51:17.054038 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:51:18.137430 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:51:39.753562 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 227.966ms
+[2024-01-27 17:51:41.121850 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:51:42.149354 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:52:35.406637 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:52:37.139715 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:52:38.905387 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:52:38.922636 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:52:42.204152 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:52:42.207971 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:52:43.287325 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:53:11.470720 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:53:12.482800 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:53:17.105575 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:53:19.673297 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:53:20.089207 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:53:20.872441 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:53:24.678474 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:53:24.688767 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:53:28.288646 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:53:34.857085 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:53:34.955225 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:53:35.773390 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:53:36.139052 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:53:41.521571 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 17:55:13.037432 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:55:14.098886 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:55:17.703867 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:55:18.715971 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:58:57.137315 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:58:58.198892 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:59:41.404654 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 17:59:42.432587 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 18:10:29.940360 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 18:10:31.890016 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 18:10:33.005635 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 18:13:03.191212 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 18:13:04.673476 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 18:13:05.888990 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_hwcodec.toml
+[2024-01-27 18:16:24.199839 -04:00] DEBUG [src/common.rs:251] clipboard updated on client
+[2024-01-27 21:03:05.131918 -04:00] INFO [src/common.rs:175] clipboard update found on client
+[2024-01-27 21:04:32.544867 -04:00] INFO [src/common.rs:175] clipboard update found on client
+[2024-01-27 21:15:16.813227 -04:00] INFO [src/common.rs:175] clipboard update found on client
+[2024-01-27 21:16:17.986065 -04:00] INFO [src/common.rs:175] clipboard update found on client
+[2024-01-27 21:33:29.843147 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 21:33:31.668823 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 21:33:33.087072 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 21:33:34.098060 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 21:33:38.169978 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 21:48:44.100601 -04:00] INFO [src/common.rs:175] clipboard update found on client
+[2024-01-27 21:51:20.497664 -04:00] INFO [src/common.rs:175] clipboard update found on client
+[2024-01-27 21:55:11.524301 -04:00] INFO [src/common.rs:175] clipboard update found on client
+[2024-01-27 21:56:12.064848 -04:00] INFO [src/common.rs:175] clipboard update found on client
+[2024-01-27 22:23:31.774496 -04:00] DEBUG [src/rendezvous_mediator.rs:170] Latency of rs-ny.rustdesk.com:21116: 221.171ms
+[2024-01-27 22:26:21.029241 -04:00] INFO [src/common.rs:175] clipboard update found on client
+[2024-01-27 23:11:19.984649 -04:00] DEBUG [src/client/io_loop.rs:249] Exit io_loop of id=1700358878
+[2024-01-27 23:11:19.984777 -04:00] INFO [src/client/io_loop.rs:853] sync transfer job status
+[2024-01-27 23:11:19.985191 -04:00] DEBUG [libs/hbb_common/src/config.rs:434] Configuration path: /home/vcatafesta/.config/rustdesk/RustDesk_default.toml
+[2024-01-27 23:11:19.985301 -04:00] INFO [src/client/io_loop.rs:864] meta: TransferSerde { write_jobs: [], read_jobs: [] }
+[2024-01-27 23:11:19.985361 -04:00] INFO [src/client.rs:1868] Video decoder loop exits
+[2024-01-27 23:11:19.985368 -04:00] INFO [src/client.rs:1896] Audio decoder loop exits
+[2024-01-27 23:11:20.226971 -04:00] INFO [src/client.rs:723] Stop text clipboard loop

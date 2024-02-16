@@ -1,0 +1,22 @@
+[Desktop Entry]
+Version=1.0
+Terminal=false
+Type=Application
+Name=TikTok
+Exec=brave --class=www.tiktok.com,Chromium-browser --profile-directory=Default --app=https://www.tiktok.com/
+Icon=/home/vcatafesta/.local/share/icons/favicon-4578911.png
+Categories=Webapps;Biglinux;
+StartupWMClass=www.tiktok.com
+Actions=SoftwareRender;NvidiaRender;IntegratedRender;
+
+[Desktop Action SoftwareRender]
+Name=Software Render
+Exec=SoftwareRender brave --class=www.tiktok.com,Chromium-browser --profile-directory=Default --app=https://www.tiktok.com/
+
+[Desktop Action NvidiaRender]
+Name=Nvidia Render
+Exec=NvidiaRender brave --class=www.tiktok.com,Chromium-browser --profile-directory=Default --app=https://www.tiktok.com/
+
+[Desktop Action IntegratedRender]
+Name=Integrated Render
+Exec=IntegratedRender brave --class=www.tiktok.com,Chromium-browser --profile-directory=Default --app=https://www.tiktok.com/

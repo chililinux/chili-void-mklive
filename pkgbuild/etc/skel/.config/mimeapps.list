@@ -1,0 +1,23 @@
+[Default Applications]
+x-scheme-handler/http=xfce4-web-browser.desktop
+x-scheme-handler/https=xfce4-web-browser.desktop
+image/apng=org.xfce.ristretto.desktop
+image/avif=org.xfce.ristretto.desktop
+image/bmp=org.xfce.ristretto.desktop
+image/gif=org.xfce.ristretto.desktop
+image/heif=org.xfce.ristretto.desktop
+image/jpeg=org.xfce.ristretto.desktop
+image/jxl=org.xfce.ristretto.desktop
+image/png=org.xfce.ristretto.desktop
+
+[Added Associations]
+x-scheme-handler/http=xfce4-web-browser.desktop;
+x-scheme-handler/https=xfce4-web-browser.desktop;
+image/apng=org.xfce.ristretto.desktop;
+image/avif=org.xfce.ristretto.desktop;
+image/bmp=org.xfce.ristretto.desktop;
+image/gif=org.xfce.ristretto.desktop;
+image/heif=org.xfce.ristretto.desktop;
+image/jpeg=org.xfce.ristretto.desktop;
+image/jxl=org.xfce.ristretto.desktop;
+image/png=org.xfce.ristretto.desktop;

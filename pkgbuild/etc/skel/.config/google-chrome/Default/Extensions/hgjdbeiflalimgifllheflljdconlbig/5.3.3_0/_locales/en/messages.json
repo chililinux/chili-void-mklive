@@ -1,0 +1,254 @@
+{
+   "add_to_chrome": {
+      "message": "Add to Chrome"
+   },
+   "add_to_chrome_extend": {
+      "message": "Add to Chrome Trustnav Adblock to protect it!"
+   },
+   "after_blocking_ads": {
+      "message": "After blocking ads"
+   },
+   "app_description": {
+      "description": "Extension short description on Store",
+      "message": "Trustnav protects you from accessing dangerous websites and unwanted ads."
+   },
+   "app_long_description": {
+      "description": "Extension long description on Store",
+      "message": "SafeSearch by Trustnav checks every search result or website, allowing you to browse the internet safely and worry-free.\n\nIf the domain or website in your search results is rated as unsafe, this extension will warn you before visiting the site. This helps protect you from credit card theft, accidentally giving your password to hackers, and from downloading ransomware or malware.\n\nThis extension protects you by changing the Default Search in Google Chrome™.\n\nBy installing SafeSearch by Trustnav you accept the following ToS and Privacy Policy: www.trustnav.com/privacy"
+   },
+   "app_name": {
+      "description": "Extension name on Store",
+      "message": "Trustnav Safesearch"
+   },
+   "before_blocking_ads": {
+      "message": "Before blocking ads"
+   },
+   "chrome_can_block_ads": {
+      "message": "Your Google Chrome now can block ads"
+   },
+   "chrome_can_block_ads_info": {
+      "message": "Add to Chrome Trustnav Adblocker to start blocking ads today."
+   },
+   "chrome_not_blocking_ads": {
+      "message": "Your Chrome is not blocking ads."
+   },
+   "complete_installation": {
+      "message": "Complete Trustnav Installation with adblocker extension"
+   },
+   "complete_installation_text": {
+      "message": "Please, complete the install of the complete Security Suite and get your navigation free of ads again."
+   },
+   "continue": {
+      "message": "Continue"
+   },
+   "dismiss": {
+      "message": "Dismiss"
+   },
+   "dont_show": {
+      "message": "Don't show again"
+   },
+   "main_help_us_vote": {
+      "message": "Help us to keep you safe of malware and phishing sites."
+   },
+   "main_help_us_vote_highlight": {
+      "message": "Is this web reliable?"
+   },
+   "main_not_protected": {
+      "message": "You are not protected"
+   },
+   "main_recommend_trustnav": {
+      "message": "Install adblocker extension to be protected of malware and ads."
+   },
+   "main_safe": {
+      "message": "safe"
+   },
+   "main_safe_site": {
+      "message": "This website is safe"
+   },
+   "main_share": {
+      "message": "Install adblocker"
+   },
+   "main_switch_on": {
+      "message": "Switch on"
+   },
+   "main_switch_on_trustnav": {
+      "message": "Switch on Trustnav to browse safe"
+   },
+   "main_undo": {
+      "message": "Undo"
+   },
+   "main_unknown_site": {
+      "message": "Unknown site"
+   },
+   "main_unsafe": {
+      "message": "unsafe"
+   },
+   "main_unsafe_site": {
+      "message": "This website is unsafe"
+   },
+   "main_you_voted": {
+      "message": "You selected this site as"
+   },
+   "main_you_voted_thank_you": {
+      "message": "Thank you for your feedback!"
+   },
+   "newtab_add": {
+      "message": "Add"
+   },
+   "newtab_add_marker": {
+      "message": "Add marker"
+   },
+   "newtab_cancel": {
+      "message": "Cancel"
+   },
+   "newtab_marker_preview": {
+      "message": "Preview"
+   },
+   "newtab_marker_thumbnail": {
+      "message": "Thumbnail URL"
+   },
+   "newtab_marker_title": {
+      "message": "Title"
+   },
+   "newtab_marker_url": {
+      "message": "URL"
+   },
+   "newtab_search": {
+      "message": "Search on"
+   },
+   "newtab_search_button": {
+      "message": "Search"
+   },
+   "newtab_secured": {
+      "message": "Secured by Trustnav for Google Chrome™"
+   },
+   "notification_continue": {
+      "message": "Continue"
+   },
+   "notification_disable": {
+      "message": "Disable alerts on this site"
+   },
+   "notification_disable_all": {
+      "message": "Disable alerts in all sites"
+   },
+   "notification_leave": {
+      "message": "Get me out!"
+   },
+   "notification_text": {
+      "message": "Our community has rated this site as untrusted. \u003Cbr>\u003Cspan>We do not recommend browsing on this site\u003C/span>"
+   },
+   "notification_unsafe": {
+      "message": "This website is unsafe"
+   },
+   "popup_login": {
+      "message": "Sign in"
+   },
+   "popup_login_button_email": {
+      "message": "Continue"
+   },
+   "popup_login_button_facebook": {
+      "message": "Continue with Facebook"
+   },
+   "popup_login_button_gmail": {
+      "message": "Continue with Google"
+   },
+   "popup_login_need_account": {
+      "message": "Need an account?"
+   },
+   "popup_login_signup": {
+      "message": "Sign up now!"
+   },
+   "popup_profile": {
+      "message": "Profile"
+   },
+   "popup_profile_logging_out": {
+      "message": "Logging out..."
+   },
+   "popup_profile_manage_account": {
+      "message": "Manage my account"
+   },
+   "settings_about": {
+      "message": "About"
+   },
+   "settings_about_text": {
+      "message": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut molestie nisi."
+   },
+   "settings_adblocker": {
+      "message": "Adblocker"
+   },
+   "settings_alerts": {
+      "message": "Alerts"
+   },
+   "settings_all_rights": {
+      "message": "Copyright © 2018"
+   },
+   "settings_and": {
+      "message": "and"
+   },
+   "settings_coming_soon": {
+      "message": "Cooming soon"
+   },
+   "settings_contact": {
+      "message": "Contact us"
+   },
+   "settings_follow_us_on": {
+      "message": "Follow us"
+   },
+   "settings_in_andorra": {
+      "message": "in Andorra"
+   },
+   "settings_install": {
+      "message": "Install"
+   },
+   "settings_install_suite": {
+      "message": "For a better performance of Trustnav Security Suite, we recommend to install all the extensions."
+   },
+   "settings_installed": {
+      "message": "Installed"
+   },
+   "settings_learn_more": {
+      "message": "Learn more on"
+   },
+   "settings_made_with": {
+      "message": "Made with"
+   },
+   "settings_notified_search_engine": {
+      "message": "Choose the search engine you want to use when searching on newtab page or on the address bar:"
+   },
+   "settings_notified_search_engine_disabled": {
+      "message": "You can not change your search engine, because you are using the unlimited mode for your Adblocker."
+   },
+   "settings_notified_visit_website": {
+      "message": "You will be notified when you visit a website that has been rated as untrusted."
+   },
+   "settings_privacy_policy": {
+      "message": "Privacy Policy"
+   },
+   "settings_recommended": {
+      "message": "(Recommended)"
+   },
+   "settings_search_engine": {
+      "message": "Search engine"
+   },
+   "settings_settings": {
+      "message": "Settings"
+   },
+   "settings_show_me_alerts": {
+      "message": "Show me alerts"
+   },
+   "settings_social": {
+      "message": "or visit our social channels, follow us to be updated"
+   },
+   "settings_terms_conditions": {
+      "message": "Terms & Conditions"
+   },
+   "settings_to_our": {
+      "message": "to our"
+   },
+   "settings_using_site_agree": {
+      "message": "By using the site, you agree"
+   },
+   "settings_websites_with_disabled": {
+      "message": "Current websites with disabled notifications:"
+   }
+}

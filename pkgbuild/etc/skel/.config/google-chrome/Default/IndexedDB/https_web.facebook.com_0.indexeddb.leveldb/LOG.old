@@ -1,0 +1,6 @@
+2024/02/15-10:04:56.517 714 Reusing MANIFEST /home/vcatafesta/.config/google-chrome/Default/IndexedDB/https_web.facebook.com_0.indexeddb.leveldb/MANIFEST-000001
+2024/02/15-10:04:56.517 714 Recovering log #3
+2024/02/15-10:04:56.727 714 Reusing old log /home/vcatafesta/.config/google-chrome/Default/IndexedDB/https_web.facebook.com_0.indexeddb.leveldb/000003.log 
+2024/02/15-10:05:07.622 713 Level-0 table #5: started
+2024/02/15-10:05:07.710 713 Level-0 table #5: 2888679 bytes OK
+2024/02/15-10:05:07.716 713 Delete type=0 #3

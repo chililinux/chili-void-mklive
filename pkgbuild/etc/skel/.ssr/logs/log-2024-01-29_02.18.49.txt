@@ -1,0 +1,106 @@
+2024-01-29 02:18:49.912 (I) ==================== SSR iniciado ====================
+2024-01-29 02:18:49.912 (I) SimpleScreenRecorder 0.4.4
+Compiled with GCC 12.2.1
+Qt: header 5.15.8, lib 5.15.12
+libavformat: header 60.3.100, lib 60.16.100
+libavcodec: header 60.3.100, lib 60.31.102
+libavutil: header 58.2.100, lib 58.29.100
+libswscale: header 7.1.100, lib 7.5.100
+2024-01-29 02:18:49.912 (I) [CPUFeatures::Detect] Recursos da CPU: mmx sse sse2 sse3 ssse3 sse4_1 sse4_2 avx avx2 bmi1 bmi2
+2024-01-29 02:18:49.952 (I) [ALSAInput::GetSourceList] Gerando lista de fontes ...
+2024-01-29 02:18:49.953 (I) [ALSAInput::GetSourceList] Encontrado plugin: [pipewire] PipeWire Sound Server
+2024-01-29 02:18:49.953 (I) [ALSAInput::GetSourceList] Encontrada placa: [hw:0] HDA Intel PCH
+2024-01-29 02:18:49.953 (I) [ALSAInput::GetSourceList] Encontrado dispositivo: [hw:0,0] HDA Intel PCH: ALC887-VD Analog
+2024-01-29 02:18:49.953 (I) [ALSAInput::GetSourceList] Encontrado dispositivo: [hw:0,2] HDA Intel PCH: ALC887-VD Alt Analog
+2024-01-29 02:18:49.953 (I) [PulseAudioInput::GetSourceList] Gerando lista de fontes ...
+2024-01-29 02:18:49.956 (I) [SourceNamesCallback] Fonte encontrada: [alsa_output.pci-0000_00_1b.0.analog-stereo.monitor] Monitor of Áudio interno Estéreo analógico
+2024-01-29 02:18:49.956 (I) [SourceNamesCallback] Fonte encontrada: [alsa_input.pci-0000_00_1b.0.analog-stereo] Áudio interno Estéreo analógico
+2024-01-29 02:18:50.040 (E) [PageRecord::OnStdin] Standard input read error (ioctl).
+2024-01-29 02:19:08.318 (I) [ALSAInput::GetSourceList] Gerando lista de fontes ...
+2024-01-29 02:19:08.321 (I) [ALSAInput::GetSourceList] Encontrado plugin: [pipewire] PipeWire Sound Server
+2024-01-29 02:19:08.321 (I) [ALSAInput::GetSourceList] Encontrada placa: [hw:0] HDA Intel PCH
+2024-01-29 02:19:08.321 (I) [ALSAInput::GetSourceList] Encontrado dispositivo: [hw:0,0] HDA Intel PCH: ALC887-VD Analog
+2024-01-29 02:19:08.321 (I) [ALSAInput::GetSourceList] Encontrado dispositivo: [hw:0,2] HDA Intel PCH: ALC887-VD Alt Analog
+2024-01-29 02:19:23.373 (I) [PageRecord::StartPage] Iniciando a página...
+2024-01-29 02:19:23.373 (I) [PageRecord::StartPage] Página iniciada.
+2024-01-29 02:19:26.402 (I) [PageRecord::StartInput] Iniciando a entrada...
+2024-01-29 02:19:26.403 (I) [X11Input::Init] Usando memória compartilhada X11.
+2024-01-29 02:19:26.404 (I) [X11Input::Init] Detecting screen configuration ...
+2024-01-29 02:19:26.405 (I) [X11Input::Init] Tela 0: x1 = 0, y1 = 0, x2 = 1366, y2 = 768
+2024-01-29 02:19:26.405 (I) [X11Input::InputThread] Segmento de entrada iniciado.
+2024-01-29 02:19:26.506 (I) [ALSAInput::InputThread] Usando formato de amostra s16.
+2024-01-29 02:19:26.519 (I) [PageRecord::StartInput] Entrada iniciada.
+2024-01-29 02:19:26.519 (I) [ALSAInput::InputThread] Segmento de entrada iniciado.
+2024-01-29 02:19:29.014 (I) [PageRecord::StopInput] Parando a entrada...
+2024-01-29 02:19:29.014 (I) [X11Input::~X11Input] Parando segmento de entrada ...
+2024-01-29 02:19:29.032 (I) [X11Input::InputThread] Segmento de entrada parado.
+2024-01-29 02:19:29.033 (I) [ALSAInput::~ALSAInput] Parando segmento de entrada ...
+2024-01-29 02:19:29.043 (I) [ALSAInput::InputThread] Segmento de entrada parado.
+2024-01-29 02:19:29.046 (I) [PageRecord::StopInput] Entrada parada.
+2024-01-29 02:19:29.046 (I) [PageRecord::StopPage] Parando a página ...
+2024-01-29 02:19:29.046 (I) [PageRecord::StopPage] Página parada.
+2024-01-29 02:20:01.667 (I) [PageRecord::StartPage] Iniciando a página...
+2024-01-29 02:20:01.667 (I) [PageRecord::StartPage] Página iniciada.
+2024-01-29 02:20:01.667 (I) [PageRecord::StartInput] Iniciando a entrada...
+2024-01-29 02:20:01.668 (I) [X11Input::Init] Usando memória compartilhada X11.
+2024-01-29 02:20:01.668 (I) [X11Input::Init] Detecting screen configuration ...
+2024-01-29 02:20:01.668 (I) [X11Input::Init] Tela 0: x1 = 0, y1 = 0, x2 = 1366, y2 = 768
+2024-01-29 02:20:01.669 (I) [X11Input::InputThread] Segmento de entrada iniciado.
+2024-01-29 02:20:01.672 (I) [ALSAInput::InputThread] Usando formato de amostra s16.
+2024-01-29 02:20:01.685 (I) [PageRecord::StartInput] Entrada iniciada.
+2024-01-29 02:20:01.685 (I) [ALSAInput::InputThread] Segmento de entrada iniciado.
+2024-01-29 02:20:05.799 (I) [PageRecord::StartOutput] Iniciando a saída...
+2024-01-29 02:20:05.799 (I) [PageRecord::StartOutput] Output file: /home/vcatafesta/Vídeos/biglinux-xfce1-2024-01-29_02.20.05.mkv
+2024-01-29 02:20:05.799 (I) [Muxer::Init] Usando o formato matroska (Matroska).
+2024-01-29 02:20:05.799 (I) [Muxer::AddStream] Usando o codec libx264 (libx264 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10).
+2024-01-29 02:20:05.800 (I) [VideoEncoder::PrepareStream] Usando formato de pixel nv12.
+2024-01-29 02:20:05.800 (S) [libx264 @ 0x564efb6cca40] using SAR=1/1
+2024-01-29 02:20:05.801 (S) [libx264 @ 0x564efb6cca40] using cpu capabilities: MMX2 SSE2Fast SSSE3 SSE4.2 AVX FMA3 BMI2 AVX2
+2024-01-29 02:20:05.803 (S) [libx264 @ 0x564efb6cca40] profile High, level 3.1, 4:2:0, 8-bit
+2024-01-29 02:20:05.803 (S) [libx264 @ 0x564efb6cca40] 264 - core 164 r3108 31e19f9 - H.264/MPEG-4 AVC codec - Copyleft 2003-2023 - http://www.videolan.org/x264.html - options: cabac=1 ref=1 deblock=1:0:0 analyse=0x3:0x3 me=dia subme=1 psy=1 psy_rd=1,00:0,00 mixed_ref=0 me_range=16 chroma_me=1 trellis=0 8x8dct=1 cqm=0 deadzone=21,11 fast_pskip=1 chroma_qp_offset=0 threads=4 lookahead_threads=1 sliced_threads=0 nr=0 decimate=1 interlaced=0 bluray_compat=0 constrained_intra=0 bframes=3 b_pyramid=2 b_adapt=1 b_bias=0 direct=1 weightb=1 open_gop=0 weightp=1 keyint=250 keyint_min=25 scenecut=40 intra_refresh=0 rc=crf mbtree=0 crf=23,0 qcomp=0,60 qpmin=0 qpmax=69 qpstep=4 ip_ratio=1,40 pb_ratio=1,30 aq=1:1,00
+2024-01-29 02:20:05.803 (I) [Muxer::AddStream] Usando o codec libvorbis (libvorbis).
+2024-01-29 02:20:05.803 (I) [BaseEncoder::EncoderThread] Segmento do codificador iniciado.
+2024-01-29 02:20:05.803 (I) [AudioEncoder::PrepareStream] Usando formato de amostra f32p.
+2024-01-29 02:20:05.809 (I) [BaseEncoder::EncoderThread] Segmento do codificador iniciado.
+2024-01-29 02:20:05.809 (I) [Muxer::MuxerThread] Fluxo do segmento do muxer iniciado.
+2024-01-29 02:20:05.809 (I) [PageRecord::StartOutput] Saída iniciada.
+2024-01-29 02:20:05.809 (I) [Synchronizer::SynchronizerThread] Fluxo sincronizador iniciado.
+2024-01-29 02:20:05.815 (I) [FastResampler::Resample] Taxa de nova amostragem é 1.0000 (era 0.0000).
+2024-01-29 02:21:11.585 (I) [PageRecord::StopOutput] Parando a saída...
+2024-01-29 02:21:11.585 (I) [PageRecord::StopOutput] Saída parada.
+2024-01-29 02:21:11.586 (I) [PageRecord::StopInput] Parando a entrada...
+2024-01-29 02:21:11.586 (I) [X11Input::~X11Input] Parando segmento de entrada ...
+2024-01-29 02:21:11.606 (I) [X11Input::InputThread] Segmento de entrada parado.
+2024-01-29 02:21:11.606 (I) [ALSAInput::~ALSAInput] Parando segmento de entrada ...
+2024-01-29 02:21:11.607 (I) [ALSAInput::InputThread] Segmento de entrada parado.
+2024-01-29 02:21:11.612 (I) [PageRecord::StopInput] Entrada parada.
+2024-01-29 02:21:11.612 (I) [PageRecord::StopPage] Parando a página ...
+2024-01-29 02:21:11.612 (I) [Synchronizer::~Synchronizer] Parando fluxo sincronizador ...
+2024-01-29 02:21:11.615 (I) [Synchronizer::SynchronizerThread] Fluxo sincronizador parado.
+2024-01-29 02:21:11.615 (I) [Muxer::Finish] Finalizando os codificadores ...
+2024-01-29 02:21:11.626 (I) [BaseEncoder::EncoderThread] Esvaziando o codificador ...
+2024-01-29 02:21:11.628 (I) [BaseEncoder::EncoderThread] Esvaziando o codificador ...
+2024-01-29 02:21:11.633 (I) [BaseEncoder::EncoderThread] Segmento do codificador parado.
+2024-01-29 02:21:11.637 (I) [BaseEncoder::EncoderThread] Segmento do codificador parado.
+2024-01-29 02:21:11.648 (I) [Muxer::MuxerThread] Fluxo do segmento muxer parado.
+2024-01-29 02:21:11.656 (I) [Muxer::~Muxer] Parando codificadores ...
+2024-01-29 02:21:11.656 (I) [Muxer::~Muxer] Aguardando o segmento muxer parar ...
+2024-01-29 02:21:11.657 (I) [BaseEncoder::~BaseEncoder] Parando segmento do codificador ...
+2024-01-29 02:21:11.657 (S) [libx264 @ 0x564efb6cca40] frame I:15    Avg QP: 9,02  size: 53743
+2024-01-29 02:21:11.657 (S) [libx264 @ 0x564efb6cca40] frame P:498   Avg QP:15,47  size:  2141
+2024-01-29 02:21:11.657 (S) [libx264 @ 0x564efb6cca40] frame B:1459  Avg QP:17,96  size:   108
+2024-01-29 02:21:11.657 (S) [libx264 @ 0x564efb6cca40] consecutive B-frames:  1,2%  0,5%  0,2% 98,2%
+2024-01-29 02:21:11.657 (S) [libx264 @ 0x564efb6cca40] mb I  I16..4: 53,3% 15,3% 31,4%
+2024-01-29 02:21:11.657 (S) [libx264 @ 0x564efb6cca40] mb P  I16..4:  0,6%  0,2%  0,5%  P16..4:  7,0%  0,0%  0,0%  0,0%  0,0%    skip:91,7%
+2024-01-29 02:21:11.657 (S) [libx264 @ 0x564efb6cca40] mb B  I16..4:  0,0%  0,0%  0,0%  B16..8:  0,5%  0,0%  0,0%  direct: 0,8%  skip:98,7%  L0:29,1% L1:70,7% BI: 0,3%
+2024-01-29 02:21:11.657 (S) [libx264 @ 0x564efb6cca40] 8x8 transform intra:15,1% inter:11,3%
+2024-01-29 02:21:11.657 (S) [libx264 @ 0x564efb6cca40] coded y,uvDC,uvAC intra: 42,3% 27,6% 22,3% inter: 0,8% 1,0% 0,4%
+2024-01-29 02:21:11.657 (S) [libx264 @ 0x564efb6cca40] i16 v,h,dc,p: 80% 17%  2%  1%
+2024-01-29 02:21:11.657 (S) [libx264 @ 0x564efb6cca40] i8 v,h,dc,ddl,ddr,vr,hd,vl,hu: 16% 18% 22%  4%  9%  9% 10%  4%  7%
+2024-01-29 02:21:11.657 (S) [libx264 @ 0x564efb6cca40] i4 v,h,dc,ddl,ddr,vr,hd,vl,hu: 30% 35% 11%  4%  4%  5%  3%  4%  4%
+2024-01-29 02:21:11.658 (S) [libx264 @ 0x564efb6cca40] i8c dc,h,v,p: 67% 20% 11%  2%
+2024-01-29 02:21:11.658 (S) [libx264 @ 0x564efb6cca40] Weighted P-Frames: Y:0,0% UV:0,0%
+2024-01-29 02:21:11.658 (S) [libx264 @ 0x564efb6cca40] kb/s:247,04
+2024-01-29 02:21:11.661 (I) [BaseEncoder::~BaseEncoder] Parando segmento do codificador ...
+2024-01-29 02:21:11.663 (I) [PageRecord::StopPage] Página parada.
+2024-01-29 02:21:27.776 (I) ==================== SSR parado ====================

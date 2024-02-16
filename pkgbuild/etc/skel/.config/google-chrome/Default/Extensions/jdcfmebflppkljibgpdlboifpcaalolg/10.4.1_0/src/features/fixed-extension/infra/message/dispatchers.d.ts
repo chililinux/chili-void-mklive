@@ -1,0 +1,25 @@
+export declare const configGetSettings: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+export declare const getStaticFile: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+export declare const getFeatureFlag: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+export declare const getConfiguration: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+export declare const getAbTestSide: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+export declare const sendGA4: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+export declare const sendBigQuery: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+export declare const featureControllerSubscribe: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+export declare const featureControllerUnsubscribe: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+export declare const checkFeaturesInExecutionByTab: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+export declare const partnerGetByDomain: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+declare const _default: {
+    configGetSettings: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+    getStaticFile: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+    getFeatureFlag: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+    getConfiguration: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+    getAbTestSide: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+    sendGA4: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+    sendBigQuery: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+    featureControllerSubscribe: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+    featureControllerUnsubscribe: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+    checkFeaturesInExecutionByTab: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+    partnerGetByDomain: import("../../../../shared/lib/message/feature_message_dispatch").default<any>;
+};
+export default _default;

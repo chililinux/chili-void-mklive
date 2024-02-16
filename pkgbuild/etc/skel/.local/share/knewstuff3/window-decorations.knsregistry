@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE khotnewstuff3>
+<hotnewstuffregistry>
+ <stuff category="114">
+  <name>Win12OS Aurorae Theme</name>
+  <providerid>https://api.kde-look.org/ocs/v1/</providerid>
+  <author>yeyushengfan258</author>
+  <homepage>https://store.kde.org/p/2038806</homepage>
+  <licence></licence>
+  <version></version>
+  <rating>50</rating>
+  <downloads>5938</downloads>
+  <installedfile>/home/vcatafesta/.local/share/aurorae/themes/Win12OS-dark/*</installedfile>
+  <id>2038806</id>
+  <releasedate>2023-05-21</releasedate>
+  <summary>Win12OS kde is a light clean theme for KDE Plasma desktop.&lt;br />
+&lt;br />
+In this repository you'll find:&lt;br />
+&lt;br />
+    Aurorae Themes&lt;br />
+    Kvantum Themes&lt;br />
+    Plasma Color Schemes&lt;br />
+    Plasma Desktop Themes&lt;br />
+    Plasma Look-and-Feel Settings&lt;br />
+    &lt;br />
+&lt;br...</summary>
+  <changelog></changelog>
+  <preview>https://images.pling.com/cache/100x100-0/img/00/00/54/79/90/2038806/6.png</preview>
+  <previewBig>https://images.pling.com/cache/770x540-0/img/00/00/54/79/90/2038806/6.png</previewBig>
+  <payload>https://files03.pling.com/api/files/download/j/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjE2ODQ3MDUzNjkiLCJvIjoiMSIsInMiOiIxMTA3MGE2NDljMzQzOTU1MjhhYmRmNGU3OTczN2FkYjAyZjMzZDRjNjI2MmZmYjUyZWEwMzI5Zjg0YWM4YWE1MmU5ZmRkN2I3ODU2MmY5MWI1OGJhNzZmNzUzMWM0ZGU4MzU1NmU2YTg4NWE0NmIzMDllYzg3ODIzNWQ2YmM4NSIsInQiOjE2ODcwNTYyNzksInN0ZnAiOm51bGwsInN0aXAiOiIxNjguMjI4LjI0NC4xMDUifQ.Qic3goC6ylLCg6eAMKI-TvqwnEUyoeF287k31ngcwTs/Win12OS-dark.zip</payload>
+  <tags>original-product,plasma,theme,gplv3,unix,kde,linux</tags>
+  <status>installed</status>
+ </stuff>
+ <stuff category="114">
+  <name>Utterly Round Dark</name>
+  <providerid>https://api.kde-look.org/ocs/v1/</providerid>
+  <author>himdek</author>
+  <homepage>https://store.kde.org/p/1999020</homepage>
+  <licence></licence>
+  <version>1.2</version>
+  <rating>58</rating>
+  <downloads>2385</downloads>
+  <installedfile>/home/vcatafesta/.local/share/aurorae/themes/Utterly-Round-Dark/*</installedfile>
+  <id>1999020</id>
+  <releasedate>2023-06-11</releasedate>
+  <summary>Rounded Window borders for KDE Plasma 5 desktop environment that can follow any light color scheme with transparency and blur&lt;br />
+&lt;br />
+* To blend window decoration with background, install and use the Color Scheme, Kvantum Theme and Konsole Color Scheme from the below Global Theme&lt;br />
+&lt;a...</summary>
+  <changelog></changelog>
+  <preview>https://images.pling.com/cache/100x100-0/img/00/00/66/42/38/1999020/screenshot-20230307-170151.png</preview>
+  <previewBig>https://images.pling.com/cache/770x540-0/img/00/00/66/42/38/1999020/screenshot-20230307-170151.png</previewBig>
+  <payload>https://files03.pling.com/api/files/download/j/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjE2ODY0NDUxNDYiLCJvIjoiMSIsInMiOiI3MjVlMDU3M2E5OTFkMjViNjIzMzQ5OTczMWY1MGI4ODFlODBmMDFiNjJhYTQ4ODFkODM5NTZiMGU4M2Q2MzExZTUxZWQ3YTIxMDU2ZmI1OTE0ODNmNjg5MzIwOGYzZmVmMmU0YjkzZTdhY2ZjZDNjNTkwYmI2MjY4NTQ5NTk4MyIsInQiOjE2ODcwNTYzNDIsInN0ZnAiOm51bGwsInN0aXAiOiIxNjguMjI4LjI0NC4xMDUifQ.rpDkIfZcT9P2YXWAg8Mrj-hZF2mQpIzPmY3qI4RyBi4/Utterly-Round-Aurorae-Dark.tar.xz</payload>
+  <tags>gplv2-later,unix,plasma,theme,original-product,blur,blured,blurred,blurry,kde,mac,linux</tags>
+  <status>installed</status>
+ </stuff>
+ <stuff category="114">
+  <name>Adapta KDE</name>
+  <providerid>https://api.kde-look.org/ocs/v1/</providerid>
+  <author>x-varlesh-x</author>
+  <homepage>https://store.kde.org/p/1191690</homepage>
+  <licence></licence>
+  <version>20180828</version>
+  <rating>65</rating>
+  <downloads>176267</downloads>
+  <installedfile>/home/vcatafesta/.local/share/aurorae/themes/Adapta/*</installedfile>
+  <id>1191690</id>
+  <releasedate>2018-08-28</releasedate>
+  <summary>Adapta KDE - This is a port of the popular GTK theme Adapta for Plasma 5 desktop with a few additions and extras.&lt;br />
+RECOMMEND USE THIS CUSTOMIZATION WITH KVANTUM ENGINE:&lt;br />
+https://www.opendesktop.org/p/1005410/&lt;br />
+https://github.com/tsujan/Kvantum/releases</summary>
+  <changelog></changelog>
+  <preview>https://images.pling.com/cache/100x100-0/img/00/00/43/80/78/1191690/76d5353fa081571df5723ae32be3d548d6c4.png</preview>
+  <previewBig>https://images.pling.com/cache/770x540-0/img/00/00/43/80/78/1191690/76d5353fa081571df5723ae32be3d548d6c4.png</previewBig>
+  <payload>https://files03.pling.com/api/files/download/j/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjE1MzU0MzQ1NDAiLCJvIjoiMSIsInMiOiI3YTRmYmMxYjJlZDJjZGE2Zjc1NDViNGQzNjMxNDg2Y2Q3OWRjNGEwNTIzMTkwOThlYmYxMTdmYTgzN2U4N2ZkYjM1MWEyMjYwMTJhMjNmZWE4MTk0ZTMxNjU5ZTgzYjgxZDlhMTRiODE3YzkyYTcxMDEzY2I4YmE5OTk4YmNjOSIsInQiOjE2ODcwNTU5NTcsInN0ZnAiOm51bGwsInN0aXAiOiIxNjguMjI4LjI0NC4xMDUifQ.CgEEYClIG-GvODxvWVGp6aH9qhevB8NY_AoMxP0-l3I/adapta-aurorae.tar.gz</payload>
+  <tags>plasma,theme,gplv3,kde,aurorae,source-package,adapta,unix,linux</tags>
+  <status>installed</status>
+ </stuff>
+</hotnewstuffregistry>

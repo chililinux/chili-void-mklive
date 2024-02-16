@@ -1,0 +1,26 @@
+{
+   "app": {
+      "background": {
+         "scripts": [ "js/background.js" ]
+      }
+   },
+   "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
+   "gcm_sender_id": "122867383838",
+   "icons": {
+      "128": "img/icons/icon128.png",
+      "16": "img/icons/icon16.png",
+      "32": "img/icons/icon32.png",
+      "60": "img/icons/icon60.png",
+      "64": "img/icons/icon64.png",
+      "90": "img/icons/icon90.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAl6VCO+wQAigUM9LtxxouzzkWSIkgw1uzHOCZvBU10ZZj9zAzvRFaUcquJw4wfTXqiA48EhBJLh3GmNo7y8JHy3uZJ3fmaxmp3bTZWm7/6VaVBfmngGVhoTZOvysgviIrg1VjOFIj/MDNyIc5XWFkyXCmLh2dpNU4pcMkuT437Rx8RGZV2wfvf8sfMQAgU4uyoTsDYxeQ2MXwxURrTaHHksDhu1OHRFrnQ3Fa8+l+3F4FsVV5vW0ZoQwHV6E54lb+wg3Q9bdpOAMYUVqwqLR50Agv0iHIe71OGge1YQRUbrFl7J0C4AmhLjc4nrF9U4LjX0Z+/iHGKmReD6METOL0wwIDAQAB",
+   "manifest_version": 2,
+   "name": "Telegram",
+   "permissions": [ "notifications", "webview", {
+      "fileSystem": [ "write" ]
+   }, "storage", "unlimitedStorage", "fullscreen" ],
+   "short_name": "Telegram",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "0.5.7.1"
+}
