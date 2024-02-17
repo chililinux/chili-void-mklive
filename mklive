@@ -170,7 +170,7 @@ Options:
  -a <xbps-arch>     Set XBPS_ARCH (do not use it unless you know what it is)
  -b <system-pkg>    Set an alternative base-system package (defaults to base-system).
  -r <repo-url>      Use this XBPS repository (may be specified multiple times).
- -c <cachedir>      Use this XBPS cache directory (a subdirectory of current 
+ -c <cachedir>      Use this XBPS cache directory (a subdirectory of current
 directory if unset).
  -k <keymap>        Default keymap to use (us if unset)
  -l <locale>        Default locale to use (en_US.UTF-8 if unset).
@@ -406,7 +406,7 @@ generate_squashfs() {
 	chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
 
 	# Remove rootfs and temporary dirs, we don't need them anymore.
-	rm -rf "$ROOTFS" "$BUILDDIR/tmp-rootfs" "$BUILDDIR/tmp"
+#	rm -rf "$ROOTFS" "$BUILDDIR/tmp-rootfs" "$BUILDDIR/tmp"
 }
 
 generate_iso_image() {
@@ -493,7 +493,9 @@ fi
 ROOTDIR='/lixo'
 
 if [ -n "$ROOTDIR" ]; then
-	BUILDDIR=$(mktemp --tmpdir="$ROOTDIR" -d)
+#	BUILDDIR=$(mktemp --tmpdir="$ROOTDIR" -d)
+	BUILDDIR="$ROOTDIR/void"
+	mkdir -p "$BUILDDIR"
 else
 	BUILDDIR=$(mktemp --tmpdir="$(pwd -P)" -d)
 fi

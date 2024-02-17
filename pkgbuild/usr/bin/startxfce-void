@@ -26,14 +26,17 @@ if [ -e "$HOME/.config/ledkeyboard" ]; then
 fi
 
 #Create user-dirs
+xdg-user-dirs-update
 xdg-user-dirs-update --force
 
 ### Execute in LiveCD
 if [ -e /run/initramfs/live/LiveOS/squashfs.img ]; then
 	# Copy the install file to the desktop and configure permissions
 	homeDesk="/home/anon/Desktop"
+	homeDesk="/home/anon/Área\ de\ trabalho/"
 	cfile='void-install.desktop'
 	cfullFilename="$homeDesk/$cfile"
+
 	if [ ! -d "$homeDesk" ]; then
 		mkdir -p "$homeDesk"
 	fi
@@ -47,4 +50,6 @@ if [ -e /run/initramfs/live/LiveOS/squashfs.img ]; then
 	# Set metadata using gio
 	gio set $cfullFilename metadata::xfce-exe-checksum "$checksum"
 	gio set $cfullFilename metadata::trusted true
+
+	cp -f $cfullFileName "/home/anon/Desktop/"
 fi
