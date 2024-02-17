@@ -33,7 +33,7 @@ xdg-user-dirs-update --force
 if [ -e /run/initramfs/live/LiveOS/squashfs.img ]; then
 	# Copy the install file to the desktop and configure permissions
 	homeDesk="/home/anon/Desktop"
-	homeDesk="/home/anon/Área\ de\ trabalho/"
+	homeDesk=/home/anon/'Área\ de\ trabalho'
 	cfile='void-install.desktop'
 	cfullFilename="$homeDesk/$cfile"
 
