@@ -32,35 +32,6 @@ export PS4='${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 #set -x
 #set -e
 
-STEP_COUNT=16
-reset=$(tput sgr0)
-# Definir os estilos de texto como variáveis
-bold=$(tput bold)
-underline=$(tput smul)   # Início do sublinhado
-nounderline=$(tput rmul) # Fim do sublinhado
-reverse=$(tput rev)      # Inverte as cores de fundo e texto
-# Definir as cores ANSI como variáveis
-black=$(tput bold)$(tput setaf 0)
-red=$(tput bold)$(tput setaf 196)
-green=$(tput bold)$(tput setaf 2)
-yellow=$(tput bold)$(tput setaf 3)
-blue=$(tput setaf 4)
-pink=$(tput setaf 5)
-magenta=$(tput setaf 5)
-cyan=$(tput setaf 6)
-white=$(tput setaf 7)
-gray=$(tput setaf 8)
-orange=$(tput setaf 202)
-purple=$(tput setaf 125)
-violet=$(tput setaf 61)
-light_red=$(tput setaf 9)
-light_green=$(tput setaf 10)
-light_yellow=$(tput setaf 11)
-light_blue=$(tput setaf 12)
-light_magenta=$(tput setaf 13)
-light_cyan=$(tput setaf 14)
-bright_white=$(tput setaf 15)
-
 trap 'error_out $? $LINENO' INT TERM 0
 umask 022
 
@@ -117,13 +88,54 @@ ADDITIONAL_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
 #pacman
 ADDITIONAL_PKGS+=" pacman fakeroot bsdtar"
 
-info_msg() {
-	printf "\033[1m$@\n\033[m"
+sh_confAmbiente() {
+    declare -g BOOTLOG="/tmp/void-mklive-$(sh_diahora).log"
+    declare -g LOGGER='/dev/tty8'
+    declare -g STEP_COUNT=16
+}
+
+sh_setvarcolors() {
+    reset=$(tput sgr0)
+    # Definir os estilos de texto como variáveis
+    bold=$(tput bold)
+    underline=$(tput smul)   # Início do sublinhado
+    nounderline=$(tput rmul) # Fim do sublinhado
+    reverse=$(tput rev)      # Inverte as cores de fundo e texto
+    # Definir as cores ANSI como variáveis
+    black=$(tput bold)$(tput setaf 0)
+    red=$(tput bold)$(tput setaf 196)
+    green=$(tput bold)$(tput setaf 2)
+    yellow=$(tput bold)$(tput setaf 3)
+    blue=$(tput setaf 4)
+    pink=$(tput setaf 5)
+    magenta=$(tput setaf 5)
+    cyan=$(tput setaf 6)
+    white=$(tput setaf 7)
+    gray=$(tput setaf 8)
+    orange=$(tput setaf 202)
+    purple=$(tput setaf 125)
+    violet=$(tput setaf 61)
+    light_red=$(tput setaf 9)
+    light_green=$(tput setaf 10)
+    light_yellow=$(tput setaf 11)
+    light_blue=$(tput setaf 12)
+    light_magenta=$(tput setaf 13)
+    light_cyan=$(tput setaf 14)
+    bright_white=$(tput setaf 15)
+}
+
+sh_diahora() {
+    DIAHORA=$(date +"%d%m%Y-%T" | sed 's/://g')
+    printf "%s\n" "$DIAHORA"
 }
 
 die() {
 	info_msg "ERROR: $@"
 	error_out 1 $LINENO
+}
+
+info_msg() {
+    printf "\033[1m$@\n\033[m"
 }
 
 print_step() {
@@ -139,9 +151,9 @@ mount_pseudofs() {
 }
 
 umount_pseudofs() {
-	umount -R -f "$ROOTFS"/sys >/dev/null 2>&1
-	umount -R -f "$ROOTFS"/dev >/dev/null 2>&1
-	umount -R -f "$ROOTFS"/proc >/dev/null 2>&1
+	umount -R -f "$ROOTFS"/sys 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	umount -R -f "$ROOTFS"/dev 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	umount -R -f "$ROOTFS"/proc 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 error_out() {
@@ -186,45 +198,44 @@ sh_chroot_job() {
     local shell='/bin/bash'
 
     print_step "$cmsg"
-#   chroot "$ROOTFS" "$shell" -c "$cjob"  >/dev/null 2>&1
-    chroot "$ROOTFS" "$shell" -c "$cjob"
+    chroot "$ROOTFS" "$shell" -c "$cjob"  2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 copy_void_keys() {
-	mkdir -p "$1"/var/db/xbps/keys  >/dev/null 2>&1
-	cp keys/*.plist "$1"/var/db/xbps/keys  >/dev/null 2>&1
+	mkdir -p "$1"/var/db/xbps/keys 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	cp keys/*.plist "$1"/var/db/xbps/keys 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 copy_dracut_files() {
-	mkdir -p "$1"/usr/lib/dracut/modules.d/01vmklive  >/dev/null 2>&1
-	cp dracut/vmklive/* "$1"/usr/lib/dracut/modules.d/01vmklive/  >/dev/null 2>&1
+	mkdir -p "$1"/usr/lib/dracut/modules.d/01vmklive 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	cp dracut/vmklive/* "$1"/usr/lib/dracut/modules.d/01vmklive/ 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 copy_autoinstaller_files() {
-	mkdir -p "$1"/usr/lib/dracut/modules.d/01autoinstaller  >/dev/null 2>&1
-	cp dracut/autoinstaller/* "$1"/usr/lib/dracut/modules.d/01autoinstaller/  >/dev/null 2>&1
+	mkdir -p "$1"/usr/lib/dracut/modules.d/01autoinstaller 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	cp dracut/autoinstaller/* "$1"/usr/lib/dracut/modules.d/01autoinstaller/ 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_prereqs() {
 	XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} \
-		-c "$XBPS_HOST_CACHEDIR" -y $REQUIRED_PKGS  >/dev/null 2>&1
+		-c "$XBPS_HOST_CACHEDIR" -y $REQUIRED_PKGS 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	[ $? -ne 0 ] && die "Failed to install required software, exiting..."
 }
 
 install_packages() {
 	XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" \
-		${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS  >/dev/null 2>&1
+		${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	[ $? -ne 0 ] && die "Missing required binary packages, exiting..."
 
 	mount_pseudofs
 
 	LANG=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" \
-		${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $PACKAGE_LIST $INITRAMFS_PKGS  >/dev/null 2>&1
+		${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $PACKAGE_LIST $INITRAMFS_PKGS 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	[ $? -ne 0 ] && die "Failed to install $PACKAGE_LIST"
 
 	print_step "Reconfigurando o ambiente - pass 1"
-#	xbps-reconfigure -r "$ROOTFS" -f base-files >/dev/null 2>&1
-#	chroot "$ROOTFS" env -i xbps-reconfigure -f base-files  >/dev/null 2>&1
+#	xbps-reconfigure -r "$ROOTFS" -f base-files 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+#	chroot "$ROOTFS" env -i xbps-reconfigure -f base-files 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 
 	# Enable choosen UTF-8 locale and generate it into the target rootfs.
 	if [ -f "$ROOTFS"/etc/default/libc-locales ]; then
@@ -236,30 +247,27 @@ install_packages() {
 
     #skel
 	print_step "Copiando skel into $ROOTFS/etc/skel"
-	[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/ >/dev/null 2>&1
-#   cp -Rpa pkgbuild/etc/skel/. "$ROOTFS/etc/skel/" >/dev/null 2>&1
+	[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/ 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+#   cp -Rpa pkgbuild/etc/skel/. "$ROOTFS/etc/skel/" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 #   print_step "Copiando configuracoes into $ROOTFS/etc"
-    cp -Rpa pkgbuild/etc/. "$ROOTFS/etc/" >/dev/null 2>&1
+    cp -Rpa pkgbuild/etc/. "$ROOTFS/etc/" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 
 	print_step "Copiando aplicativos into $ROOTFS/usr/bin"
-	[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/ >/dev/null 2>&1
+	[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/ 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
     for x in pkgbuild/usr/bin/*; do
-        install -Dm755 $x "$ROOTFS"/usr/bin/ >/dev/null 2>&1
+        install -Dm755 $x "$ROOTFS"/usr/bin/ 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
     done
 
     print_step "Copiando wallpapers into $ROOTFS/usr/share/backgrounds"
-	[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/ >/dev/null 2>&1
-    cp -Rpva pkgbuild/usr/share/backgrounds -t "$ROOTFS"/usr/share/ >/dev/null 2>&1
+	[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/ 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    print_step "Copiando instalaador into $ROOTFS/usr/share/applications"
+    cp -Rpva pkgbuild/usr/share/applications -t "$ROOTFS"/usr/share/ 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 
-    #instalando browsers
 	sh_chroot_job "Atualizando repositorios Pacman" 'pacman -Sy --noconfirm'
 	sh_chroot_job "Instalando Paru" 'pacman -Sdd paru --noconfirm'
 	sh_chroot_job "Instalando navegador Brave" 'pacman -Sdd brave-browser --noconfirm'
 	sh_chroot_job "Instalando navegador Google Chrome" 'paru -Sdd google-chrome --noconfirm'
-
-    #ajustando instalador
-	sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print "$1"}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true;'
-
+    #sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print "$1"}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true;'
 	sh_chroot_job "Reconfigurando o ambiente - pass 2" 'xbps-reconfigure -a'
 
 	# Cleanup and remove useless stuff.
@@ -272,7 +280,7 @@ enable_services() {
 		if ! [ -e $ROOTFS/etc/sv/$service ]; then
 			die "service $service not in /etc/sv"
 		fi
-		ln -sf /etc/sv/$service $ROOTFS/etc/runit/runsvdir/default/ >/dev/null 2>&1
+		ln -sf /etc/sv/$service $ROOTFS/etc/runit/runsvdir/default/ 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	done
 }
 
@@ -286,35 +294,35 @@ generate_initramfs() {
 	copy_dracut_files "$ROOTFS"
 	copy_autoinstaller_files "$ROOTFS"
 	chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" \
-		--add-drivers "ahci" --force-add "vmklive autoinstaller" --omit systemd "/boot/initrd" $KERNELVERSION >/dev/null 2>&1
+		--add-drivers "ahci" --force-add "vmklive autoinstaller" --omit systemd "/boot/initrd" $KERNELVERSION 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	[ $? -ne 0 ] && die "Failed to generate the initramfs"
 
-	mv "$ROOTFS"/boot/initrd "$BOOT_DIR" >/dev/null 2>&1
-	cp "$ROOTFS"/boot/vmlinuz-$KERNELVERSION "$BOOT_DIR"/vmlinuz >/dev/null 2>&1
+	mv "$ROOTFS"/boot/initrd "$BOOT_DIR" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	cp "$ROOTFS"/boot/vmlinuz-$KERNELVERSION "$BOOT_DIR"/vmlinuz 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 cleanup_rootfs() {
 	for f in ${INITRAMFS_PKGS}; do
 		revdeps=$(xbps-query -r "$ROOTFS" -X $f)
 		if [ -n "$revdeps" ]; then
-			xbps-pkgdb -r "$ROOTFS" -m auto $f >/dev/null 2>&1
+			xbps-pkgdb -r "$ROOTFS" -m auto $f 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 		else
-			xbps-remove -r "$ROOTFS" -Ry ${f} >/dev/null 2>&1
+			xbps-remove -r "$ROOTFS" -Ry ${f} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 		fi
 	done
-	rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01vmklive >/dev/null 2>&1
-	rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01autoinstaller >/dev/null 2>&1
+	rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01vmklive 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01autoinstaller 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 generate_isolinux_boot() {
-	cp -f "$SYSLINUX_DATADIR"/isolinux.bin "$ISOLINUX_DIR" >/dev/null 2>&1
-	cp -f "$SYSLINUX_DATADIR"/ldlinux.c32 "$ISOLINUX_DIR" >/dev/null 2>&1
-	cp -f "$SYSLINUX_DATADIR"/libcom32.c32 "$ISOLINUX_DIR" >/dev/null 2>&1
-	cp -f "$SYSLINUX_DATADIR"/vesamenu.c32 "$ISOLINUX_DIR" >/dev/null 2>&1
-	cp -f "$SYSLINUX_DATADIR"/libutil.c32 "$ISOLINUX_DIR" >/dev/null 2>&1
-	cp -f "$SYSLINUX_DATADIR"/chain.c32 "$ISOLINUX_DIR" >/dev/null 2>&1
-	cp -f isolinux/isolinux.cfg.in "$ISOLINUX_DIR"/isolinux.cfg >/dev/null 2>&1
-	cp -f ${SPLASH_IMAGE} "$ISOLINUX_DIR" >/dev/null 2>&1
+	cp -f "$SYSLINUX_DATADIR"/isolinux.bin "$ISOLINUX_DIR" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	cp -f "$SYSLINUX_DATADIR"/ldlinux.c32 "$ISOLINUX_DIR" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	cp -f "$SYSLINUX_DATADIR"/libcom32.c32 "$ISOLINUX_DIR" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	cp -f "$SYSLINUX_DATADIR"/vesamenu.c32 "$ISOLINUX_DIR" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	cp -f "$SYSLINUX_DATADIR"/libutil.c32 "$ISOLINUX_DIR" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	cp -f "$SYSLINUX_DATADIR"/chain.c32 "$ISOLINUX_DIR" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	cp -f isolinux/isolinux.cfg.in "$ISOLINUX_DIR"/isolinux.cfg 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	cp -f ${SPLASH_IMAGE} "$ISOLINUX_DIR" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 
 	sed -i -e "s|@@SPLASHIMAGE@@|$(basename "${SPLASH_IMAGE}")|" \
 		-e "s|@@KERNVER@@|${KERNELVERSION}|" \
@@ -323,7 +331,7 @@ generate_isolinux_boot() {
 		-e "s|@@LOCALE@@|${LOCALE}|" \
 		-e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
 		-e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
-		"$ISOLINUX_DIR"/isolinux.cfg >/dev/null 2>&1
+		"$ISOLINUX_DIR"/isolinux.cfg 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 generate_grub_efi_boot() {
@@ -342,12 +350,12 @@ generate_grub_efi_boot() {
 	modprobe -q loop || :
 
 	# Create EFI vfat image.
-	truncate -s 32M "$GRUB_DIR"/efiboot.img >/dev/null 2>&1
-	mkfs.vfat -F12 -S 512 -n "grub_uefi" "$GRUB_DIR/efiboot.img" >/dev/null 2>&1
+	truncate -s 32M "$GRUB_DIR"/efiboot.img 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	mkfs.vfat -F12 -S 512 -n "grub_uefi" "$GRUB_DIR/efiboot.img" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 
 	GRUB_EFI_TMPDIR="$(mktemp --tmpdir="$HOME" -d)"
 	LOOP_DEVICE="$(losetup --show --find "${GRUB_DIR}"/efiboot.img)"
-	mount -o rw,flush -t vfat "${LOOP_DEVICE}" "${GRUB_EFI_TMPDIR}" >/dev/null 2>&1
+	mount -o rw,flush -t vfat "${LOOP_DEVICE}" "${GRUB_EFI_TMPDIR}" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 
 	cp -a "$IMAGEDIR"/boot "$VOIDHOSTDIR"
 	xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
@@ -385,16 +393,16 @@ generate_squashfs() {
 	ROOTFS_SIZE=$(du --apparent-size -sm "$ROOTFS" | awk '{print $1}')
 	mkdir -p "$BUILDDIR/tmp/LiveOS"
 	truncate -s "$((ROOTFS_SIZE + ROOTFS_SIZE))M" \
-		"$BUILDDIR"/tmp/LiveOS/ext3fs.img >/dev/null 2>&1
+		"$BUILDDIR"/tmp/LiveOS/ext3fs.img 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	mkdir -p "$BUILDDIR/tmp-rootfs"
-	mkfs.ext3 -F -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img" >/dev/null 2>&1
+	mkfs.ext3 -F -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	mount -o loop "$BUILDDIR/tmp/LiveOS/ext3fs.img" "$BUILDDIR/tmp-rootfs"
 	cp -a "$ROOTFS"/* "$BUILDDIR"/tmp-rootfs/
 	umount -f "$BUILDDIR/tmp-rootfs"
 	mkdir -p "$IMAGEDIR/LiveOS"
 
-	"$VOIDHOSTDIR"/usr/bin/mksquashfs -processors 2 "$BUILDDIR/tmp" "$IMAGEDIR/LiveOS/squashfs.img" \
-		-comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
+	"$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR/tmp" "$IMAGEDIR/LiveOS/squashfs.img" \
+		-comp "${SQUASHFS_COMPRESSION}" -processors 2 || die "Failed to generate squashfs image"
 	chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
 
 	# Remove rootfs and temporary dirs, we don't need them anymore.
@@ -415,6 +423,9 @@ generate_iso_image() {
 		-isohybrid-mbr "$SYSLINUX_DATADIR"/isohdpfx.bin \
 		-output "$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
 }
+
+sh_confAmbiente
+sh_setvarcolors
 
 #
 # main()
@@ -454,6 +465,7 @@ XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-fastly.voidlinux.org
 BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "
 ARCH=$(xbps-uhelper arch)
 
+# Set defaults
 # Set defaults
 : ${BASE_ARCH:=$(xbps-uhelper arch 2>/dev/null || uname -m)}
 : ${XBPS_CACHEDIR:="$(pwd -P)"/xbps-cachedir-${BASE_ARCH}}
@@ -510,10 +522,10 @@ CURRENT_STEP=0
 mkdir -p "$ROOTFS" "$VOIDHOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR"
 
 print_step "Synchronizing XBPS repository data..."
-copy_void_keys "$ROOTFS"  >/dev/null 2>&1
-copy_void_keys "$VOIDHOSTDIR"  >/dev/null 2>&1
-XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -r "$ROOTFS" ${XBPS_REPOSITORY} -S  >/dev/null 2>&1
-XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -S  >/dev/null 2>&1
+copy_void_keys "$ROOTFS" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+copy_void_keys "$VOIDHOSTDIR" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -r "$ROOTFS" ${XBPS_REPOSITORY} -S 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -S 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 
 # Get linux version for ISO
 # If linux version option specified use

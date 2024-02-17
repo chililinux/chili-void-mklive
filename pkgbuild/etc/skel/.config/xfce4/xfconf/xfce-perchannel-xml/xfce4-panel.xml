@@ -75,7 +75,7 @@
     <property name="plugin-8" type="string" value="pulseaudio">
       <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
       <property name="show-notifications" type="bool" value="true"/>
-      <property name="known-players" type="string" value="Chrome;Reprodutor de Mídias VLC"/>
+      <property name="known-players" type="string" value="Brave;Chrome;Reprodutor de Mídias VLC"/>
     </property>
     <property name="plugin-9" type="string" value="power-manager-plugin"/>
     <property name="plugin-10" type="string" value="notification-plugin"/>
@@ -150,7 +150,7 @@
       <property name="position-search-alternate" type="bool" value="false"/>
       <property name="position-commands-alternate" type="bool" value="false"/>
       <property name="show-command-suspend" type="bool" value="true"/>
-      <property name="command-menueditor" type="string" value="menulibre"/>
+      <property name="command-menueditor" type="string" value="manjaro-settings-manager"/>
       <property name="favorites-in-recent" type="bool" value="true"/>
     </property>
     <property name="clipman" type="empty">
