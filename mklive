@@ -29,8 +29,8 @@
 
 #debug
 export PS4='${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
-#set -x
-#set -e
+set -x
+set -e
 
 trap 'error_out $? $LINENO' INT TERM 0
 umask 022
@@ -39,10 +39,10 @@ readonly PROGNAME=$(basename "$0")
 readonly INITRAMFS_PKGS="binutils device-mapper dhclient dracut-network openresolv"
 readonly REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi squashfs-tools xorriso"
 declare ADDITIONAL_PKGS="bash dialog gettext lynx curl wget pv nano parted efivar"
-ADDITIONAL_PKGS+=" efibootmgr grub grub-x86_64-efi grub-utils curl wget xz zstd"
+ADDITIONAL_PKGS+=" efibootmgr grub grub-utils grub-void-theme curl wget xz zstd"
 ADDITIONAL_PKGS+=" git bc geoip geoipupdate iputils lvm2 cryptsetup"
 ADDITIONAL_PKGS+=" xtools vpm vsv neofetch pfetch inxi"
-#ADDITIONAL_PKGS+=" wifi-firmware rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
+ADDITIONAL_PKGS+=" wifi-firmware rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
 
 #xfce
 ADDITIONAL_PKGS+=" xorg xorg-video-drivers xorg-fonts xfce4"
@@ -64,8 +64,10 @@ ADDITIONAL_PKGS+=" xfce4-wavelan-plugin xfce4-xkb-plugin"
 ADDITIONAL_PKGS+=" xarchiver unrar zip unzip p7zip bzip2 file-roller"
 ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR lynx"
 #ADDITIONAL_PKGS+=" gnome-backgrounds mate-backgrounds"
-ADDITIONAL_PKGS+=" bluez bluez-alsa bluedevil blueman bluez-cups"
-ADDITIONAL_PKGS+=" Thunar pcmanfm octoxbps"
+
+ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
+ADDITIONAL_PKGS+=" Thunar pcmanfm"
+
 ADDITIONAL_PKGS+=" fonts-roboto-ttf liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font noto-fonts-emoji font-emoji-one-color ttf-ubuntu-font-family google-fonts-ttf font-iosevka"
 ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
 ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
@@ -79,14 +81,14 @@ ADDITIONAL_PKGS+=" neofetch pfetch bc bat bash-completion vsv vpm xtools geoip g
 ADDITIONAL_PKGS+=" intel-ucode linux-firmware-amd"
 ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver brother-brlaser cups-pdf"
 ADDITIONAL_PKGS+=" vlc celluloid mate-calc avahi htop cmatrix tmate xkill evince menulibre ocs-url"
-ADDITIONAL_PKGS+=" mugshot xapps python3-setproctitle"
+ADDITIONAL_PKGS+=" mugshot"
 #ADDITIONAL_PKGS+=" nano-syntax-highlighting"
 
 #office
 ADDITIONAL_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
 
 #pacman
-ADDITIONAL_PKGS+=" pacman fakeroot bsdtar"
+ADDITIONAL_PKGS+=" pacman fakeroot bsdtar octoxbps"
 
 sh_confAmbiente() {
     declare -g BOOTLOG="/tmp/void-mklive-$(sh_diahora).log"
@@ -219,19 +221,22 @@ copy_autoinstaller_files() {
 install_prereqs() {
 	XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} \
 		-c "$XBPS_HOST_CACHEDIR" -y $REQUIRED_PKGS 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-	[ $? -ne 0 ] && die "Failed to install required software, exiting..."
+    result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Failed to install required software, exiting..."
 }
 
 install_packages() {
 	XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" \
 		${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-	[ $? -ne 0 ] && die "Missing required binary packages, exiting..."
+    result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Missing required binary packages, exiting..."
 
 	mount_pseudofs
 
 	LANG=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" \
 		${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $PACKAGE_LIST $INITRAMFS_PKGS 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-	[ $? -ne 0 ] && die "Failed to install $PACKAGE_LIST"
+    result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Failed to install $PACKAGE_LIST"
 
 	print_step "Reconfigurando o ambiente - pass 1"
 #	xbps-reconfigure -r "$ROOTFS" -f base-files 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
@@ -249,7 +254,16 @@ install_skel() {
 	[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/ 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 #   cp -Rpa pkgbuild/etc/skel/. "$ROOTFS/etc/skel/" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 #   print_step "Copiando configuracoes into $ROOTFS/etc"
-    cp -Rpa pkgbuild/etc/. "$ROOTFS/etc/" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    cp -Rpva pkgbuild/etc/. "$ROOTFS/etc/" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+}
+
+install_wallpapers() {
+    print_step "Copiando wallpapers into $ROOTFS/usr/share/backgrounds"
+	[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/ 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    cp -Rpva pkgbuild/usr/share/backgrounds -t "$ROOTFS/usr/share/" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+
+    print_step "Copiando instalaador into $ROOTFS/usr/share/applications"
+    cp -Rpva pkgbuild/usr/share/applications -t "$ROOTFS/usr/share/" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_apps() {
@@ -260,16 +274,9 @@ install_apps() {
     done
 }
 
-install_wallpapers() {
-    print_step "Copiando wallpapers into $ROOTFS/usr/share/backgrounds"
-	[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/ 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-    print_step "Copiando instalaador into $ROOTFS/usr/share/applications"
-    cp -Rpva pkgbuild/usr/share/applications -t "$ROOTFS"/usr/share/ 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-}
-
 install_pacman() {
 	sh_chroot_job "Atualizando Pacman" 'pacman -Sy --noconfirm'
-	sh_chroot_job "Instalando Apps" 'pacman -Sdd brave-browser paru blueberry rfkill gnome-bluetooth --noconfirm'
+	sh_chroot_job "Instalando Apps" 'pacman -Sdd brave-browser paru blueberry bluez-tools --noconfirm'
 	sh_chroot_job "Instalando Google Chrome" 'paru -Sdd google-chrome --noconfirm'
     #sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print "$1"}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true;'
 }
@@ -281,8 +288,8 @@ reconfigure_packages() {
 }
 
 finish_clean() {
-	# Cleanup and remove useless stuff.
-	rm -rf "$ROOTFS"/var/cache/* "$ROOTFS"/run/* "$ROOTFS"/var/run/*
+    # Cleanup and remove useless stuff.
+    rm -rf "$ROOTFS"/var/cache/* "$ROOTFS"/run/* "$ROOTFS"/var/run/*
 }
 
 
@@ -307,7 +314,8 @@ generate_initramfs() {
 	copy_autoinstaller_files "$ROOTFS"
 	chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" \
 		--add-drivers "ahci" --force-add "vmklive autoinstaller" --omit systemd "/boot/initrd" $KERNELVERSION 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-	[ $? -ne 0 ] && die "Failed to generate the initramfs"
+    result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Failed to generate the initramfs"
 
 	mv "$ROOTFS"/boot/initrd "$BOOT_DIR" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	cp "$ROOTFS"/boot/vmlinuz-$KERNELVERSION "$BOOT_DIR"/vmlinuz 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
@@ -471,7 +479,9 @@ shift $((OPTIND - 1))
 XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-fastly.voidlinux.org/current"\
 " --repository=https://repo-fastly.voidlinux.org/current/nonfree"\
 " --repository=https://repo-fastly.voidlinux.org/current/multilib"\
-" --repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree"
+" --repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree"\
+" --repository=/github/void-packages/hostdir/binpkgs"\
+" --repository=https://chililinux.com/void/current"
 
 # Configure dracut to use overlayfs for the writable overlay.
 BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "
@@ -571,19 +581,14 @@ mkdir -p "$ROOTFS"/etc
 [ -s data/issue ] && cp data/issue "$ROOTFS"/etc
 
 #print_step "Installing void pkgs into the rootfs: ${PACKAGE_LIST} ..."
-if !(( KEEP_BUILDDIR )); then
-    print_step "Installing void pkgs into the rootfs..."
-    install_packages
-fi
+print_step "Installing void pkgs into the rootfs..."
+install_packages
 install_skel
-install_apps
 install_wallpapers
+install_apps
 install_pacman
-
-if !(( KEEP_BUILDDIR )); then
-    reconfigure_packages
-    finish_clean
-fi
+reconfigure_packages
+finish_clean
 
 : ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd dhcpcd}
 : ${ADDITIONAL_SERVICE_LIST:=NetworkManager avahi-daemon bluetoothd cupsd dbus elogind lxdm irqbalance polkitd sshd uuidd }
@@ -614,4 +619,4 @@ print_step "Generating ISO image..."
 generate_iso_image
 
 hsize=$(du -sh "$OUTPUT_FILE" | awk '{print $1}')
-info_msg "Created $(readlink -f "$OUTPUT_FILE") ($hsize) successfully."
+info_msg "${green}Created $(readlink -f "$OUTPUT_FILE") ($hsize) successfully.${reset}"

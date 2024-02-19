@@ -33,23 +33,23 @@ xdg-user-dirs-update --force
 if [ -e /run/initramfs/live/LiveOS/squashfs.img ]; then
 	# Copy the install file to the desktop and configure permissions
 	homeDesk="/home/anon/Desktop"
-	homeDesk=/home/anon/'Área\ de\ trabalho'
+	homeArea=/home/anon/'Área de trabalho'
 	cfile='void-install.desktop'
-	cfullFilename="$homeDesk/$cfile"
+	cfullFilename="$homeArea/$cfile"
 
-	if [ ! -d "$homeDesk" ]; then
+	if [ ! -d "$homeArea" ]; then
 		mkdir -p "$homeDesk"
+		mkdir -p "$homeArea"
 	fi
 
-	cp -f /usr/share/applications/$cfile "$homeDesk/"
-	chmod +x "$cfullFilename"
-
+	cp -f /usr/share/applications/$cfile "$cfullFilename"
 	# Generate the SHA256sum of the file on each boot
-	checksum=$(sha256sum $cfullFilename | awk '{print $1}')
+	checksum=$(sha256sum "$cfullFilename" | awk '{print $1}')
 
 	# Set metadata using gio
-	gio set $cfullFilename metadata::xfce-exe-checksum "$checksum"
-	gio set $cfullFilename metadata::trusted true
+	gio set "$cfullFilename" metadata::xfce-exe-checksum "$checksum"
+	gio set "$cfullFilename" metadata::trusted true
+	chmod +x "$cfullFilename"
 
-	cp -f $cfullFileName "/home/anon/Desktop/"
+#	cp -f $cfullFileName "$homeDesk/"
 fi

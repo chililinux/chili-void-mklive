@@ -79,7 +79,7 @@ ADDITIONAL_PKGS+=" neofetch pfetch bc bat bash-completion vsv vpm xtools geoip g
 ADDITIONAL_PKGS+=" intel-ucode linux-firmware-amd"
 ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver brother-brlaser cups-pdf"
 ADDITIONAL_PKGS+=" vlc celluloid mate-calc avahi htop cmatrix tmate xkill evince menulibre ocs-url"
-ADDITIONAL_PKGS+=" mugshot xapps python3-setproctitle"
+ADDITIONAL_PKGS+=" mugshot rfkill xapps"
 #ADDITIONAL_PKGS+=" nano-syntax-highlighting"
 
 #office
@@ -269,7 +269,7 @@ install_wallpapers() {
 
 install_pacman() {
 	sh_chroot_job "Atualizando Pacman" 'pacman -Sy --noconfirm'
-	sh_chroot_job "Instalando Apps" 'pacman -Sdd brave-browser paru blueberry rfkill gnome-bluetooth --noconfirm'
+	sh_chroot_job "Instalando Apps" 'pacman -Sdd brave-browser paru blueberry bluez-tools gnome-bluetooth python-setproctitle --noconfirm'
 	sh_chroot_job "Instalando Google Chrome" 'paru -Sdd google-chrome --noconfirm'
     #sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print "$1"}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true;'
 }
@@ -281,8 +281,8 @@ reconfigure_packages() {
 }
 
 finish_clean() {
-	# Cleanup and remove useless stuff.
-	rm -rf "$ROOTFS"/var/cache/* "$ROOTFS"/run/* "$ROOTFS"/var/run/*
+    # Cleanup and remove useless stuff.
+    rm -rf "$ROOTFS"/var/cache/* "$ROOTFS"/run/* "$ROOTFS"/var/run/*
 }
 
 
@@ -582,8 +582,8 @@ install_pacman
 
 if !(( KEEP_BUILDDIR )); then
     reconfigure_packages
-    finish_clean
 fi
+finish_clean
 
 : ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd dhcpcd}
 : ${ADDITIONAL_SERVICE_LIST:=NetworkManager avahi-daemon bluetoothd cupsd dbus elogind lxdm irqbalance polkitd sshd uuidd }
