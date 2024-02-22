@@ -1,7 +1,0 @@
-[History]
-Directories[$e]=file:///usr/share,file:$HOME,file:///,file:///usr,lib,file:///home,file:///etc,file:///var,file:///mnt
-Patterns[$e]=*
-
-[KPropertiesDialog]
-1366x768 screen: Height=467
-1366x768 screen: Width=407

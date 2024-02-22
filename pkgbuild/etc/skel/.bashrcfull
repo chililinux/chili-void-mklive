@@ -102,7 +102,7 @@ printf 'Welcome back! The time now is %s UTC\n' "$timenow"
 printf 'Server load    :  %s\n' "$load"
 printf 'Server Uptime  : %s\n' "$(uptime)"
 printf 'User           :  %s %s\n' "$(whoami)" "$(id)"
-printf 'Link to distro :  https://chililinux.com/ \n'
+printf 'Link to distro :  https://chililinux.com/void/ \n'
 
 function _exit()              # Function to run upon exit of shell.
 {

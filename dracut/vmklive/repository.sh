@@ -7,10 +7,9 @@ repository=https://repo-fastly.voidlinux.org/current
 repository=https://repo-fastly.voidlinux.org/current/nonfree
 repository=https://repo-fastly.voidlinux.org/current/multilib
 repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree
-#repository=https://voidlinux.com.br/repo/current
-#repository=https://voidlinux.com.br/repo/current/nonfree
-#repository=https://voidlinux.com.br/repo/current/multilib
-#repository=https://voidlinux.com.br/repo/current/multilib/nonfree
+
+repository=https://chililinux.com/void/current
+
 #repository=http://void.chililinux.com/voidlinux/current
 #repository=http://void.chililinux.com/voidlinux/current/nonfree
 #repository=http://void.chililinux.com/voidlinux/current/multilib

@@ -1,8 +1,0 @@
-[autodisable]
-KeyboardActivityTimeoutMs=300
-
-[parameters]
-OneFingerTapButton=LeftButton
-PalmDetect=true
-ThreeFingerTapButton=RightButton
-TwoFingerTapButton=MiddleButton
