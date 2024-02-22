@@ -1,6 +1,8 @@
 ##
 ## Static mirrors from CDN
 
+Include = /etc/pacman.d/mirrorlist
+
 ## General CDN from manjaro
 Server = http://mirrors.manjaro.org/repo/stable/$repo/$arch
 

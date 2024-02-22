@@ -34,10 +34,10 @@ export PS4='${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 #set -e
 trap 'error_out $? $LINENO' INT TERM 0
 umask 022
+declare -gi MAKE_XFCE=0
 
 sh_choose_packages() {
     print_step "Escolhendo pacotes base"
-	declare -gi MAKE_XFCE=1
 	declare -a INCLUDE_DIRS=()
 	declare -g PROGNAME=$(basename "$0")
 	declare -g REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
@@ -322,6 +322,14 @@ install_icons() {
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
+install_grub_themes() {
+	print_step "Copiando grub themes into $ROOTFS/boot/grub/themes"
+	{
+		[ -d "$ROOTFS/boot/grub/themes/" ] && mkdir -p "$ROOTFS"/boot/grub/
+		cp -Rpva pkgbuild/boot/grub/themes -t "$ROOTFS/boot/grub/"
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+}
+
 install_apps() {
 	print_step "Copiando aplicativos into $ROOTFS/usr/bin"
 	{
@@ -334,10 +342,10 @@ install_apps() {
 
 install_pacman() {
 	#sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print "$1"}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true;'
-	sh_chroot_job "Instalando pacman App" "/usr/bin/pacman -Sydd pacman-contrib brave-browser paru --noconfirm"
+	sh_chroot_job "Instalando pacman App" "/usr/bin/pacman -Sydd pacman-contrib brave-browser paru --noconfirm --overwrite \*"
 	if ((MAKE_XFCE)); then
-		sh_chroot_job "Instalando Brave-Browser" "/usr/bin/pacman -Sdd brave-browser --noconfirm"
-		sh_chroot_job "Instalando Google Chrome" "/usr/bin/paru -Sdd google-chrome --noconfirm"
+		sh_chroot_job "Instalando Brave-Browser" "/usr/bin/pacman -Sdd brave-browser --noconfirm --overwrite \*"
+		sh_chroot_job "Instalando Google Chrome" "/usr/bin/paru -Sdd google-chrome --noconfirm --overwrite \*"
 	fi
 	sh_chroot_job "Removendo Cache" "/usr/bin/paccache -k0 -r -v"
 }
@@ -732,6 +740,7 @@ install_skel
 install_wallpapers
 install_themes
 install_icons
+install_grub_themes
 install_apps
 reconfigure_packages
 install_pacman
