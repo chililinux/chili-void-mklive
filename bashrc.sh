@@ -1,1 +1,0 @@
-/github/void-installer/bashrc.sh
