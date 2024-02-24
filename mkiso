@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck shell=bash disable=SC1091,SC2039,SC2166,SC2162,SC2155,SC2005,SC2034,SC2154,SC2229,SC2030,SC2031
 #
 # vim: set ts=4 sw=4 et:
 #
@@ -31,19 +30,21 @@
 #xbps-install -U -r /tmp/fakeroot --repository=https://repo-fastly.voidlinux.org/current bash -S
 #debug
 export PS4='${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
-set -x
+#set -x
 #set -e
 trap 'error_out $? $LINENO' INT TERM 0
 umask 022
 declare -gi MAKE_XFCE=0
+declare -gi MAKE_XFCE_BASE=0
+declare -gi MAKE_XFCE_CUSTOM=0
+declare -gi LBIND=0
 declare -gi QUIET=0
 
 sh_choose_packages() {
-	print_step "Escolhendo pacotes base"
+    print_step "Escolhendo pacotes base"
 	declare -a INCLUDE_DIRS=()
 	declare -g PROGNAME=$(basename "$0")
 	declare -g REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
-	REQUIRED_PKGS=" bash util-linux xbps"
 	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut-network openresolv"
 	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted tree htop"
 	ADDITIONAL_PKGS+=" grub-void-theme"
@@ -57,61 +58,83 @@ sh_choose_packages() {
 	ADDITIONAL_PKGS+=" bubblewrap"
 }
 
-sh_choose_packages_xfce() {
-	print_step "Escolhendo pacotes X"
-	#xorg
-	ADDITIONAL_PKGS+=" xorg xorg-video-drivers xorg-fonts xinit xterm dbus dbus-x11 elogind dbus-elogind xfce-polkit polkit-elogind xdg-user-dirs xrdb"
-	#xfce
-	ADDITIONAL_PKGS+=" xfce4 xfce4-appfinder xfce4-battery-plugin xfce4-clipman-plugin xfce4-cpufreq-plugin"
-	ADDITIONAL_PKGS+=" xfce4-cpugraph-plugin xfce4-datetime-plugin xfce4-dict xfce4-diskperf-plugin xfce4-fsguard-plugin"
-	ADDITIONAL_PKGS+=" xfce4-genmon-plugin xfce4-mailwatch-plugin xfce4-mpc-plugin xfce4-netload-plugin xfce4-notifyd"
-	ADDITIONAL_PKGS+=" xfce4-panel xfce4-pulseaudio-plugin xfce4-power-manager xfce4-screensaver xfce4-session"
-	ADDITIONAL_PKGS+=" xfce4-settings xfce4-screenshooter xfce4-sensors-plugin xfce4-systemload-plugin xfce4-taskmanager"
-	ADDITIONAL_PKGS+=" xfce4-time-out-plugin xfce4-timer-plugin xfce4-verve-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin"
-	ADDITIONAL_PKGS+=" xfce4-wavelan-plugin xfce4-xkb-plugin"
-	ADDITIONAL_PKGS+=" setxkbmap numlockx nitrogen ristretto mate-notification-daemon"
-	ADDITIONAL_PKGS+=" plank"
-	ADDITIONAL_PKGS+=" adwaita-icon-theme"
-	ADDITIONAL_PKGS+=" cool-retro-term"
-	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
-
+sh_choose_packages_xfce_base() {
+    print_step "Escolhendo pacotes X Base"
+    #xorg
+    ADDITIONAL_PKGS+=" xorg xorg-video-drivers xorg-fonts xinit xterm dbus dbus-x11 dbus-elogind polkit-elogind xdg-user-dirs xrdb"
+    #xfce
+    ADDITIONAL_PKGS+=" xfce4"
+    ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
+    ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
+    ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
 	#login manager
 	ADDITIONAL_PKGS+=" lxdm"
 	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
 	#ADDITIONAL_PKGS+=" slim"
 	#ADDITIONAL_PKGS+=" lightdm"
+}
 
-	ADDITIONAL_PKGS+=" xarchiver unrar zip unzip 7zip p7zip bzip2 file-roller"
+sh_choose_packages_xfce_custom() {
+    print_step "Escolhendo pacotes X Custom"
+#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
+#	ADDITIONAL_PKGS+=" xfce4-screenshooter xfce4-dict"
+#   ADDITIONAL_PKGS+=" xfce4-battery-plugin"
+#   ADDITIONAL_PKGS+=" xfce4-clipman-plugin"
+#   ADDITIONAL_PKGS+=" xfce4-cpufreq-plugin"
+#	ADDITIONAL_PKGS+=" xfce4-sensors-plugin"
+#	ADDITIONAL_PKGS+=" xfce4-systemload-plugin"
+#	ADDITIONAL_PKGS+=" xfce4-cpugraph-plugin"
+#	ADDITIONAL_PKGS+=" xfce4-datetime-plugin"
+#   ADDITIONAL_PKGS+=" xfce4-diskperf-plugin"
+#   ADDITIONAL_PKGS+=" xfce4-fsguard-plugin"
+#	ADDITIONAL_PKGS+=" xfce4-genmon-plugin"
+#   ADDITIONAL_PKGS+=" xfce4-mailwatch-plugin"
+#   ADDITIONAL_PKGS+=" xfce4-mpc-plugin" "
+#   ADDITIONAL_PKGS+=" xfce4-netload-plugin"
+#	ADDITIONAL_PKGS+=" xfce4-time-out-plugin"
+#   ADDITIONAL_PKGS+=" xfce4-timer-plugin"
+#   ADDITIONAL_PKGS+=" xfce4-verve-plugin"
+#   ADDITIONAL_PKGS+=" xfce4-whiskermenu-plugin"
+#   ADDITIONAL_PKGS+=" xfce4-weather-plugin"
+#	ADDITIONAL_PKGS+=" xfce4-wavelan-plugin" "
+#   ADDITIONAL_PKGS+=" xfce4-xkb-plugin"
+#	ADDITIONAL_PKGS+=" setxkbmap"
+#   ADDITIONAL_PKGS+=" numlockx"
+#   ADDITIONAL_PKGS+=" nitrogen"
+#   ADDITIONAL_PKGS+=" mate-notification-daemon"
+#	ADDITIONAL_PKGS+=" plank"
+	ADDITIONAL_PKGS+=" adwaita-icon-theme"
+	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
+#	ADDITIONAL_PKGS+=" cool-retro-term"
+
+#	ADDITIONAL_PKGS+=" xarchiver unrar zip unzip 7zip p7zip bzip2 file-roller"
 	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
 
-	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
-	ADDITIONAL_PKGS+=" Thunar"
-	#ADDITIONAL_PKGS+=" pcmanfm"
+#	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
+#   ADDITIONAL_PKGS+=" pcmanfm"
 
-	#ADDITIONAL_PKGS+=" fonts-roboto-ttf liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font font-emoji-one-color google-fonts-ttf"
-	ADDITIONAL_PKGS+=" noto-fonts-emoji ttf-ubuntu-font-family font-iosevka"
-	ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
-	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
-	ADDITIONAL_PKGS+=" NetworkManager network-manager-applet gvfs gvfs-smb gvfs-cdda inetutils iputils"
-	ADDITIONAL_PKGS+=" xfce4-terminal"
-	#ADDITIONAL_PKGS+=" lxterminal rxvt-unicode"
-	ADDITIONAL_PKGS+=" nano vim mousepad"
-	ADDITIONAL_PKGS+=" nano-syntax-highlighting"
-	ADDITIONAL_PKGS+=" gparted"
-	ADDITIONAL_PKGS+=" bat bash-completion irqbalance"
-	ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver"
-	#ADDITIONAL_PKGS+=" brother-brlaser cups-pdf"
-	ADDITIONAL_PKGS+=" vlc celluloid"
-	#ADDITIONAL_PKGS+=" evince"
-	ADDITIONAL_PKGS+=" mate-calc avahi cmatrix tmate xkill menulibre mugshot ocs-url"
-	ADDITIONAL_PKGS+=" nvme-cli"
-	ADDITIONAL_PKGS+=" inxi"
-
-	#office
-	ADDITIONAL_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
-
-	#pacman
-	ADDITIONAL_PKGS+=" pacman fakeroot bsdtar octoxbps"
+#	#ADDITIONAL_PKGS+=" fonts-roboto-ttf liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font font-emoji-one-color google-fonts-ttf"
+#	ADDITIONAL_PKGS+=" noto-fonts-emoji ttf-ubuntu-font-family font-iosevka nerd-fonts-symbols-ttf"
+#	ADDITIONAL_PKGS+=" avahi irqbalance"
+#	ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver"
+#	ADDITIONAL_PKGS+=" gvfs gvfs-smb gvfs-cdda inetutils iputils"
+#	#ADDITIONAL_PKGS+=" lxterminal rxvt-unicode"
+#	ADDITIONAL_PKGS+=" nano vim"
+#	ADDITIONAL_PKGS+=" nano-syntax-highlighting"
+#	ADDITIONAL_PKGS+=" gparted"
+#	ADDITIONAL_PKGS+=" bat bash-completion"
+#	#ADDITIONAL_PKGS+=" brother-brlaser cups-pdf"
+#	ADDITIONAL_PKGS+=" vlc celluloid"
+#	ADDITIONAL_PKGS+=" evince"
+#	ADDITIONAL_PKGS+=" mate-calc cmatrix tmate xkill menulibre mugshot ocs-url"
+#	ADDITIONAL_PKGS+=" nvme-cli"
+#	ADDITIONAL_PKGS+=" inxi"
+#
+#	#office
+#	ADDITIONAL_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
+#
+#	#pacman
+#	ADDITIONAL_PKGS+=" pacman fakeroot bsdtar octoxbps"
 }
 
 debug() {
@@ -171,37 +194,40 @@ sh_setvarcolors() {
 }
 
 die() {
-	info_msg "ERROR: $*"
+    local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
+    local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
+    local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
+	info_msg "ERROR: ${script_name0} $@"
 	error_out 1 $LINENO
 }
 
 info_msg() {
-	printf "%s\n" "${red}$*${reset}"
+	printf "${red}$@${reset}\n"
 }
 
 print_step() {
 	CURRENT_STEP=$((CURRENT_STEP + 1))
-	info_msg "${cyan}[${CURRENT_STEP}/${STEP_COUNT}]${reset} $*"
+	info_msg "$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
 }
 
 mount_pseudofs() {
 	for f in sys dev proc; do
 		mkdir -p "$ROOTFS"/$f
 		mount --rbind /$f "$ROOTFS"/$f
-		LMOUNTBIND=1
+		LBIND=1
 	done
 }
+
 umount_pseudofs() {
-	{
-		for f in sys dev proc; do
-			if ! umount -R -f "$ROOTFS/$f"; then
-				if ((LMOUNTBIND)); then
-					info_msg "ERROR: failed to unmount $ROOTFS/$f/"
-					return 1
-				fi
-			fi
-		done
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	for f in sys dev proc; do
+		if ! umount -R -f "$ROOTFS/$f"  > /dev/null 2>&-; then
+    	    if (( LBIND )); then
+	    		info_msg "ERROR: failed to unmount $ROOTFS/$f/"
+		    	return 1
+		    fi
+		fi
+		LBIND=0
+	done
 }
 
 error_out() {
@@ -228,7 +254,7 @@ sh_chroot_job() {
 			--ro-bind /etc/group /etc/group \
 			"$shell" -c "$cjob"
 		#chroot "$ROOTFS" "$shell" -c "$cjob"  2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 copy_void_keys() {
@@ -247,26 +273,39 @@ copy_autoinstaller_files() {
 }
 
 install_prereqs() {
-	{
-		LC_ALL=C XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" -r "$VOIDHOSTDIR" "${XBPS_REPOSITORY}" -c "$XBPS_HOST_CACHEDIR" -y "$REQUIRED_PKGS" -S
-		result="${PIPESTATUS[0]}"
-		[ "$result" -ne 0 ] && die "Failed to install required software, exiting..."
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+{
+   	LC_ALL=C XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -c "$XBPS_HOST_CACHEDIR" -y $REQUIRED_PKGS -S
+} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Failed to install required software, exiting..."
 }
 
 install_packages() {
+    print_step "Testando void pkgs..."
 	{
-		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -S -r "$ROOTFS" "${XBPS_REPOSITORY}" -c "$XBPS_CACHEDIR" -yn "$PACKAGE_LIST" "$INITRAMFS_PKGS"
-		result="${PIPESTATUS[0]}"
-		[ "$result" -ne 0 ] && die "Missing required binary packages, exiting..."
+		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS $ADDITIONAL_PKGS
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Missing required binary packages, exiting..."
 
-		mount_pseudofs
+	mount_pseudofs
 
-		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -S -U -r "$ROOTFS" "${XBPS_REPOSITORY}" -c "$XBPS_CACHEDIR" -y "$PACKAGE_LIST" "$INITRAMFS_PKGS"
-		result="${PIPESTATUS[0]}"
-		[ "$result" -ne 0 ] && die "Failed to install $PACKAGE_LIST"
+    print_step "Instalando void pkgs BASE INITRAMFS em rootfs..."
+    {
+		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $PACKAGE_LIST $INITRAMFS_PKGS
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Failed to install $PACKAGE_LIST"
 
-		print_step "Reconfigurando o ambiente - pass 1"
+    print_step "Instalando void pkgs ADDITIONAL em rootfs..."
+    {
+		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $ADDITIONAL_PKGS
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Failed to install $ADDITIONAL_PKGS"
+
+	print_step "Reconfigurando o ambiente - pass 1"
+    {
 		xbps-reconfigure -r "$ROOTFS" -f base-files >/dev/null 2>&1
 		chroot "$ROOTFS" env -i xbps-reconfigure -f base-files
 
@@ -274,7 +313,7 @@ install_packages() {
 		if [ -f "$ROOTFS"/etc/default/libc-locales ]; then
 			sed -e "s/\#\(${LOCALE}.*\)/\1/g" -i "$ROOTFS"/etc/default/libc-locales
 		fi
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 ignore_packages() {
@@ -290,15 +329,15 @@ install_skel() {
 	{
 		[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
 		cp -Rpva pkgbuild/etc/. "$ROOTFS/etc/"
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 
 	print_step "Copiando configuracoes into $ROOTFS/root/"
 	{
-		cp -Rpva pkgbuild/etc/skel/.bash* "$ROOTFS/root/"
-		cp -Rpva pkgbuild/etc/skel/.git-prompt.sh "$ROOTFS/root/"
-		cp -Rpva pkgbuild/etc/skel/.dircolors "$ROOTFS/root/"
-		rsync -a pkgbuild/etc/skel/.config/neofetch/config.conf "$ROOTFS/root/.config/neofetch/"
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		cp -Rpva pkgbuild/etc/skel/.bash* $ROOTFS/root/
+		cp -Rpva pkgbuild/etc/skel/.git-prompt.sh $ROOTFS/root/
+		cp -Rpva pkgbuild/etc/skel/.dircolors $ROOTFS/root/
+		rsync -a pkgbuild/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_wallpapers() {
@@ -306,12 +345,12 @@ install_wallpapers() {
 	{
 		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
 		cp -Rpva pkgbuild/usr/share/backgrounds -t "$ROOTFS/usr/share/"
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 
 	print_step "Copiando instalador into $ROOTFS/usr/share/applications"
 	{
 		cp -Rpva pkgbuild/usr/share/applications -t "$ROOTFS/usr/share/"
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_themes() {
@@ -319,7 +358,7 @@ install_themes() {
 	{
 		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
 		cp -Rpva pkgbuild/usr/share/themes -t "$ROOTFS/usr/share/"
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_icons() {
@@ -327,7 +366,7 @@ install_icons() {
 	{
 		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
 		cp -Rpva pkgbuild/usr/share/icons -t "$ROOTFS/usr/share/"
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_grub_themes() {
@@ -335,7 +374,7 @@ install_grub_themes() {
 	{
 		[ -d "$ROOTFS/boot/grub/themes/" ] && mkdir -p "$ROOTFS"/boot/grub/
 		cp -Rpva pkgbuild/boot/grub/themes -t "$ROOTFS/boot/grub/"
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_apps() {
@@ -343,15 +382,15 @@ install_apps() {
 	{
 		[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/
 		for x in pkgbuild/usr/bin/*; do
-			install -Dm755 "$x" "$ROOTFS"/usr/bin/
+			install -Dm755 $x "$ROOTFS"/usr/bin/
 		done
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_pacman() {
 	#sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print "$1"}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true;'
 	sh_chroot_job "Instalando pacman App" "/usr/bin/pacman -Sydd pacman-contrib brave-browser paru --noconfirm --overwrite \*"
-	if ((MAKE_XFCE)); then
+	if ((MAKE_XFCE_CUSTOM)); then
 		sh_chroot_job "Instalando Brave-Browser" "/usr/bin/pacman -Sdd brave-browser --noconfirm --overwrite \*"
 		sh_chroot_job "Instalando Google Chrome" "/usr/bin/paru -Sdd google-chrome --noconfirm --overwrite \*"
 	fi
@@ -363,7 +402,7 @@ reconfigure_packages() {
 	{
 		chroot "$ROOTFS" env -i xbps-reconfigure -a
 		#	sh_chroot_job "Reconfigurando o ambiente - pass 2" 'xbps-reconfigure -a'
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 finish_clean() {
@@ -375,10 +414,10 @@ finish_clean() {
 enable_services() {
 	SERVICE_LIST="$*"
 	for service in $SERVICE_LIST; do
-		if ! [ -e "$ROOTFS/etc/sv/$service" ]; then
+		if ! [ -e $ROOTFS/etc/sv/$service ]; then
 			die "service $service not in /etc/sv"
 		fi
-		ln -sf /etc/sv/"$service" "$ROOTFS/etc/runit/runsvdir/default/"
+		ln -sf /etc/sv/$service $ROOTFS/etc/runit/runsvdir/default/
 	done
 }
 
@@ -394,54 +433,50 @@ generate_initramfs() {
 	{
 		copy_dracut_files "$ROOTFS"
 		copy_autoinstaller_files "$ROOTFS"
-		chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" --add-drivers "ahci" --force-add "vmklive autoinstaller" --omit systemd "/boot/initrd" "$KERNELVERSION"
+		chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" --add-drivers "ahci" --force-add "vmklive autoinstaller" --omit systemd "/boot/initrd" $KERNELVERSION
 		result="${PIPESTATUS[0]}"
-		[ "$result" -ne 0 ] && die "Failed to generate the initramfs"
-		mv "$ROOTFS/boot/initrd" "$BOOT_DIR"
-		cp "$ROOTFS/boot/vmlinuz-$KERNELVERSION" "$BOOT_DIR"/vmlinuz
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		[ $result -ne 0 ] && die "Failed to generate the initramfs"
+		mv "$ROOTFS"/boot/initrd "$BOOT_DIR"
+		cp "$ROOTFS"/boot/vmlinuz-$KERNELVERSION "$BOOT_DIR"/vmlinuz
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 cleanup_rootfs() {
-	{
-		for f in ${INITRAMFS_PKGS}; do
-			revdeps=$(xbps-query -r "$ROOTFS" -X "$f")
-			if [ -n "$revdeps" ]; then
-				xbps-pkgdb -r "$ROOTFS" -m auto "$f"
-			else
-				xbps-remove -r "$ROOTFS" -Ry "${f}" >/dev/null 2>&1
-			fi
-		done
-		rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01vmklive
-		rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01autoinstaller
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	for f in ${INITRAMFS_PKGS}; do
+		revdeps=$(xbps-query -r "$ROOTFS" -X $f)
+		if [ -n "$revdeps" ]; then
+			xbps-pkgdb -r "$ROOTFS" -m auto $f
+		else
+			xbps-remove -r "$ROOTFS" -Ry ${f} >/dev/null 2>&1
+		fi
+	done
+	rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01vmklive
+	rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01autoinstaller
 }
 
 generate_isolinux_boot() {
-	{
-		cp -f "$SYSLINUX_DATADIR"/isolinux.bin "$ISOLINUX_DIR"
-		cp -f "$SYSLINUX_DATADIR"/ldlinux.c32 "$ISOLINUX_DIR"
-		cp -f "$SYSLINUX_DATADIR"/libcom32.c32 "$ISOLINUX_DIR"
-		cp -f "$SYSLINUX_DATADIR"/vesamenu.c32 "$ISOLINUX_DIR"
-		cp -f "$SYSLINUX_DATADIR"/libutil.c32 "$ISOLINUX_DIR"
-		cp -f "$SYSLINUX_DATADIR"/chain.c32 "$ISOLINUX_DIR"
-		cp -f "$SYSLINUX_DATADIR"/reboot.c32 "$ISOLINUX_DIR"
-		cp -f "$SYSLINUX_DATADIR"/poweroff.c32 "$ISOLINUX_DIR"
-		cp -f isolinux/isolinux.cfg.in "$ISOLINUX_DIR"/isolinux.cfg
-		cp -f "${SPLASH_IMAGE}" "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/isolinux.bin "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/ldlinux.c32 "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/libcom32.c32 "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/vesamenu.c32 "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/libutil.c32 "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/chain.c32 "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/reboot.c32 "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/poweroff.c32 "$ISOLINUX_DIR"
+	cp -f isolinux/isolinux.cfg.in "$ISOLINUX_DIR"/isolinux.cfg
+	cp -f ${SPLASH_IMAGE} "$ISOLINUX_DIR"
 
-		sed -i -e "s|@@SPLASHIMAGE@@|$(basename "${SPLASH_IMAGE}")|" \
-			-e "s|@@KERNVER@@|${KERNELVERSION}|" \
-			-e "s|@@KEYMAP@@|${KEYMAP}|" \
-			-e "s|@@ARCH@@|$BASE_ARCH|" \
-			-e "s|@@LOCALE@@|${LOCALE}|" \
-			-e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
-			-e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
-			"$ISOLINUX_DIR"/isolinux.cfg
+	sed -i -e "s|@@SPLASHIMAGE@@|$(basename "${SPLASH_IMAGE}")|" \
+		-e "s|@@KERNVER@@|${KERNELVERSION}|" \
+		-e "s|@@KEYMAP@@|${KEYMAP}|" \
+		-e "s|@@ARCH@@|$BASE_ARCH|" \
+		-e "s|@@LOCALE@@|${LOCALE}|" \
+		-e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
+		-e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
+		"$ISOLINUX_DIR"/isolinux.cfg
 
-		# include memtest86+
-		cp -f "$VOIDHOSTDIR"/boot/memtest.bin "$BOOT_DIR"
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	# include memtest86+
+	cp -f "$VOIDHOSTDIR"/boot/memtest.bin "$BOOT_DIR"
 }
 
 generate_grub_efi_boot() {
@@ -469,22 +504,24 @@ generate_grub_efi_boot() {
 		mount -o rw,flush -t vfat "${LOOP_DEVICE}" "${GRUB_EFI_TMPDIR}"
 
 		cp -a "$IMAGEDIR"/boot "$VOIDHOSTDIR"
-		if ! xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
+		xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
 			--directory="/usr/lib/grub/i386-efi" \
 			--format="i386-efi" \
 			--output="/tmp/bootia32.efi" \
-			"boot/grub/grub.cfg"; then
+			"boot/grub/grub.cfg"
+		if [ $? -ne 0 ]; then
 			umount "$GRUB_EFI_TMPDIR"
 			losetup --detach "${LOOP_DEVICE}"
 			die "Failed to generate EFI loader"
 		fi
 		mkdir -p "${GRUB_EFI_TMPDIR}"/EFI/BOOT
 		cp -f "$VOIDHOSTDIR"/tmp/bootia32.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTIA32.EFI
-		if ! xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
+		xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
 			--directory="/usr/lib/grub/x86_64-efi" \
 			--format="x86_64-efi" \
 			--output="/tmp/bootx64.efi" \
-			"boot/grub/grub.cfg"; then
+			"boot/grub/grub.cfg"
+		if [ $? -ne 0 ]; then
 			umount "$GRUB_EFI_TMPDIR"
 			losetup --detach "${LOOP_DEVICE}"
 			die "Failed to generate EFI loader"
@@ -496,7 +533,7 @@ generate_grub_efi_boot() {
 
 		# include memtest86+
 		cp -f "$VOIDHOSTDIR"/boot/memtest.efi "$BOOT_DIR"
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 generate_squashfs() {
@@ -507,7 +544,7 @@ generate_squashfs() {
 		mkdir -p "$BUILDDIR/tmp/LiveOS"
 		truncate -s "$((ROOTFS_SIZE + ROOTFS_SIZE))M" "$BUILDDIR"/tmp/LiveOS/ext3fs.img
 		mkdir -p "$BUILDDIR/tmp-rootfs"
-		mkfs.ext3 -F -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img"
+		mkfs.ext3 -F -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 		mount -o loop "$BUILDDIR/tmp/LiveOS/ext3fs.img" "$BUILDDIR/tmp-rootfs"
 		cp -a "$ROOTFS"/* "$BUILDDIR"/tmp-rootfs/
 		umount -f "$BUILDDIR/tmp-rootfs"
@@ -521,7 +558,7 @@ generate_squashfs() {
 		rm -rf "$ROOTFS"
 		rm -rf "$BUILDDIR/tmp-rootfs"
 		rm -rf "$BUILDDIR/tmp"
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 generate_iso_image() {
@@ -538,7 +575,7 @@ generate_iso_image() {
 			-eltorito-alt-boot -e boot/grub/efiboot.img -isohybrid-gpt-basdat -no-emul-boot \
 			-isohybrid-mbr "$SYSLINUX_DATADIR"/isohdpfx.bin \
 			-output "$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
-	} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 usage() {
@@ -551,27 +588,29 @@ usage() {
 		        To generate a more complete live ISO image, use build-x86-images.sh.
 
 		        OPTIONS
-		                -a <arch>          Set XBPS_ARCH in the ISO image
-		                -b <system-pkg>    Set an alternative base package (default: base-system)
-		                -r <repo>          Use this XBPS repository. May be specified multiple times
-		                -c <cachedir>      Use this XBPS cache directory (default: ./xbps-cachedir-<arch>)
-		                -k <keymap>        Default keymap to use (default: us)
-		                -l <locale>        Default locale to use (default: en_US.UTF-8)
-		                -i <lz4|gzip|bzip2|xz> Compression type for the initramfs image (default: xz)
-		                -s <gzip|lzo|xz>   Compression type for the squashfs image (default: xz)
-		                -o <file>          Output file name for the ISO image (default: automatic)
-		                -p "<pkg> ..."     Install additional packages in the ISO image
-		                -g "<pkg> ..."     Ignore packages when building the ISO image
-		                -I <includedir>    Include directory structure under given path in the ROOTFS
-		                -S "<service> ..." Enable services in the ISO image
-		                -C "<arg> ..."     Add additional kernel command line arguments
-		                -T <title>         Modify the bootloader title (default: Void Linux)
-		                -v linux<version>  Install a custom Linux version on ISO image (default: linux metapackage)
-		                -K                 Do not remove builddir
-		                -h                 Show this help and exit
-		                -V                 Show version and exit
-		                -X                 Make XFCE iso.
-		                -Q                 Quiet mode (default: 0)
+                -a <arch>          Set XBPS_ARCH in the ISO image
+                -b <system-pkg>    Set an alternative base package (default: base-system)
+                -r <repo>          Use this XBPS repository. May be specified multiple times
+                -c <cachedir>      Use this XBPS cache directory (default: ./xbps-cachedir-<arch>)
+                -k <keymap>        Default keymap to use (default: us)
+                -l <locale>        Default locale to use (default: en_US.UTF-8)
+                -i <lz4|gzip|bzip2|xz> Compression type for the initramfs image (default: xz)
+                -s <gzip|lzo|xz>   Compression type for the squashfs image (default: xz)
+                -o <file>          Output file name for the ISO image (default: automatic)
+                -p "<pkg> ..."     Install additional packages in the ISO image
+                -g "<pkg> ..."     Ignore packages when building the ISO image
+                -I <includedir>    Include directory structure under given path in the ROOTFS
+                -S "<service> ..." Enable services in the ISO image
+                -C "<arg> ..."     Add additional kernel command line arguments
+                -T <title>         Modify the bootloader title (default: Void Linux)
+                -v linux<version>  Install a custom Linux version on ISO image (default: linux metapackage)
+                -K                 Do not remove builddir
+                -h                 Show this help and exit
+                -V                 Show version and exit
+                -X                 Make XFCE iso base.
+                -Y                 Make XFCE iso custom.
+                -Q                 Quiet mode (default: 0)
+
 	EOF
 }
 
@@ -581,7 +620,7 @@ usage() {
 sh_confAmbiente
 sh_setvarcolors
 
-while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:Vh:Xx:Qq" opt; do
+while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQq" opt; do
 	case $opt in
 	a) BASE_ARCH="$OPTARG" ;;
 	b) BASE_SYSTEM_PKG="$OPTARG" ;;
@@ -599,9 +638,10 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:Vh:Xx:Qq" opt; do
 	p) PACKAGE_LIST="$PACKAGE_LIST $OPTARG" ;;
 	C) BOOT_CMDLINE="$OPTARG" ;;
 	T) BOOT_TITLE="$OPTARG" ;;
-	x | X) MAKE_XFCE=1 ;;
+	x|X) MAKE_XFCE=1; MAKE_XFCE_BASE=1 ;;
+	y|Y) MAKE_XFCE=1; MAKE_XFCE_CUSTOM=1 ;;
+    q|Q) QUIET=1 ;;
 	v) LINUX_VERSION="$OPTARG" ;;
-	q | Q) QUIET=1 ;;
 	V)
 		version
 		exit 0
@@ -618,9 +658,20 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:Vh:Xx:Qq" opt; do
 done
 shift $((OPTIND - 1))
 
+# Check for root permissions.
+if [ "$(id -u)" -ne 0 ]; then
+	die "Must be run as root, exiting..."
+fi
+
 sh_choose_packages
 if ((MAKE_XFCE)); then
-	sh_choose_packages_xfce
+    if ((MAKE_XFCE_BASE)); then
+        sh_choose_packages_xfce_base
+    fi
+    if ((MAKE_XFCE_CUSTOM)); then
+        sh_choose_packages_xfce_base
+        sh_choose_packages_xfce_custom
+    fi
 fi
 
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://void.chililinux.com/voidlinux/current"
@@ -635,8 +686,7 @@ XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-fastly.voidlinux.org
  --repository=https://repo-fastly.voidlinux.org/current/nonfree""\
  --repository=https://repo-fastly.voidlinux.org/current/multilib""\
  --repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree""\
- --repository=/github/void-packages/hostdir/binpkgs"
-# --repository=https://chililinux.com/void/current"
+ --repository=/home/vcatafesta/github/void-packages/hostdir/binpkgs"
 
 # Configure dracut to use overlayfs for the writable overlay.
 BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "
@@ -644,6 +694,7 @@ ARCH=$(xbps-uhelper arch)
 
 # Set defaults
 : ${BASE_ARCH:=$(xbps-uhelper arch 2>/dev/null || uname -m)}
+: ${XBPS_CACHEDIR:="$(pwd -P)"/xbps-cachedir-${BASE_ARCH}}
 : ${XBPS_HOST_CACHEDIR:="$(pwd -P)"/xbps-cachedir-${ARCH}}
 #: ${KEYMAP:=us}
 #: ${LOCALE:=en_US.UTF-8}
@@ -655,12 +706,7 @@ ARCH=$(xbps-uhelper arch)
 : ${BOOT_TITLE:="Void Linux Custom"}
 
 # Required packages in the image for a working system.
-PACKAGE_LIST="$BASE_SYSTEM_PKG $PACKAGE_LIST $ADDITIONAL_PKGS"
-
-# Check for root permissions.
-if [ "$(id -u)" -ne 0 ]; then
-	die "Must be run as root, exiting..."
-fi
+PACKAGE_LIST="$BASE_SYSTEM_PKG $PACKAGE_LIST"
 
 #mount -o remount,size=18G,mode=1777 tmpfs /tmp
 #ROOTDIR='/tmp'
@@ -692,25 +738,33 @@ CURRENT_STEP=0
 [ "${#INCLUDE_DIRS[@]}" -gt 0 ] && STEP_COUNT=$((STEP_COUNT + 1))
 [ -n "${IGNORE_PKGS}" ] && STEP_COUNT=$((STEP_COUNT + 1))
 
-: "${SYSLINUX_DATADIR:="$VOIDHOSTDIR"/usr/lib/syslinux}"
-: "${GRUB_DATADIR:="$VOIDHOSTDIR"/usr/share/grub}"
-: "${SPLASH_IMAGE:=data/splash.png}"
-: "${XBPS_INSTALL_CMD:=xbps-install}"
-: "${XBPS_REMOVE_CMD:=xbps-remove}"
-: "${XBPS_QUERY_CMD:=xbps-query}"
-: "${XBPS_RINDEX_CMD:=xbps-rindex}"
-: "${XBPS_UHELPER_CMD:=xbps-uhelper}"
-: "${XBPS_RECONFIGURE_CMD:=xbps-reconfigure}"
+: ${SYSLINUX_DATADIR:="$VOIDHOSTDIR"/usr/lib/syslinux}
+: ${GRUB_DATADIR:="$VOIDHOSTDIR"/usr/share/grub}
+: ${SPLASH_IMAGE:=data/splash.png}
+: ${XBPS_INSTALL_CMD:=xbps-install}
+: ${XBPS_REMOVE_CMD:=xbps-remove}
+: ${XBPS_QUERY_CMD:=xbps-query}
+: ${XBPS_RINDEX_CMD:=xbps-rindex}
+: ${XBPS_UHELPER_CMD:=xbps-uhelper}
+: ${XBPS_RECONFIGURE_CMD:=xbps-reconfigure}
 
 mkdir -p "$ROOTFS" "$VOIDHOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR"
+
+sh_monitor() {
+    if [ $QUIET -eq 1 ]; then
+        tee -i -a "$BOOTLOG" >$LOGGER
+    fi
+}
 
 print_step "Synchronizing XBPS repository data..."
 {
 	copy_void_keys "$ROOTFS"
 	copy_void_keys "$VOIDHOSTDIR"
-	LC_ALL=C XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -r "$ROOTFS" "${XBPS_REPOSITORY}" -S
-	LC_ALL=C XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -r "$VOIDHOSTDIR" "${XBPS_REPOSITORY}" -S
-} && ((QUIET)) && 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	LC_ALL=C XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -r "$ROOTFS" ${XBPS_REPOSITORY} -Sy
+	LC_ALL=C XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -Sy
+} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+result="${PIPESTATUS[0]}"
+[ $result -ne 0 ] && die "Failed to synchronizing, exiting..."
 
 # Get linux version for ISO
 # If linux version option specified use
@@ -751,22 +805,28 @@ fi
 
 print_step "Installing void pkgs into the rootfs..."
 install_packages
-install_skel
-install_wallpapers
-install_themes
-install_icons
-install_grub_themes
-install_apps
+#install_skel
+#install_wallpapers
+#install_themes
+#install_icons
+#install_grub_themes
+#install_apps
 reconfigure_packages
 install_pacman
 finish_clean
 
-: "${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd dhcpcd}"
+: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd dhcpcd}
 print_step "Enabling services..."
-enable_services "${DEFAULT_SERVICE_LIST}" "${SERVICE_LIST}"
+enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST}
 if ((MAKE_XFCE)); then
-	: "${ADDITIONAL_SERVICE_LIST:=NetworkManager avahi-daemon bluetoothd cupsd dbus elogind lxdm irqbalance polkitd sshd uuidd }"
-	enable_services "${ADDITIONAL_SERVICE_LIST}"
+    if ((MAKE_XFCE_BASE)); then
+	    : ${ADDITIONAL_SERVICE_LIST_BASE:=NetworkManager dbus elogind lxdm polkitd }
+    	enable_services ${ADDITIONAL_SERVICE_LIST_BASE}
+    fi
+    if ((MAKE_XFCE_CUSTOM)); then
+    	: ${ADDITIONAL_SERVICE_LIST_FULL:=avahi-daemon bluetoothd cupsd irqbalance sshd uuidd }
+    	enable_services ${ADDITIONAL_SERVICE_LIST_FULL}
+    fi
 fi
 
 if [ "${#INCLUDE_DIRS[@]}" -gt 0 ]; then
