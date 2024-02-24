@@ -29,4 +29,5 @@
   <property name="overlay-scrolling" type="bool" value="true"/>
   <property name="misc-slim-tabs" type="bool" value="true"/>
   <property name="scrolling-unlimited" type="bool" value="true"/>
+  <property name="font-use-system" type="bool" value="true"/>
 </channel>
