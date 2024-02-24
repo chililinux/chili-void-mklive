@@ -88,7 +88,7 @@ sh_choose_packages_xfce() {
 	#ADDITIONAL_PKGS+=" pcmanfm"
 
 	#ADDITIONAL_PKGS+=" fonts-roboto-ttf liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font font-emoji-one-color google-fonts-ttf"
-	ADDITIONAL_PKGS+=" noto-fonts-emoji ttf-ubuntu-font-family font-iosevka"
+	ADDITIONAL_PKGS+=" noto-fonts-emoji ttf-ubuntu-font-family font-iosevka nerd-fonts-symbols-ttf"
 	ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
 	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
 	ADDITIONAL_PKGS+=" NetworkManager network-manager-applet gvfs gvfs-smb gvfs-cdda inetutils iputils"
