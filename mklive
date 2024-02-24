@@ -35,11 +35,13 @@ export PS4='${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 trap 'error_out $? $LINENO' INT TERM 0
 umask 022
 declare -gi MAKE_XFCE=0
+declare -gi MAKE_XFCE_BASE=0
+declare -gi MAKE_XFCE_CUSTOM=0
 declare -gi LBIND=0
 declare -gi QUIET=0
 
 sh_choose_packages() {
-    print_step "Escolhendo pacotes base"
+    print_step "Configurando pacotes essenciais"
 	declare -a INCLUDE_DIRS=()
 	declare -g PROGNAME=$(basename "$0")
 	declare -g REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
@@ -56,60 +58,81 @@ sh_choose_packages() {
 	ADDITIONAL_PKGS+=" bubblewrap"
 }
 
-sh_choose_packages_xfce() {
-    print_step "Escolhendo pacotes X"
-	#xorg
-	ADDITIONAL_PKGS+=" xorg xorg-video-drivers xorg-fonts xinit xterm dbus dbus-x11 elogind dbus-elogind xfce-polkit polkit-elogind xdg-user-dirs xrdb"
-	#xfce
-	ADDITIONAL_PKGS+=" xfce4 xfce4-appfinder xfce4-battery-plugin xfce4-clipman-plugin xfce4-cpufreq-plugin"
-	ADDITIONAL_PKGS+=" xfce4-cpugraph-plugin xfce4-datetime-plugin xfce4-dict xfce4-diskperf-plugin xfce4-fsguard-plugin"
-	ADDITIONAL_PKGS+=" xfce4-genmon-plugin xfce4-mailwatch-plugin xfce4-mpc-plugin xfce4-netload-plugin xfce4-notifyd"
-	ADDITIONAL_PKGS+=" xfce4-panel xfce4-pulseaudio-plugin xfce4-power-manager xfce4-screensaver xfce4-session"
-	ADDITIONAL_PKGS+=" xfce4-settings xfce4-screenshooter xfce4-sensors-plugin xfce4-systemload-plugin xfce4-taskmanager"
-	ADDITIONAL_PKGS+=" xfce4-time-out-plugin xfce4-timer-plugin xfce4-verve-plugin xfce4-whiskermenu-plugin xfce4-weather-plugin"
-	ADDITIONAL_PKGS+=" xfce4-wavelan-plugin xfce4-xkb-plugin"
-	ADDITIONAL_PKGS+=" setxkbmap numlockx nitrogen ristretto mate-notification-daemon"
-	ADDITIONAL_PKGS+=" plank"
-	ADDITIONAL_PKGS+=" adwaita-icon-theme"
-	ADDITIONAL_PKGS+=" cool-retro-term"
-	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
-
+sh_choose_packages_xfce_base() {
+    print_step "Escolhendo pacotes X Base"
+    #xorg
+    ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 dbus-elogind polkit-elogind xdg-user-dirs xrdb"
+    #xfce
+    ADDITIONAL_PKGS+=" xfce4"
+    ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
+    ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
+#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
+    ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
+    ADDITIONAL_PKGS+=" gnome-keyring"
+    ADDITIONAL_PKGS+=" orca"
 	#login manager
 	ADDITIONAL_PKGS+=" lxdm"
 	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
 	#ADDITIONAL_PKGS+=" slim"
 	#ADDITIONAL_PKGS+=" lightdm"
+}
 
+sh_choose_packages_xfce_custom() {
+    print_step "Escolhendo pacotes X Custom"
+	ADDITIONAL_PKGS+=" xfce4-screenshooter xfce4-dict"
+    ADDITIONAL_PKGS+=" xfce4-battery-plugin"
+    ADDITIONAL_PKGS+=" xfce4-clipman-plugin"
+    ADDITIONAL_PKGS+=" xfce4-cpufreq-plugin"
+	ADDITIONAL_PKGS+=" xfce4-sensors-plugin"
+	ADDITIONAL_PKGS+=" xfce4-systemload-plugin"
+	ADDITIONAL_PKGS+=" xfce4-cpugraph-plugin"
+	ADDITIONAL_PKGS+=" xfce4-datetime-plugin"
+    ADDITIONAL_PKGS+=" xfce4-diskperf-plugin"
+    ADDITIONAL_PKGS+=" xfce4-fsguard-plugin"
+	ADDITIONAL_PKGS+=" xfce4-genmon-plugin"
+    ADDITIONAL_PKGS+=" xfce4-mailwatch-plugin"
+    ADDITIONAL_PKGS+=" xfce4-mpc-plugin"
+    ADDITIONAL_PKGS+=" xfce4-netload-plugin"
+	ADDITIONAL_PKGS+=" xfce4-time-out-plugin"
+    ADDITIONAL_PKGS+=" xfce4-timer-plugin"
+    ADDITIONAL_PKGS+=" xfce4-verve-plugin"
+    ADDITIONAL_PKGS+=" xfce4-whiskermenu-plugin"
+    ADDITIONAL_PKGS+=" xfce4-weather-plugin"
+ 	ADDITIONAL_PKGS+=" xfce4-wavelan-plugin"
+    ADDITIONAL_PKGS+=" xfce4-xkb-plugin"
+ 	ADDITIONAL_PKGS+=" setxkbmap"
+    ADDITIONAL_PKGS+=" numlockx"
+    ADDITIONAL_PKGS+=" nitrogen"
+    ADDITIONAL_PKGS+=" mate-notification-daemon"
+ 	ADDITIONAL_PKGS+=" plank"
+	ADDITIONAL_PKGS+=" adwaita-icon-theme"
+	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
+	ADDITIONAL_PKGS+=" cool-retro-term"
 	ADDITIONAL_PKGS+=" xarchiver unrar zip unzip 7zip p7zip bzip2 file-roller"
 	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
-
 	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
-	ADDITIONAL_PKGS+=" Thunar"
-	#ADDITIONAL_PKGS+=" pcmanfm"
-
-	#ADDITIONAL_PKGS+=" fonts-roboto-ttf liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font font-emoji-one-color google-fonts-ttf"
+##  ADDITIONAL_PKGS+=" pcmanfm"
+#	#ADDITIONAL_PKGS+=" fonts-roboto-ttf liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font font-emoji-one-color google-fonts-ttf"
 	ADDITIONAL_PKGS+=" noto-fonts-emoji ttf-ubuntu-font-family font-iosevka nerd-fonts-symbols-ttf"
-	ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
-	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
-	ADDITIONAL_PKGS+=" NetworkManager network-manager-applet gvfs gvfs-smb gvfs-cdda inetutils iputils"
-	ADDITIONAL_PKGS+=" xfce4-terminal"
-	#ADDITIONAL_PKGS+=" lxterminal rxvt-unicode"
-	ADDITIONAL_PKGS+=" nano vim mousepad"
+	ADDITIONAL_PKGS+=" avahi irqbalance"
+	ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver"
+    ADDITIONAL_PKGS+=" brother-brlaser cups-pdf"
+	ADDITIONAL_PKGS+=" gvfs gvfs-smb gvfs-cdda inetutils iputils"
+#	#ADDITIONAL_PKGS+=" lxterminal rxvt-unicode"
+	ADDITIONAL_PKGS+=" nano vim"
 	ADDITIONAL_PKGS+=" nano-syntax-highlighting"
 	ADDITIONAL_PKGS+=" gparted"
-	ADDITIONAL_PKGS+=" bat bash-completion irqbalance"
-	ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver"
-	#ADDITIONAL_PKGS+=" brother-brlaser cups-pdf"
+	ADDITIONAL_PKGS+=" bat bash-completion"
 	ADDITIONAL_PKGS+=" vlc celluloid"
-	#ADDITIONAL_PKGS+=" evince"
-	ADDITIONAL_PKGS+=" mate-calc avahi cmatrix tmate xkill menulibre mugshot ocs-url"
+	ADDITIONAL_PKGS+=" evince"
+	ADDITIONAL_PKGS+=" mate-calc cmatrix tmate xkill menulibre mugshot ocs-url"
 	ADDITIONAL_PKGS+=" nvme-cli"
 	ADDITIONAL_PKGS+=" inxi"
-
-	#office
+#
+#	#office
 	ADDITIONAL_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
-
-	#pacman
+#
+#	#pacman
 	ADDITIONAL_PKGS+=" pacman fakeroot bsdtar octoxbps"
 }
 
@@ -300,64 +323,87 @@ ignore_packages() {
 }
 
 install_skel() {
+    local path
+
+    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	#skel
 	print_step "Copiando skel into $ROOTFS/etc/skel"
 	{
 		[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
-		cp -Rpva pkgbuild/etc/. "$ROOTFS/etc/"
+		cp -Rpva $path/etc/. "$ROOTFS/etc/"
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 
 	print_step "Copiando configuracoes into $ROOTFS/root/"
 	{
-		cp -Rpva pkgbuild/etc/skel/.bash* $ROOTFS/root/
-		cp -Rpva pkgbuild/etc/skel/.git-prompt.sh $ROOTFS/root/
-		cp -Rpva pkgbuild/etc/skel/.dircolors $ROOTFS/root/
-		rsync -a pkgbuild/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/
+		cp -Rpva $path/etc/skel/.bash* $ROOTFS/root/
+		cp -Rpva $path/etc/skel/.git-prompt.sh $ROOTFS/root/
+		cp -Rpva $path/etc/skel/.dircolors $ROOTFS/root/
+		rsync -a $path/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_wallpapers() {
+    local path
+
+    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	print_step "Copiando wallpapers into $ROOTFS/usr/share/backgrounds"
 	{
 		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-		cp -Rpva pkgbuild/usr/share/backgrounds -t "$ROOTFS/usr/share/"
+		cp -Rpva $path/usr/share/backgrounds -t "$ROOTFS/usr/share/"
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+}
 
-	print_step "Copiando instalador into $ROOTFS/usr/share/applications"
+install_installer() {
+    local path
+
+    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
+	print_step "Copiando installer into $ROOTFS/usr/share/applications"
 	{
-		cp -Rpva pkgbuild/usr/share/applications -t "$ROOTFS/usr/share/"
+		cp -Rpva $path/usr/share/applications -t "$ROOTFS/usr/share/"
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_themes() {
+    local path
+
+    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	print_step "Copiando temas into $ROOTFS/usr/share/themes"
 	{
 		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-		cp -Rpva pkgbuild/usr/share/themes -t "$ROOTFS/usr/share/"
+		cp -Rpva $path/usr/share/themes -t "$ROOTFS/usr/share/"
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_icons() {
+    local path
+
+    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	print_step "Copiando icones into $ROOTFS/usr/share/icons"
 	{
 		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-		cp -Rpva pkgbuild/usr/share/icons -t "$ROOTFS/usr/share/"
+		cp -Rpva $path/usr/share/icons -t "$ROOTFS/usr/share/"
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_grub_themes() {
+    local path
+
+    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	print_step "Copiando grub themes into $ROOTFS/boot/grub/themes"
 	{
 		[ -d "$ROOTFS/boot/grub/themes/" ] && mkdir -p "$ROOTFS"/boot/grub/
-		cp -Rpva pkgbuild/boot/grub/themes -t "$ROOTFS/boot/grub/"
+		cp -Rpva $path/boot/grub/themes -t "$ROOTFS/boot/grub/"
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
-install_apps() {
+install_chili_apps() {
+    local path='config-xfce-base'
+
+    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	print_step "Copiando aplicativos into $ROOTFS/usr/bin"
 	{
 		[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/
-		for x in pkgbuild/usr/bin/*; do
+		for x in $path/usr/bin/*; do
 			install -Dm755 $x "$ROOTFS"/usr/bin/
 		done
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
@@ -366,7 +412,7 @@ install_apps() {
 install_pacman() {
 	#sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print "$1"}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true;'
 	sh_chroot_job "Instalando pacman App" "/usr/bin/pacman -Sydd pacman-contrib brave-browser paru --noconfirm --overwrite \*"
-	if ((MAKE_XFCE)); then
+	if ((MAKE_XFCE_CUSTOM)); then
 		sh_chroot_job "Instalando Brave-Browser" "/usr/bin/pacman -Sdd brave-browser --noconfirm --overwrite \*"
 		sh_chroot_job "Instalando Google Chrome" "/usr/bin/paru -Sdd google-chrome --noconfirm --overwrite \*"
 	fi
@@ -583,7 +629,8 @@ usage() {
                 -K                 Do not remove builddir
                 -h                 Show this help and exit
                 -V                 Show version and exit
-                -X                 Make XFCE iso.
+                -X                 Make XFCE iso base.
+                -Y                 Make XFCE iso custom.
                 -Q                 Quiet mode (default: 0)
 
 	EOF
@@ -595,7 +642,7 @@ usage() {
 sh_confAmbiente
 sh_setvarcolors
 
-while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxQq" opt; do
+while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQq" opt; do
 	case $opt in
 	a) BASE_ARCH="$OPTARG" ;;
 	b) BASE_SYSTEM_PKG="$OPTARG" ;;
@@ -613,7 +660,8 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxQq" opt; do
 	p) PACKAGE_LIST="$PACKAGE_LIST $OPTARG" ;;
 	C) BOOT_CMDLINE="$OPTARG" ;;
 	T) BOOT_TITLE="$OPTARG" ;;
-	x|X) MAKE_XFCE=1 ;;
+	x|X) MAKE_XFCE=1; MAKE_XFCE_BASE=1 ;;
+	y|Y) MAKE_XFCE=1; MAKE_XFCE_CUSTOM=1 ;;
     q|Q) QUIET=1 ;;
 	v) LINUX_VERSION="$OPTARG" ;;
 	V)
@@ -639,7 +687,13 @@ fi
 
 sh_choose_packages
 if ((MAKE_XFCE)); then
-    sh_choose_packages_xfce
+    if ((MAKE_XFCE_BASE)); then
+        sh_choose_packages_xfce_base
+    fi
+    if ((MAKE_XFCE_CUSTOM)); then
+        sh_choose_packages_xfce_base
+        sh_choose_packages_xfce_custom
+    fi
 fi
 
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://void.chililinux.com/voidlinux/current"
@@ -754,9 +808,13 @@ if [ "$?" -ne "0" ]; then
 	die "Failed to find kernel package version"
 fi
 if ((MAKE_XFCE)); then
-    : ${OUTPUT_FILE="void-live-xfce-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
+    if ((MAKE_XFCE_BASE)); then
+        : ${OUTPUT_FILE="void-live-xfce-base-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
+    else
+        : ${OUTPUT_FILE="void-live-xfce-custom-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
+    fi
 else
-    : ${OUTPUT_FILE="void-live-base-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
+    : ${OUTPUT_FILE="void-live-base-custom-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
 fi
 
 print_step "Installing software to generate the image..."
@@ -774,11 +832,16 @@ fi
 print_step "Installing void pkgs into the rootfs..."
 install_packages
 install_skel
+if ((MAKE_XFCE)); then
+install_installer
+fi
+if ((MAKE_XFCE_CUSTOM)); then
 install_wallpapers
 install_themes
 install_icons
+fi
+install_chili_apps
 install_grub_themes
-install_apps
 reconfigure_packages
 install_pacman
 finish_clean
@@ -787,8 +850,12 @@ finish_clean
 print_step "Enabling services..."
 enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST}
 if ((MAKE_XFCE)); then
-	: ${ADDITIONAL_SERVICE_LIST:=NetworkManager avahi-daemon bluetoothd cupsd dbus elogind lxdm irqbalance polkitd sshd uuidd }
-	enable_services ${ADDITIONAL_SERVICE_LIST}
+    : ${ADDITIONAL_SERVICE_LIST_BASE:=NetworkManager dbus elogind lxdm polkitd }
+   	enable_services ${ADDITIONAL_SERVICE_LIST_BASE}
+    if ((MAKE_XFCE_CUSTOM)); then
+    	: ${ADDITIONAL_SERVICE_LIST_FULL:=avahi-daemon bluetoothd cupsd irqbalance sshd uuidd }
+    	enable_services ${ADDITIONAL_SERVICE_LIST_FULL}
+    fi
 fi
 
 if [ "${#INCLUDE_DIRS[@]}" -gt 0 ]; then
