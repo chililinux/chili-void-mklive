@@ -396,8 +396,8 @@ install_grub_themes() {
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
-install_apps() {
-    local path
+install_chili_apps() {
+    local path='config-xfce-base'
 
     ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	print_step "Copiando aplicativos into $ROOTFS/usr/bin"
@@ -808,9 +808,13 @@ if [ "$?" -ne "0" ]; then
 	die "Failed to find kernel package version"
 fi
 if ((MAKE_XFCE)); then
-    : ${OUTPUT_FILE="void-live-xfce-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
+    if ((MAKE_XFCE_BASE)); then
+        : ${OUTPUT_FILE="void-live-xfce-base-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
+    else
+        : ${OUTPUT_FILE="void-live-xfce-custom-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
+    fi
 else
-    : ${OUTPUT_FILE="void-live-base-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
+    : ${OUTPUT_FILE="void-live-base-custom-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
 fi
 
 print_step "Installing software to generate the image..."
@@ -835,8 +839,8 @@ if ((MAKE_XFCE_CUSTOM)); then
 install_wallpapers
 install_themes
 install_icons
-install_apps
 fi
+install_chili_apps
 install_grub_themes
 reconfigure_packages
 install_pacman
