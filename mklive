@@ -170,7 +170,10 @@ sh_setvarcolors() {
 }
 
 die() {
-	info_msg "ERROR: $@"
+    local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
+    local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
+    local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
+	info_msg "ERROR: ${script_name0} $@"
 	error_out 1 $LINENO
 }
 
@@ -246,26 +249,39 @@ copy_autoinstaller_files() {
 }
 
 install_prereqs() {
-	{
-		LC_ALL=C XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -c "$XBPS_HOST_CACHEDIR" -y $REQUIRED_PKGS -S
-		result="${PIPESTATUS[0]}"
-		[ $result -ne 0 ] && die "Failed to install required software, exiting..."
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+{
+   	LC_ALL=C XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -c "$XBPS_HOST_CACHEDIR" -y $REQUIRED_PKGS -S
+} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Failed to install required software, exiting..."
 }
 
 install_packages() {
+    print_step "Testando void pkgs..."
 	{
-		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS
-		result="${PIPESTATUS[0]}"
-		[ $result -ne 0 ] && die "Missing required binary packages, exiting..."
+		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS $ADDITIONAL_PKGS
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Missing required binary packages, exiting..."
 
-		mount_pseudofs
+	mount_pseudofs
 
+    print_step "Instalando void pkgs BASE INITRAMFS em rootfs..."
+    {
 		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $PACKAGE_LIST $INITRAMFS_PKGS
-		result="${PIPESTATUS[0]}"
-		[ $result -ne 0 ] && die "Failed to install $PACKAGE_LIST"
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Failed to install $PACKAGE_LIST"
 
-		print_step "Reconfigurando o ambiente - pass 1"
+    print_step "Instalando void pkgs ADDITIONAL em rootfs..."
+    {
+		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $ADDITIONAL_PKGS
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Failed to install $ADDITIONAL_PKGS"
+
+	print_step "Reconfigurando o ambiente - pass 1"
+    {
 		xbps-reconfigure -r "$ROOTFS" -f base-files >/dev/null 2>&1
 		chroot "$ROOTFS" env -i xbps-reconfigure -f base-files
 
@@ -579,7 +595,7 @@ usage() {
 sh_confAmbiente
 sh_setvarcolors
 
-while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:Vh:Xx:Qq" opt; do
+while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxQq" opt; do
 	case $opt in
 	a) BASE_ARCH="$OPTARG" ;;
 	b) BASE_SYSTEM_PKG="$OPTARG" ;;
@@ -616,6 +632,11 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:Vh:Xx:Qq" opt; do
 done
 shift $((OPTIND - 1))
 
+# Check for root permissions.
+if [ "$(id -u)" -ne 0 ]; then
+	die "Must be run as root, exiting..."
+fi
+
 sh_choose_packages
 if ((MAKE_XFCE)); then
     sh_choose_packages_xfce
@@ -627,12 +648,13 @@ fi
 # --repository=https://mirrors.servercentral.com/voidlinux/current/nonfree""\
 # --repository=https://mirrors.servercentral.com/voidlinux/current/multilib""\
 # --repository=https://mirrors.servercentral.com/voidlinux/current/multilib/nonfree""\
+# --repository=https://chililinux.com/void/current""\
 # --repository=/github/void-packages/hostdir/binpkgs"
 XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-fastly.voidlinux.org/current""\
  --repository=https://repo-fastly.voidlinux.org/current/nonfree""\
  --repository=https://repo-fastly.voidlinux.org/current/multilib""\
  --repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree""\
- --repository=/github/void-packages/hostdir/binpkgs"
+ --repository=/home/vcatafesta/github/void-packages/hostdir/binpkgs"
 
 # Configure dracut to use overlayfs for the writable overlay.
 BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "
@@ -652,18 +674,13 @@ ARCH=$(xbps-uhelper arch)
 : ${BOOT_TITLE:="Void Linux Custom"}
 
 # Required packages in the image for a working system.
-PACKAGE_LIST="$BASE_SYSTEM_PKG $PACKAGE_LIST $ADDITIONAL_PKGS"
-
-# Check for root permissions.
-if [ "$(id -u)" -ne 0 ]; then
-	die "Must be run as root, exiting..."
-fi
+PACKAGE_LIST="$BASE_SYSTEM_PKG $PACKAGE_LIST"
 
 #mount -o remount,size=18G,mode=1777 tmpfs /tmp
 #ROOTDIR='/tmp'
-mount -o remount,size=18G,mode=1777 tmpfs /dev/shm
-ROOTDIR='/dev/shm'
-#ROOTDIR='/mnt/voidlinux'
+#mount -o remount,size=18G,mode=1777 tmpfs /dev/shm
+#ROOTDIR='/dev/shm'
+ROOTDIR='/mnt/voidlinux'
 #mount /dev/nvme0n1p2 /mnt/voidlinux
 #ROOTDIR='/mnt/voidlinux/@/lixo'
 
@@ -701,6 +718,12 @@ CURRENT_STEP=0
 
 mkdir -p "$ROOTFS" "$VOIDHOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR"
 
+sh_monitor() {
+    if [ $QUIET -eq 1 ]; then
+        tee -i -a "$BOOTLOG" >$LOGGER
+    fi
+}
+
 print_step "Synchronizing XBPS repository data..."
 {
 	copy_void_keys "$ROOTFS"
@@ -708,6 +731,8 @@ print_step "Synchronizing XBPS repository data..."
 	LC_ALL=C XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -r "$ROOTFS" ${XBPS_REPOSITORY} -Sy
 	LC_ALL=C XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -Sy
 } 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+result="${PIPESTATUS[0]}"
+[ $result -ne 0 ] && die "Failed to synchronizing, exiting..."
 
 # Get linux version for ISO
 # If linux version option specified use
