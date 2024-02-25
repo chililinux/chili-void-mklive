@@ -34,9 +34,10 @@ export PS4='${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 #set -e
 trap 'error_out $? $LINENO' INT TERM 0
 umask 022
-declare -gi MAKE_XFCE=0
+declare -gi MAKE_X=0
 declare -gi MAKE_XFCE_BASE=0
 declare -gi MAKE_XFCE_CUSTOM=0
+declare -gi MAKE_AWESOME=0
 declare -gi LBIND=0
 declare -gi QUIET=0
 
@@ -46,16 +47,43 @@ sh_choose_packages() {
 	declare -g PROGNAME=$(basename "$0")
 	declare -g REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
 	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut-network openresolv"
-	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted tree htop"
+	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted tree htop rsync"
 	ADDITIONAL_PKGS+=" grub-void-theme"
 	ADDITIONAL_PKGS+=" xz zstd porg"
 	ADDITIONAL_PKGS+=" bc geoip geoipupdate iputils lvm2 cryptsetup"
 	ADDITIONAL_PKGS+=" xtools vpm vsv neofetch"
+	ADDITIONAL_PKGS+=" bash-completion"
 	#   ADDITIONAL_PKGS+=" wifi-firmware"
 	#   ADDITIONAL_PKGS+=" rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
 	ADDITIONAL_PKGS+=" pacman"
 	ADDITIONAL_PKGS+=" cifs-utils ntfs-3g"
 	ADDITIONAL_PKGS+=" bubblewrap"
+}
+
+sh_choose_packages_awesome() {
+    print_step "Escolhendo pacotes X Awesome Custom"
+    #xorg
+    ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
+    #xfce
+    ADDITIONAL_PKGS+=" awesome"
+	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
+	ADDITIONAL_PKGS+=" noto-fonts-emoji"
+    ADDITIONAL_PKGS+=" Adapta"
+    ADDITIONAL_PKGS+=" xfce4-terminal"
+    ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
+    ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
+#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
+    ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
+    ADDITIONAL_PKGS+=" gnome-keyring"
+    ADDITIONAL_PKGS+=" orca"
+ 	ADDITIONAL_PKGS+=" setxkbmap"
+    ADDITIONAL_PKGS+=" numlockx"
+    ADDITIONAL_PKGS+=" nitrogen"
+	#login manager
+	ADDITIONAL_PKGS+=" lxdm"
+	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
+	#ADDITIONAL_PKGS+=" slim"
+	#ADDITIONAL_PKGS+=" lightdm"
 }
 
 sh_choose_packages_xfce_base() {
@@ -125,7 +153,7 @@ sh_choose_packages_xfce_custom() {
 	ADDITIONAL_PKGS+=" nano vim"
 	ADDITIONAL_PKGS+=" nano-syntax-highlighting"
 	ADDITIONAL_PKGS+=" gparted"
-	ADDITIONAL_PKGS+=" bat bash-completion"
+	ADDITIONAL_PKGS+=" bat"
 	ADDITIONAL_PKGS+=" vlc celluloid"
 	ADDITIONAL_PKGS+=" evince"
 	ADDITIONAL_PKGS+=" mate-calc cmatrix tmate xkill menulibre mugshot ocs-url"
@@ -325,10 +353,22 @@ ignore_packages() {
 	done
 }
 
-install_skel() {
+get_conf_path() {
     local path
 
-    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
+    if ((MAKE_XFCE_BASE)); then
+        path='config-xfce-base'
+    elif ((MAKE_XFCE_CUSTOM)); then
+        path='config-xfce-custom'
+    elif ((MAKE_AWESOME)); then
+        path='config-awesome-custom'
+    fi
+    echo "$path"
+}
+
+install_skel() {
+    local path=$(get_conf_path)
+
 	#skel
 	print_step "Copiando skel into $ROOTFS/etc/skel"
 	{
@@ -346,9 +386,8 @@ install_skel() {
 }
 
 install_wallpapers() {
-    local path
+    local path=$(get_conf_path)
 
-    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	print_step "Copiando wallpapers into $ROOTFS/usr/share/backgrounds"
 	{
 		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
@@ -357,12 +396,22 @@ install_wallpapers() {
 }
 
 install_installer() {
-    local path
+    local path=$(get_conf_path)
 
-    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	print_step "Copiando installer into $ROOTFS/usr/share/applications"
 	{
+		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
 		cp -Rpva $path/usr/share/applications -t "$ROOTFS/usr/share/"
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+}
+
+install_usr() {
+    local path=$(get_conf_path)
+
+	print_step "Copiando usr into $ROOTFS/usr/"
+	{
+		[ -d "$ROOTFS/usr" ] && mkdir -p "$ROOTFS"/usr/
+		rsync -a $path/usr/ $ROOTFS/usr/
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
@@ -634,6 +683,7 @@ usage() {
                 -V                 Show version and exit
                 -X                 Make XFCE iso base.
                 -Y                 Make XFCE iso custom.
+                -W                 Make AWESOME iso custom.
                 -Q                 Quiet mode (default: 0)
 
 	EOF
@@ -645,7 +695,7 @@ usage() {
 sh_confAmbiente
 sh_setvarcolors
 
-while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQq" opt; do
+while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWw" opt; do
 	case $opt in
 	a) BASE_ARCH="$OPTARG" ;;
 	b) BASE_SYSTEM_PKG="$OPTARG" ;;
@@ -663,8 +713,9 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQq" opt; do
 	p) PACKAGE_LIST="$PACKAGE_LIST $OPTARG" ;;
 	C) BOOT_CMDLINE="$OPTARG" ;;
 	T) BOOT_TITLE="$OPTARG" ;;
-	x|X) MAKE_XFCE=1; MAKE_XFCE_BASE=1 ;;
-	y|Y) MAKE_XFCE=1; MAKE_XFCE_CUSTOM=1 ;;
+	x|X) MAKE_X=1; MAKE_XFCE_BASE=1 ;;
+	y|Y) MAKE_X=1; MAKE_XFCE_CUSTOM=1 ;;
+	w|W) MAKE_X=1; MAKE_AWESOME=1 ;;
     q|Q) QUIET=1 ;;
 	v) LINUX_VERSION="$OPTARG" ;;
 	V)
@@ -689,7 +740,10 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 sh_choose_packages
-if ((MAKE_XFCE)); then
+if ((MAKE_X)); then
+    if ((MAKE_AWESOME)); then
+        sh_choose_packages_awesome
+    fi
     if ((MAKE_XFCE_BASE)); then
         sh_choose_packages_xfce_base
     fi
@@ -810,11 +864,13 @@ KERNELVERSION=$($XBPS_UHELPER_CMD getpkgversion ${_kver})
 if [ "$?" -ne "0" ]; then
 	die "Failed to find kernel package version"
 fi
-if ((MAKE_XFCE)); then
+if ((MAKE_X)); then
     if ((MAKE_XFCE_BASE)); then
         : ${OUTPUT_FILE="void-live-xfce-base-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
-    else
+    elif ((MAKE_XFCE_BASE)); then
         : ${OUTPUT_FILE="void-live-xfce-custom-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
+    elif ((MAKE_AWESOME)); then
+        : ${OUTPUT_FILE="void-live-awesome-custom-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
     fi
 else
     : ${OUTPUT_FILE="void-live-base-custom-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
@@ -835,14 +891,15 @@ fi
 print_step "Installing void pkgs into the rootfs..."
 install_packages
 install_skel
-if ((MAKE_XFCE)); then
-install_installer
+if ((MAKE_X)); then
+    install_installer
 fi
 if ((MAKE_XFCE_CUSTOM)); then
-install_wallpapers
-install_themes
-install_icons
+    install_wallpapers
+    install_themes
+    install_icons
 fi
+install_usr
 install_chili_apps
 install_grub_themes
 reconfigure_packages
@@ -852,7 +909,7 @@ finish_clean
 : ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd dhcpcd}
 print_step "Enabling services..."
 enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST}
-if ((MAKE_XFCE)); then
+if ((MAKE_X)); then
     : ${ADDITIONAL_SERVICE_LIST_BASE:=NetworkManager dbus elogind lxdm polkitd }
    	enable_services ${ADDITIONAL_SERVICE_LIST_BASE}
     if ((MAKE_XFCE_CUSTOM)); then
