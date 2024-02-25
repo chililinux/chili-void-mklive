@@ -67,7 +67,7 @@ sh_choose_packages_awesome() {
     #xorg
     ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
     #xfce
-    ADDITIONAL_PKGS+=" awesome"
+    ADDITIONAL_PKGS+=" awesome polybar"
 	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
 	ADDITIONAL_PKGS+=" noto-fonts-emoji"
     ADDITIONAL_PKGS+=" Adapta"
