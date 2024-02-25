@@ -40,6 +40,7 @@ declare -gi MAKE_XFCE_CUSTOM=0
 declare -gi MAKE_AWESOME=0
 declare -gi LBIND=0
 declare -gi QUIET=0
+declare -g title='Void Linux Custom'
 
 sh_choose_packages() {
     print_step "Configurando pacotes essenciais"
@@ -61,6 +62,7 @@ sh_choose_packages() {
 }
 
 sh_choose_packages_awesome() {
+    title='Void Linux Awesome Custom'
     print_step "Escolhendo pacotes X Awesome Custom"
     #xorg
     ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
@@ -87,6 +89,7 @@ sh_choose_packages_awesome() {
 }
 
 sh_choose_packages_xfce_base() {
+    title='Void Linux XFCE Base'
     print_step "Escolhendo pacotes X Base"
     #xorg
     ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 dbus-elogind polkit-elogind xdg-user-dirs xrdb"
@@ -109,6 +112,7 @@ sh_choose_packages_xfce_base() {
 }
 
 sh_choose_packages_xfce_custom() {
+    title='Void Linux XFCE Custom'
     print_step "Escolhendo pacotes X Custom"
 	ADDITIONAL_PKGS+=" xfce4-screenshooter xfce4-dict"
     ADDITIONAL_PKGS+=" xfce4-battery-plugin"
@@ -408,7 +412,7 @@ install_installer() {
 install_usr() {
     local path=$(get_conf_path)
 
-	print_step "Copiando usr into $ROOTFS/usr/"
+	print_step "Copiando /usr into $ROOTFS/usr/"
 	{
 		[ -d "$ROOTFS/usr" ] && mkdir -p "$ROOTFS"/usr/
 		rsync -a $path/usr/ $ROOTFS/usr/
@@ -782,7 +786,7 @@ ARCH=$(xbps-uhelper arch)
 : ${INITRAMFS_COMPRESSION:=xz}
 : ${SQUASHFS_COMPRESSION:=xz}
 : ${BASE_SYSTEM_PKG:=base-system}
-: ${BOOT_TITLE:="Void Linux Custom"}
+: ${BOOT_TITLE:="$title"}
 
 # Required packages in the image for a working system.
 PACKAGE_LIST="$BASE_SYSTEM_PKG $PACKAGE_LIST"
