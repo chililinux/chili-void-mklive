@@ -67,7 +67,7 @@ sh_choose_packages_awesome() {
     #xorg
     ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
     #xfce
-    ADDITIONAL_PKGS+=" awesome"
+    ADDITIONAL_PKGS+=" awesome polybar"
 	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
 	ADDITIONAL_PKGS+=" noto-fonts-emoji"
     ADDITIONAL_PKGS+=" Adapta"
@@ -871,7 +871,7 @@ fi
 if ((MAKE_X)); then
     if ((MAKE_XFCE_BASE)); then
         : ${OUTPUT_FILE="void-live-xfce-base-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
-    elif ((MAKE_XFCE_BASE)); then
+    elif ((MAKE_XFCE_CUSTOM)); then
         : ${OUTPUT_FILE="void-live-xfce-custom-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
     elif ((MAKE_AWESOME)); then
         : ${OUTPUT_FILE="void-live-awesome-custom-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
