@@ -23,7 +23,7 @@
   <property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_NONE"/>
   <property name="misc-menubar-default" type="bool" value="false"/>
   <property name="font-use-system" type="bool" value="false"/>
-  <property name="font-name" type="string" value="Monospace Bold 10"/>
+  <property name="font-name" type="string" value="Monospace Bold 9"/>
   <property name="misc-confirm-close" type="bool" value="false"/>
   <property name="misc-copy-on-select" type="bool" value="true"/>
   <property name="misc-show-unsafe-paste-dialog" type="bool" value="false"/>
