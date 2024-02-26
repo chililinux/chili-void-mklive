@@ -51,14 +51,14 @@ end
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "Blue/theme.lua")
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "Brown/theme.lua")
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "Dark/theme.lua")
+-- beautiful.init(gears.filesystem.get_themes_dir() .. "darkblue/theme.lua")
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "Desert/theme.lua")
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "Gruvbox/theme.lua")
+-- beautiful.init(gears.filesystem.get_themes_dir() .. "gtk/theme.lua")
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "Miami/theme.lua")
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "Nord/theme.lua")
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "TokyoNight/theme.lua")
 beautiful.init(gears.filesystem.get_themes_dir() .. "Void/theme.lua")
--- beautiful.init(gears.filesystem.get_themes_dir() .. "darkblue/theme.lua")
--- beautiful.init(gears.filesystem.get_themes_dir() .. "gtk/theme.lua")
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "sky/theme.lua")
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "xresources/theme.lua")
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "zenburn/theme.lua")
@@ -66,12 +66,12 @@ beautiful.init(gears.filesystem.get_themes_dir() .. "Void/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 -- terminal = "xterm"
-terminal = "xfce4-terminal"
-editor = os.getenv("EDITOR") or "nano"
-editor_cmd = terminal .. " -e " .. editor
-browser = "firefox"
--- fm = "thunar"
-fm = "pcmanfm"
+terminal    = "xfce4-terminal"
+editor      = os.getenv("EDITOR") or "nano"
+editor_cmd  = terminal .. " -e " .. editor
+browser     = "firefox"
+fm          = "thunar"
+-- fm          = "pcmanfm"
 install_cmd = terminal .. " -e " .. "void-install-pkexec"
 
 
@@ -121,11 +121,11 @@ beautiful.menu_bg_focus="#f7f4e0"
 beautiful.menu_fg_focus="#374247"
 -- beautiful.menu_fg_normal=""
 
-mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "Open Terminal", terminal },
-                                    { "Browser", browser },
-                                    { "File manager", fm },
-                                    { "Instalar Void Linux", install_cmd }
+mymainmenu = awful.menu({ items = { { "Awesome", myawesomemenu, },
+                                    { " Open Terminal", terminal },
+                                    { " Browser", browser },
+                                    { " File manager", fm },
+                                    { " Instalar Void Linux", install_cmd }
                                   }
                         })
 

@@ -88,7 +88,7 @@ sh_choose_packages_awesome() {
     ADDITIONAL_PKGS+=" awesome polybar"
     ADDITIONAL_PKGS+=" pcmanfm Thunar"
 	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
-	ADDITIONAL_PKGS+=" noto-fonts-emoji"
+	ADDITIONAL_PKGS+=" font-awesome noto-fonts-emoji"
     ADDITIONAL_PKGS+=" Adapta"
     ADDITIONAL_PKGS+=" xfce4-terminal"
     ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
