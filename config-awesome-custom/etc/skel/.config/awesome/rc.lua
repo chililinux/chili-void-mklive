@@ -70,7 +70,10 @@ terminal = "xfce4-terminal"
 editor = os.getenv("EDITOR") or "nano"
 editor_cmd = terminal .. " -e " .. editor
 browser = "firefox"
-fm = "nautilus"
+-- fm = "thunar"
+fm = "pcmanfm"
+install_cmd = terminal .. " -e " .. "void-install-pkexec"
+
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -103,15 +106,26 @@ awful.layout.layouts = {
 -- {{{ Menu
 -- Create a launcher widget and a main menu
 myawesomemenu = {
-   { "hotkeys", function() hotkeys_popup.show_help(nil, awful.screen.focused()) end },
-   { "manual", terminal .. " -e man awesome" },
-   { "edit config", editor_cmd .. " " .. awesome.conffile },
-   { "restart", awesome.restart },
-   { "quit", function() awesome.quit() end },
+   { "Hotkeys", function() hotkeys_popup.show_help(nil, awful.screen.focused()) end },
+   { "Manual", terminal .. " -e man awesome" },
+   { "Edit config", editor_cmd .. " " .. awesome.conffile },
+   { "Restart", awesome.restart },
+   { "Quit", function() awesome.quit() end },
 }
 
+-- menu pulldown - vcatafesta@gmail.com
+beautiful.menu_height=20
+beautiful.menu_width=180
+beautiful.menu_bg_normal="#374247"
+beautiful.menu_bg_focus="#f7f4e0"
+beautiful.menu_fg_focus="#374247"
+-- beautiful.menu_fg_normal=""
+
 mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "open terminal", terminal }
+                                    { "Open Terminal", terminal },
+                                    { "Browser", browser },
+                                    { "File manager", fm },
+                                    { "Instalar Void Linux", install_cmd }
                                   }
                         })
 

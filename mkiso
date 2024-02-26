@@ -66,7 +66,7 @@ sh_choose_packages() {
 	declare -g PROGNAME=$(basename "$0")
 	declare -g REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
 	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut-network openresolv"
-	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted tree htop rsync lynx parallel tmate gpm"
+	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted tree htop rsync lynx parallel tmate gpm evtest"
 	ADDITIONAL_PKGS+=" grub-void-theme"
 	ADDITIONAL_PKGS+=" xz zstd porg"
 	ADDITIONAL_PKGS+=" bc geoip geoipupdate iputils lvm2 cryptsetup"
@@ -80,12 +80,13 @@ sh_choose_packages() {
 }
 
 sh_choose_packages_awesome() {
-    title='Void Linux X/Awesome Custom'
+    title='Void Linux Awesome Custom'
     print_step "Selecionando pacotes X Awesome Custom"
     #xorg
     ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
     #xfce
     ADDITIONAL_PKGS+=" awesome polybar"
+    ADDITIONAL_PKGS+=" pcmanfm Thunar"
 	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
 	ADDITIONAL_PKGS+=" noto-fonts-emoji"
     ADDITIONAL_PKGS+=" Adapta"
@@ -99,15 +100,16 @@ sh_choose_packages_awesome() {
  	ADDITIONAL_PKGS+=" setxkbmap"
     ADDITIONAL_PKGS+=" numlockx"
     ADDITIONAL_PKGS+=" nitrogen"
+    ADDITIONAL_PKGS+=" evtest-qt"
 	#login manager
-	ADDITIONAL_PKGS+=" lxdm"
+	ADDITIONAL_PKGS+=" lxdm lxdm-theme-vdojo"
 	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
 	#ADDITIONAL_PKGS+=" slim"
 	#ADDITIONAL_PKGS+=" lightdm"
 }
 
 sh_choose_packages_xfce_base() {
-    title='Void Linux X/XFCE Base'
+    title='Void Linux XFCE Base'
     print_step "Selecionando pacotes XFCE Base"
     #xorg
     ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 dbus-elogind polkit-elogind xdg-user-dirs xrdb"
@@ -122,15 +124,16 @@ sh_choose_packages_xfce_base() {
     ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
     ADDITIONAL_PKGS+=" gnome-keyring"
     ADDITIONAL_PKGS+=" orca"
+    ADDITIONAL_PKGS+=" evtest-qt"
 	#login manager
-	ADDITIONAL_PKGS+=" lxdm"
+	ADDITIONAL_PKGS+=" lxdm lxdm-theme-vdojo"
 	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
 	#ADDITIONAL_PKGS+=" slim"
 	#ADDITIONAL_PKGS+=" lightdm"
 }
 
 sh_choose_packages_xfce_custom() {
-    title='Void Linux X/XFCE Custom'
+    title='Void Linux XFCE Custom'
     print_step "Selecionando pacotes XFCE Custom"
 	ADDITIONAL_PKGS+=" xfce4-screenshooter xfce4-dict"
     ADDITIONAL_PKGS+=" xfce4-battery-plugin"
@@ -181,6 +184,7 @@ sh_choose_packages_xfce_custom() {
 	ADDITIONAL_PKGS+=" mate-calc cmatrix xkill menulibre mugshot ocs-url"
 	ADDITIONAL_PKGS+=" nvme-cli"
 	ADDITIONAL_PKGS+=" inxi"
+	ADDITIONAL_PKGS+=" evtest-qt"
 #
 #	#office
 	ADDITIONAL_PKGS+=" libreoffice libreoffice-i18n-pt-BR"

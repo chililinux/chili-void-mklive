@@ -43,6 +43,8 @@ if [ -r ${NEWROOT}/etc/lxdm/lxdm.conf ]; then
     sed -e "s,.*autologin.*=.*,autologin=$USERNAME," -i ${NEWROOT}/etc/lxdm/lxdm.conf
     if [ -x ${NEWROOT}/usr/bin/enlightenment_start ]; then
         sed -e "s,.*session.*=.*,session=/usr/bin/enlightenment_start," -i ${NEWROOT}/etc/lxdm/lxdm.conf
+    elif [ -x ${NEWROOT}/usr/bin/awesome ]; then
+        sed -e "s,.*session.*=.*,session=/usr/bin/awesome," -i ${NEWROOT}/etc/lxdm/lxdm.conf
     elif [ -x ${NEWROOT}/usr/bin/startxfce4 ]; then
         sed -e "s,.*session.*=.*,session=/usr/bin/startxfce4," -i ${NEWROOT}/etc/lxdm/lxdm.conf
     elif [ -x ${NEWROOT}/usr/bin/mate-session ]; then
