@@ -32,8 +32,9 @@ sed -i -e "s|TIMEZONE=.*|TIMEZONE=$TIMEZONE|g" $NEWROOT/etc/rc.conf
 sed -i -e "s|#\?TIMEZONE=.*|TIMEZONE=$TIMEZONE|g" $NEWROOT/etc/rc.conf
 
 #font
-sed -i -e "s|FONT=.*|FONT=Lat2-Terminus16|g" $NEWROOT/etc/rc.conf
-sed -i -e "s|#\?FONT=.*|FONT=Lat2-Terminus16|g" $NEWROOT/etc/rc.conf
-
+#sed -i -e "s|FONT=.*|FONT=Lat2-Terminus16|g" $NEWROOT/etc/rc.conf
+#sed -i -e "s|#\?FONT=.*|FONT=Lat2-Terminus16|g" $NEWROOT/etc/rc.conf
+sed -i -e "s|FONT=.*|FONT=Uni2-Fixed16.psf.gz|g" $NEWROOT/etc/rc.conf
+sed -i -e "s|#\?FONT=.*|FONT=Uni2-Fixed16.psf.gz|g" $NEWROOT/etc/rc.conf
 chroot ${NEWROOT} sh -c "xbps-reconfigure -f glibc-locales"
 
