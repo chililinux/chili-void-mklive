@@ -54,17 +54,20 @@ declare -gi MAKE_X=0
 declare -gi MAKE_XFCE_BASE=0
 declare -gi MAKE_XFCE_CUSTOM=0
 declare -gi MAKE_AWESOME=0
+declare -gi MAKE_ENLIGHTENMENT
+declare -gi KEEP_BUILDDIR=0
 declare -gi LBIND=0
 declare -gi QUIET=0
+declare -g title
+declare -g name
 readonly true=1
 readonly false=0
-declare -g title='Void Linux Custom'
 
 sh_choose_packages() {
     print_step "Selecionando pacotes essenciais"
 	declare -a INCLUDE_DIRS=()
 	declare -g PROGNAME=$(basename "$0")
-	declare -g REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
+	declare -g REQUIRED_PKGS="linux xbps base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
 	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut-network openresolv"
 	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted tree htop rsync lynx parallel tmate gpm evtest"
 	ADDITIONAL_PKGS+=" grub-void-theme"
@@ -80,7 +83,6 @@ sh_choose_packages() {
 }
 
 sh_choose_packages_awesome() {
-    title='Void Linux Awesome Custom'
     print_step "Selecionando pacotes X Awesome Custom"
     #xorg
     ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
@@ -103,6 +105,36 @@ sh_choose_packages_awesome() {
     ADDITIONAL_PKGS+=" evtest-qt"
 	#login manager
 	ADDITIONAL_PKGS+=" lxdm lxdm-theme-vdojo"
+	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
+	#ADDITIONAL_PKGS+=" slim"
+	#ADDITIONAL_PKGS+=" lightdm"
+}
+
+sh_choose_packages_enlightenment() {
+    title='Void Linux Enlightenment Custom'
+    print_step "Selecionando pacotes X Enlightenment Custom"
+    #xorg
+    ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
+    #xfce
+    ADDITIONAL_PKGS+=" enlightenment polybar"
+    ADDITIONAL_PKGS+=" pcmanfm Thunar"
+	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
+	ADDITIONAL_PKGS+=" font-awesome noto-fonts-emoji"
+    ADDITIONAL_PKGS+=" Adapta"
+    ADDITIONAL_PKGS+=" xfce4-terminal"
+    ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
+    ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
+#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
+    ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
+    ADDITIONAL_PKGS+=" gnome-keyring"
+    ADDITIONAL_PKGS+=" orca"
+ 	ADDITIONAL_PKGS+=" setxkbmap"
+    ADDITIONAL_PKGS+=" numlockx"
+    ADDITIONAL_PKGS+=" nitrogen"
+    ADDITIONAL_PKGS+=" evtest-qt"
+	#login manager
+#	ADDITIONAL_PKGS+=" lxdm lxdm-theme-vdojo"
+	ADDITIONAL_PKGS+=" lightdm"
 	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
 	#ADDITIONAL_PKGS+=" slim"
 	#ADDITIONAL_PKGS+=" lightdm"
@@ -372,7 +404,7 @@ umount_pseudofs() {
 error_out() {
 	trap - INT TERM 0
 	umount_pseudofs || exit "${1:-0}"
-	[ -d "$BUILDDIR" ] && [ -z "$KEEP_BUILDDIR" ] && rm -rf --one-file-system "$BUILDDIR"
+  	[ -d "$BUILDDIR" ] && [ -z "$KEEP_BUILDDIR" ] && rm -rf --one-file-system "$BUILDDIR"
 	exit "${1:-0}"
 }
 
@@ -420,14 +452,21 @@ install_prereqs() {
 }
 
 install_packages() {
-    print_step "Running dry-run for packages list selected..."
-	{
-		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS $ADDITIONAL_PKGS
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-	result="${PIPESTATUS[0]}"
-	[ $result -ne 0 ] && die "Missing required binary packages, exiting..."
+#    print_step "Running dry-run for packages list selected..."
+#	{
+#		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS
+#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+#	result="${PIPESTATUS[0]}"
+#	[ $result -ne 0 ] && die "Missing required binary packages, exiting..."
 
 	mount_pseudofs
+
+    print_step "Atualizando pacotes void BASE INITRAMFS em $ROOTFS..."
+    {
+		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -Sf -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y xbps cryptsetup linux
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Failed to install $PACKAGE_LIST"
 
     print_step "Instalando pacotes void BASE INITRAMFS em $ROOTFS..."
     {
@@ -463,17 +502,7 @@ ignore_packages() {
 }
 
 get_conf_path() {
-    local path
-
-    if ((MAKE_XFCE_BASE)); then
-        path='config-xfce-base'
-    elif ((MAKE_XFCE_CUSTOM)); then
-        path='config-xfce-custom'
-    elif ((MAKE_AWESOME)); then
-        path='config-awesome-custom'
-    else
-        path='config-base-custom'
-    fi
+    local path="config-$name"
     echo "$path"
 }
 
@@ -527,18 +556,17 @@ install_usr() {
 }
 
 install_common() {
-    local path='config-common'
+    local common_path='config-common'
 
 	print_step "Copiando config-common into $ROOTFS/usr/"
 	{
-        rsync -a $path/ $ROOTFS/
+        rsync -a $common_path/ $ROOTFS/
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_themes() {
-    local path
+    local path=$(get_conf_path)
 
-    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	print_step "Copiando temas into $ROOTFS/usr/share/themes"
 	{
 		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
@@ -547,9 +575,8 @@ install_themes() {
 }
 
 install_icons() {
-    local path
+    local path=$(get_conf_path)
 
-    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	print_step "Copiando icones into $ROOTFS/usr/share/icons"
 	{
 		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
@@ -558,9 +585,8 @@ install_icons() {
 }
 
 install_grub_themes() {
-    local path
+    local path=$(get_conf_path)
 
-    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	print_step "Copiando grub themes into $ROOTFS/boot/grub/themes"
 	{
 		[ -d "$ROOTFS/boot/grub/themes/" ] && mkdir -p "$ROOTFS"/boot/grub/
@@ -569,9 +595,8 @@ install_grub_themes() {
 }
 
 install_chili_apps() {
-    local path='config-xfce-base'
+    local path=$(get_conf_path)
 
-    ((MAKE_XFCE_BASE)) && path='config-xfce-base' || path='config-xfce-custom'
 	print_step "Copiando aplicativos into $ROOTFS/usr/bin"
 	{
 		[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/
@@ -624,6 +649,8 @@ copy_include_directories() {
 
 generate_initramfs() {
 	local _args
+
+	print_step "Gerando initramfs into $ROOTFS"
 	{
 		copy_dracut_files "$ROOTFS"
 		copy_autoinstaller_files "$ROOTFS"
@@ -749,7 +776,7 @@ generate_squashfs() {
 		chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
 
 		# Remove rootfs and temporary dirs, we don't need them anymore.
-		rm -rf "$ROOTFS"
+        [ -z "$KEEP_BUILDDIR" ] && rm -rf "$ROOTFS"
 		rm -rf "$BUILDDIR/tmp-rootfs"
 		rm -rf "$BUILDDIR/tmp"
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
@@ -801,12 +828,33 @@ usage() {
                 -K                 Do not remove builddir
                 -h                 Show this help and exit
                 -V                 Show version and exit
+                -n                 NAO cria squashfs, usa antigo
                 -X                 Make XFCE iso base.
                 -Y                 Make XFCE iso custom.
                 -W                 Make AWESOME iso custom.
+                -E                 Make ENLIGHTNMENT iso custom.
                 -Q                 Quiet mode (default: 0)
 
 	EOF
+}
+
+set_config_distro() {
+    if ((MAKE_ENLIGHTENMENT)); then
+        title='Void Linux Enlightenment Custom'
+        name='enlightenment-custom'
+    elif ((MAKE_AWESOME)); then
+        title='Void Linux Awesome Custom'
+        name='awesome-custom'
+    elif ((MAKE_XFCE_BASE)); then
+        title='Void Linux Xfce Base'
+        name='xfce-base'
+    elif ((MAKE_XFCE_CUSTOM)); then
+        title='Void Linux Xfce Custom'
+        name='xfce-custom'
+    else
+        title='Void Linux Custom'
+        name='base-custom'
+    fi
 }
 
 #
@@ -819,14 +867,14 @@ sh_setLanguage
 sh_checkDependencies
 sh_setAsciiLines
 
-while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWw" opt; do
+while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEe" opt; do
 	case $opt in
 	a) BASE_ARCH="$OPTARG" ;;
 	b) BASE_SYSTEM_PKG="$OPTARG" ;;
 	r) XBPS_REPOSITORY="--repository=$OPTARG $XBPS_REPOSITORY" ;;
 	c) XBPS_CACHEDIR="$OPTARG" ;;
 	g) IGNORE_PKGS="$IGNORE_PKGS $OPTARG" ;;
-	K) readonly KEEP_BUILDDIR=1 ;;
+	K) KEEP_BUILDDIR=1 ;;
 	k) KEYMAP="$OPTARG" ;;
 	l) LOCALE="$OPTARG" ;;
 	i) INITRAMFS_COMPRESSION="$OPTARG" ;;
@@ -837,9 +885,10 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWw" opt; do
 	p) PACKAGE_LIST="$PACKAGE_LIST $OPTARG" ;;
 	C) BOOT_CMDLINE="$OPTARG" ;;
 	T) BOOT_TITLE="$OPTARG" ;;
-	x|X) MAKE_X=1; MAKE_XFCE_BASE=1 ;;
-	y|Y) MAKE_X=1; MAKE_XFCE_CUSTOM=1 ;;
-	w|W) MAKE_X=1; MAKE_AWESOME=1 ;;
+	x|X) MAKE_X=1; MAKE_XFCE_BASE=1;;
+	y|Y) MAKE_X=1; MAKE_XFCE_CUSTOM=1;;
+	w|W) MAKE_X=1; MAKE_AWESOME=1;;
+	e|E) MAKE_X=1; MAKE_ENLIGHTENMENT=1;;
     q|Q) QUIET=1 ;;
 	v) LINUX_VERSION="$OPTARG" ;;
 	V)
@@ -863,17 +912,23 @@ if [ "$(id -u)" -ne 0 ]; then
 	die "Must be run as root, exiting..."
 fi
 
+set_config_distro
 sh_choose_packages
-if ((MAKE_X)); then
-    if ((MAKE_AWESOME)); then
-        sh_choose_packages_awesome
-    fi
-    if ((MAKE_XFCE_BASE)); then
-        sh_choose_packages_xfce_base
-    fi
-    if ((MAKE_XFCE_CUSTOM)); then
-        sh_choose_packages_xfce_base
-        sh_choose_packages_xfce_custom
+if [[ $KEEP_BUILDDIR -eq 0 ]]; then
+    if ((MAKE_X)); then
+        if ((MAKE_ENLIGHTENMENT)); then
+            sh_choose_packages_enlightenment
+        fi
+        if ((MAKE_AWESOME)); then
+            sh_choose_packages_awesome
+        fi
+        if ((MAKE_XFCE_BASE)); then
+            sh_choose_packages_xfce_base
+        fi
+        if ((MAKE_XFCE_CUSTOM)); then
+            sh_choose_packages_xfce_base
+            sh_choose_packages_xfce_custom
+        fi
     fi
 fi
 
@@ -915,14 +970,14 @@ PACKAGE_LIST="$BASE_SYSTEM_PKG $PACKAGE_LIST"
 #ROOTDIR='/tmp'
 #mount -o remount,size=18G,mode=1777 tmpfs /dev/shm
 #ROOTDIR='/dev/shm'
-ROOTDIR='/mnt/voidlinux'
+ROOTDIR="/lfs/voidlinux"
 #mount /dev/nvme0n1p2 /mnt/voidlinux
 #ROOTDIR='/mnt/voidlinux/@/lixo'
 
 if [ -n "$ROOTDIR" ]; then
 	#	BUILDDIR=$(mktemp --tmpdir="$ROOTDIR" -d)
-	BUILDDIR="$ROOTDIR/void"
-	rm -rf "$BUILDDIR"
+	BUILDDIR="$ROOTDIR/$name"
+    [ -d "$BUILDDIR" ] && [ -z "$KEEP_BUILDDIR" ] && rm -rf --one-file-system "$BUILDDIR"
 	mkdir -p "$BUILDDIR"
 else
 	BUILDDIR=$(mktemp --tmpdir="$(pwd -P)" -d)
@@ -988,18 +1043,7 @@ KERNELVERSION=$($XBPS_UHELPER_CMD getpkgversion ${_kver})
 if [ "$?" -ne "0" ]; then
 	die "Failed to find kernel package version"
 fi
-if ((MAKE_X)); then
-    if ((MAKE_XFCE_BASE)); then
-        : ${OUTPUT_FILE="void-live-xfce-base-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
-    elif ((MAKE_XFCE_CUSTOM)); then
-        : ${OUTPUT_FILE="void-live-xfce-custom-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
-    elif ((MAKE_AWESOME)); then
-        : ${OUTPUT_FILE="void-live-awesome-custom-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
-    fi
-else
-    : ${OUTPUT_FILE="void-live-base-custom-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
-fi
-
+: ${OUTPUT_FILE="void-live-$name-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
 print_step "Instalando software para gerar a imagem de disco..."
 install_prereqs
 
@@ -1035,7 +1079,11 @@ finish_clean
 print_step "Enabling services..."
 enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST}
 if ((MAKE_X)); then
-    : ${ADDITIONAL_SERVICE_LIST_BASE:=NetworkManager dbus elogind lxdm polkitd }
+    if ((MAKE_ENLIGHTENMENT)); then
+        : ${ADDITIONAL_SERVICE_LIST_BASE:=NetworkManager dbus lightdm polkitd }
+    else
+        : ${ADDITIONAL_SERVICE_LIST_BASE:=NetworkManager dbus elogind lxdm polkitd }
+    fi
    	enable_services ${ADDITIONAL_SERVICE_LIST_BASE}
     if ((MAKE_XFCE_CUSTOM)); then
     	: ${ADDITIONAL_SERVICE_LIST_FULL:=avahi-daemon bluetoothd cupsd irqbalance sshd uuidd }
