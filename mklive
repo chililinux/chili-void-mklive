@@ -82,7 +82,7 @@ sh_choose_packages() {
 	declare -g PROGNAME=$(basename "$0")
 	declare -g REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
 	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut-network openresolv"
-	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted tree htop rsync lynx parallel tmate gpm evtest"
+	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted tree htop rsync lynx parallel tmate gpm evtest acpi"
 	ADDITIONAL_PKGS+=" grub-void-theme"
 	ADDITIONAL_PKGS+=" xz zstd porg"
 	ADDITIONAL_PKGS+=" bc geoip geoipupdate iputils lvm2 cryptsetup"
@@ -103,7 +103,7 @@ sh_choose_packages_awesome() {
     ADDITIONAL_PKGS+=" awesome polybar"
     ADDITIONAL_PKGS+=" pcmanfm Thunar"
 	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
-	ADDITIONAL_PKGS+=" font-awesome noto-fonts-emoji"
+	ADDITIONAL_PKGS+=" font-awesome noto-fonts-emoji ttf-ubuntu-font-family font-iosevka nerd-fonts-symbols-ttf"
     ADDITIONAL_PKGS+=" Adapta"
     ADDITIONAL_PKGS+=" xfce4-terminal"
     ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
@@ -132,7 +132,7 @@ sh_choose_packages_enlightenment() {
     ADDITIONAL_PKGS+=" enlightenment efl exquisite"
     ADDITIONAL_PKGS+=" Thunar"
 	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
-	ADDITIONAL_PKGS+=" font-awesome noto-fonts-emoji"
+	ADDITIONAL_PKGS+=" noto-fonts-emoji ttf-ubuntu-font-family font-iosevka nerd-fonts-symbols-ttf"
     ADDITIONAL_PKGS+=" Adapta"
     ADDITIONAL_PKGS+=" xfce4-terminal terminology"
     ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
@@ -144,7 +144,6 @@ sh_choose_packages_enlightenment() {
     ADDITIONAL_PKGS+=" orca"
  	ADDITIONAL_PKGS+=" setxkbmap"
     ADDITIONAL_PKGS+=" numlockx"
-    ADDITIONAL_PKGS+=" nitrogen"
     ADDITIONAL_PKGS+=" evtest-qt"
     ADDITIONAL_PKGS+=" connman"
 	ADDITIONAL_PKGS+=" gparted"
@@ -865,7 +864,7 @@ set_config_distro() {
         title='Void Linux Xfce Custom'
         name='xfce-custom'
     else
-        title='Void Linux Custom'
+        title='Void Linux Base Custom'
         name='base-custom'
     fi
     print_step "Building ISO: ${yellow}$title${reset}"
@@ -1095,7 +1094,7 @@ if ((MAKE_X)); then
     	ADDITIONAL_SERVICE_LIST+=' avahi-daemon cupsd irqbalance sshd uuidd'
     fi
     if ((MAKE_ENLIGHTENMENT)); then
-    	ADDITIONAL_SERVICE_LIST+=' connmand'
+    	ADDITIONAL_SERVICE_LIST+=' connmand acpid'
     fi
    	enable_services ${ADDITIONAL_SERVICE_LIST}
 else # tty
