@@ -70,7 +70,7 @@ declare -gi MAKE_ENLIGHTENMENT
 #declare -gi KEEP_BUILDDIR=0
 declare -gi LBIND=0
 declare -gi QUIET=0
-declare -gi STEP_COUNT=23
+declare -gi STEP_COUNT=27
 declare -g title
 declare -g name
 readonly true=1
@@ -85,7 +85,7 @@ sh_choose_packages() {
 	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted tree htop rsync lynx parallel tmate gpm evtest acpi"
 	ADDITIONAL_PKGS+=" grub-void-theme"
 	ADDITIONAL_PKGS+=" xz zstd porg"
-	ADDITIONAL_PKGS+=" bc geoip geoipupdate iputils lvm2 cryptsetup"
+	ADDITIONAL_PKGS+=" bc geoip geoipupdate iputils lvm2 cryptsetup pigz"
 	ADDITIONAL_PKGS+=" xtools vpm vsv neofetch"
 	ADDITIONAL_PKGS+=" bash-completion"
 	#   ADDITIONAL_PKGS+=" wifi-firmware"
