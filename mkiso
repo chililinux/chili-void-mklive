@@ -66,15 +66,19 @@ declare -gi MAKE_X=0
 declare -gi MAKE_XFCE_BASE=0
 declare -gi MAKE_XFCE_CUSTOM=0
 declare -gi MAKE_AWESOME=0
-declare -gi MAKE_ENLIGHTENMENT
+declare -gi MAKE_ENLIGHTENMENT=0
+declare -gi MAKE_FLUXBOX=0
 #declare -gi KEEP_BUILDDIR=0
 declare -gi LBIND=0
 declare -gi QUIET=0
 declare -gi STEP_COUNT=27
+declare -g VOL_ID='VOID_LIVE'
 declare -g title
 declare -g name
 readonly true=1
 readonly false=0
+declare -g SQUASHFS_COMPRESSION=zstd
+declare -g INITRAM_COMPRESSION=zstd
 
 sh_choose_packages() {
     print_step "Selecionando pacotes essenciais"
@@ -109,6 +113,36 @@ sh_choose_packages_awesome() {
     ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
     ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
 #	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
+	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
+    ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
+    ADDITIONAL_PKGS+=" gnome-keyring"
+    ADDITIONAL_PKGS+=" orca"
+ 	ADDITIONAL_PKGS+=" setxkbmap"
+    ADDITIONAL_PKGS+=" numlockx"
+    ADDITIONAL_PKGS+=" nitrogen"
+    ADDITIONAL_PKGS+=" evtest-qt"
+	#login manager
+	ADDITIONAL_PKGS+=" lxdm lxdm-theme-vdojo"
+	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
+	#ADDITIONAL_PKGS+=" slim"
+	#ADDITIONAL_PKGS+=" lightdm"
+}
+
+sh_choose_packages_fluxbox() {
+    print_step "Selecionando pacotes X Fluxbox Custom"
+    #xorg
+    ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
+    #xfce
+    ADDITIONAL_PKGS+=" fluxbox polybar"
+    ADDITIONAL_PKGS+=" pcmanfm Thunar"
+	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
+	ADDITIONAL_PKGS+=" noto-fonts-emoji ttf-ubuntu-font-family font-iosevka nerd-fonts-symbols-ttf"
+    ADDITIONAL_PKGS+=" Adapta"
+    ADDITIONAL_PKGS+=" xfce4-terminal"
+    ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
+    ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
+#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
+	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
     ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
     ADDITIONAL_PKGS+=" gnome-keyring"
     ADDITIONAL_PKGS+=" orca"
@@ -769,7 +803,20 @@ generate_grub_efi_boot() {
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
+get_compression_options() {
+    local param
+    case $1 in
+        gzip) param=" -noappend -ef exclude_dir -comp gzip -Xcompression-level 1" ;;
+        xz)   param=" -noappend -ef exclude_dir -b 1048576 -comp xz -Xdict-size 100%" ;;
+        zstd) param=" -noappend -ef exclude_dir -b 1M -comp zstd -Xcompression-level 1" ;;
+        lzma) param=" -noappend -ef exclude_dir -b 1M -comp lzma" ;;
+        lz4)  param=" -noappend -ef exclude_dir -b 1M -comp lz4 -Xhc" ;;
+    esac
+    echo "$param"
+}
+
 generate_squashfs() {
+    local options=$(get_compression_options "$SQUASHFS_COMPRESSION")
 	umount_pseudofs
 	{
 		# Find out required size for the rootfs and create an ext3fs image off it.
@@ -783,8 +830,9 @@ generate_squashfs() {
 		umount -f "$BUILDDIR/tmp-rootfs"
 		mkdir -p "$IMAGEDIR/LiveOS"
 
+#			-comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
 		"$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR/tmp" "$IMAGEDIR/LiveOS/squashfs.img" \
-			-comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
+			"$options" || die "Failed to generate squashfs image"
 		chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
 
 		# Remove rootfs and temporary dirs, we don't need them anymore.
@@ -801,7 +849,7 @@ generate_iso_image() {
 			-iso-level 3 -rock -joliet \
 			-max-iso9660-filenames -omit-period \
 			-omit-version-number -relaxed-filenames -allow-lowercase \
-			-volid "VOID_LIVE" \
+			-volid "$VOL_ID" \
 			-eltorito-boot boot/isolinux/isolinux.bin \
 			-eltorito-catalog boot/isolinux/boot.cat \
 			-no-emul-boot -boot-load-size 4 -boot-info-table \
@@ -827,8 +875,8 @@ usage() {
                 -c <cachedir>      Use this XBPS cache directory (default: ./xbps-cachedir-<arch>)
                 -k <keymap>        Default keymap to use (default: us)
                 -l <locale>        Default locale to use (default: en_US.UTF-8)
-                -i <lz4|gzip|bzip2|xz> Compression type for the initramfs image (default: xz)
-                -s <gzip|lzo|xz>   Compression type for the squashfs image (default: xz)
+                -i <lz4|gzip|bzip2|xz|zstd|lzma|lzo> Compression type for the initramfs image (default: xz)
+                -s <lz4|gzip|bzip2|xz|zstd|lzma|lz4|lzo>   Compression type for the squashfs image (default: xz)
                 -o <file>          Output file name for the ISO image (default: automatic)
                 -p "<pkg> ..."     Install additional packages in the ISO image
                 -g "<pkg> ..."     Ignore packages when building the ISO image
@@ -845,6 +893,7 @@ usage() {
                 -Y                 Make XFCE iso custom.
                 -W                 Make AWESOME iso custom.
                 -E                 Make ENLIGHTNMENT iso custom.
+                -F                 Make FLUXBOX iso custom.
                 -Q                 Quiet mode (default: 0)
 
 	EOF
@@ -857,6 +906,9 @@ set_config_distro() {
     elif ((MAKE_AWESOME)); then
         title='Void Linux Awesome Custom'
         name='awesome-custom'
+    elif ((MAKE_FLUXBOX)); then
+        title='Void Linux Fluxbox Custom'
+        name='fluxfox-custom'
     elif ((MAKE_XFCE_BASE)); then
         title='Void Linux Xfce Base'
         name='xfce-base'
@@ -867,7 +919,11 @@ set_config_distro() {
         title='Void Linux Base Custom'
         name='base-custom'
     fi
-    print_step "Building ISO: ${yellow}$title${reset}"
+    print_step "Building ISO    => ${yellow}$title${reset}"
+    print_step "Output file ISO => ${yellow}$OUTPUT_FILE${reset}"
+    print_step "Compression SFS => ${yellow}$SQUASHFS_COMPRESSION${reset}"
+    print_step "Compression RAM => ${yellow}$INITRAM_COMPRESSION${reset}"
+    print_step "ISO LABEL       => ${yellow}$VOL_ID${reset}"
 }
 
 #
@@ -880,7 +936,7 @@ sh_setLanguage
 sh_checkDependencies
 sh_setAsciiLines
 
-while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEe" opt; do
+while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFf" opt; do
 	case $opt in
 	a) BASE_ARCH="$OPTARG" ;;
 	b) BASE_SYSTEM_PKG="$OPTARG" ;;
@@ -890,10 +946,10 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEe" opt; do
 	K) KEEP_BUILDDIR=1 ;;
 	k) KEYMAP="$OPTARG" ;;
 	l) LOCALE="$OPTARG" ;;
-	i) INITRAMFS_COMPRESSION="$OPTARG" ;;
 	I) INCLUDE_DIRS+=("$OPTARG") ;;
-	S) SERVICE_LIST="$SERVICE_LIST $OPTARG" ;;
+	i) INITRAMFS_COMPRESSION="$OPTARG" ;;
 	s) SQUASHFS_COMPRESSION="$OPTARG" ;;
+	S) SERVICE_LIST="$SERVICE_LIST $OPTARG" ;;
 	o) OUTPUT_FILE="$OPTARG" ;;
 	p) PACKAGE_LIST="$PACKAGE_LIST $OPTARG" ;;
 	C) BOOT_CMDLINE="$OPTARG" ;;
@@ -902,6 +958,7 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEe" opt; do
 	y|Y) MAKE_X=1; MAKE_XFCE_CUSTOM=1;;
 	w|W) MAKE_X=1; MAKE_AWESOME=1;;
 	e|E) MAKE_X=1; MAKE_ENLIGHTENMENT=1;;
+	f|F) MAKE_X=1; MAKE_FLUXBOX=1;;
     q|Q) QUIET=1 ;;
 	v) LINUX_VERSION="$OPTARG" ;;
 	V)
@@ -926,6 +983,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 set_config_distro
+
 sh_choose_packages
     if ((MAKE_X)); then
         if ((MAKE_ENLIGHTENMENT)); then
@@ -933,6 +991,9 @@ sh_choose_packages
         fi
         if ((MAKE_AWESOME)); then
             sh_choose_packages_awesome
+        fi
+        if ((MAKE_FLUXBOX)); then
+            sh_choose_packages_fluxbox
         fi
         if ((MAKE_XFCE_BASE)); then
             sh_choose_packages_xfce_base
@@ -969,8 +1030,8 @@ ARCH=$(xbps-uhelper arch)
 #: ${LOCALE:=en_US.UTF-8}
 : ${KEYMAP:=br-abnt2}
 : ${LOCALE:=pt_BR.UTF-8}
-: ${INITRAMFS_COMPRESSION:=xz}
-: ${SQUASHFS_COMPRESSION:=xz}
+: ${INITRAMFS_COMPRESSION:=zstd}
+: ${SQUASHFS_COMPRESSION:=zstd}
 : ${BASE_SYSTEM_PKG:=base-system}
 : ${BOOT_TITLE:="$title"}
 
