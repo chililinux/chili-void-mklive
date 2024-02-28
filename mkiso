@@ -36,6 +36,15 @@ export TEXTDOMAIN=void-install
 declare -gA Alanguage=([pt_BR]=0 [en_US]=1 [de_DE]=2 [fr_FR]=3 [es_ES]=4 [it_IT]=5)
 declare -gA Alocale=([0]=pt_BR [1]=en_US [2]=de_DE [3]=fr_FR [4]=es_ES [5]=it_IT)
 
+# Armazenar os aliases atuais em uma variável
+OLD_ALIASES=$(alias)
+
+# Armazenar os aliases atuais em uma variável
+OLD_ALIASES=$(alias)
+
+# Desativar todos os aliases
+unalias -a
+
 #debug
 export PS4='${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 #set -x
@@ -44,20 +53,24 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='1.0.26-20240226'
+readonly _VERSION_='1.0.27-20240227'
 readonly distro=$(uname -n)
 readonly DEPENDENCIES=(rsync sed cat cp umount losetup grep chroot mkfs.vfat tee)
 
+# Restaurar os aliases quando o script terminar
+trap "eval \"$OLD_ALIASES\"" EXIT
 trap 'error_out $? $LINENO' INT TERM 0
+
 umask 022
 declare -gi MAKE_X=0
 declare -gi MAKE_XFCE_BASE=0
 declare -gi MAKE_XFCE_CUSTOM=0
 declare -gi MAKE_AWESOME=0
 declare -gi MAKE_ENLIGHTENMENT
-declare -gi KEEP_BUILDDIR=0
+#declare -gi KEEP_BUILDDIR=0
 declare -gi LBIND=0
 declare -gi QUIET=0
+declare -gi STEP_COUNT=23
 declare -g title
 declare -g name
 readonly true=1
@@ -67,7 +80,7 @@ sh_choose_packages() {
     print_step "Selecionando pacotes essenciais"
 	declare -a INCLUDE_DIRS=()
 	declare -g PROGNAME=$(basename "$0")
-	declare -g REQUIRED_PKGS="linux xbps base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
+	declare -g REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
 	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut-network openresolv"
 	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted tree htop rsync lynx parallel tmate gpm evtest"
 	ADDITIONAL_PKGS+=" grub-void-theme"
@@ -116,28 +129,30 @@ sh_choose_packages_enlightenment() {
     #xorg
     ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
     #xfce
-    ADDITIONAL_PKGS+=" enlightenment polybar"
-    ADDITIONAL_PKGS+=" pcmanfm Thunar"
+    ADDITIONAL_PKGS+=" enlightenment efl exquisite"
+    ADDITIONAL_PKGS+=" Thunar"
 	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
 	ADDITIONAL_PKGS+=" font-awesome noto-fonts-emoji"
     ADDITIONAL_PKGS+=" Adapta"
-    ADDITIONAL_PKGS+=" xfce4-terminal"
+    ADDITIONAL_PKGS+=" xfce4-terminal terminology"
     ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
     ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
-#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
     ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
+#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
+	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
     ADDITIONAL_PKGS+=" gnome-keyring"
     ADDITIONAL_PKGS+=" orca"
  	ADDITIONAL_PKGS+=" setxkbmap"
     ADDITIONAL_PKGS+=" numlockx"
     ADDITIONAL_PKGS+=" nitrogen"
     ADDITIONAL_PKGS+=" evtest-qt"
+    ADDITIONAL_PKGS+=" connman"
+	ADDITIONAL_PKGS+=" gparted"
 	#login manager
-#	ADDITIONAL_PKGS+=" lxdm lxdm-theme-vdojo"
-	ADDITIONAL_PKGS+=" lightdm"
+	ADDITIONAL_PKGS+=" lxdm lxdm-theme-vdojo"
+#	ADDITIONAL_PKGS+=" lightdm"
 	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
 	#ADDITIONAL_PKGS+=" slim"
-	#ADDITIONAL_PKGS+=" lightdm"
 }
 
 sh_choose_packages_xfce_base() {
@@ -248,7 +263,6 @@ sh_diahora() {
 sh_setEnvironment() {
 	declare -g BOOTLOG="/tmp/void-mklive-$(sh_diahora).log"
 	declare -g LOGGER='/dev/tty8'
-	declare -gi STEP_COUNT=22
 
     # flag languages
     : PT_BR=0
@@ -452,21 +466,21 @@ install_prereqs() {
 }
 
 install_packages() {
-#    print_step "Running dry-run for packages list selected..."
-#	{
-#		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS
-#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-#	result="${PIPESTATUS[0]}"
-#	[ $result -ne 0 ] && die "Missing required binary packages, exiting..."
+    print_step "Running dry-run for packages list selected..."
+	{
+		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Missing required binary packages, exiting..."
 
 	mount_pseudofs
 
-    print_step "Atualizando pacotes void BASE INITRAMFS em $ROOTFS..."
-    {
-		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -Sf -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y xbps cryptsetup linux
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-	result="${PIPESTATUS[0]}"
-	[ $result -ne 0 ] && die "Failed to install $PACKAGE_LIST"
+#    print_step "Atualizando pacotes essenciais em $ROOTFS..."
+#    {
+#		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -Sf -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y xbps cryptsetup linux
+#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+#	result="${PIPESTATUS[0]}"
+#	[ $result -ne 0 ] && die "Failed to install $PACKAGE_LIST"
 
     print_step "Instalando pacotes void BASE INITRAMFS em $ROOTFS..."
     {
@@ -560,7 +574,7 @@ install_common() {
 
 	print_step "Copiando config-common into $ROOTFS/usr/"
 	{
-        rsync -a $common_path/ $ROOTFS/
+        rsync -a --copy-links $common_path/ $ROOTFS/
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
@@ -607,13 +621,12 @@ install_chili_apps() {
 }
 
 install_pacman() {
-	#sh_chroot_job "Ajustando instalador" 'cfile=/etc/skel/void-install.desktop; chmod +x $cfile; checksum=$(sha256sum $cfile | awk '{print "$1"}'); gio set $cfile metadata::xfce-exe-checksum $checksum; gio set $cfile metadata::trusted true;'
-	sh_chroot_job "Instalando pacman App" "/usr/bin/pacman -Sydd pacman-contrib brave-browser paru --noconfirm --overwrite \*"
-	if ((MAKE_XFCE_CUSTOM)); then
-		sh_chroot_job "Instalando Brave-Browser" "/usr/bin/pacman -Sdd brave-browser --noconfirm --overwrite \*"
-		sh_chroot_job "Instalando Google Chrome" "/usr/bin/paru -Sdd google-chrome --noconfirm --overwrite \*"
-	fi
-	sh_chroot_job "Removendo Cache" "/usr/bin/paccache -k0 -r -v"
+    sh_chroot_job "Instalando pacman App" "/usr/bin/pacman -Sydd pacman-contrib paru --noconfirm --overwrite \*"
+    if ((MAKE_X)); then
+        sh_chroot_job "Instalando Brave-Browser" "/usr/bin/pacman -Sdd brave-browser --noconfirm --overwrite \*"
+        sh_chroot_job "Instalando Google Chrome" "/usr/bin/paru -Sdd google-chrome --noconfirm --overwrite \*"
+    fi
+    sh_chroot_job "Removendo Cache" "/usr/bin/paccache -k0 -r -v"
 }
 
 reconfigure_packages() {
@@ -855,6 +868,7 @@ set_config_distro() {
         title='Void Linux Custom'
         name='base-custom'
     fi
+    print_step "Building ISO: ${yellow}$title${reset}"
 }
 
 #
@@ -914,7 +928,6 @@ fi
 
 set_config_distro
 sh_choose_packages
-if [[ $KEEP_BUILDDIR -eq 0 ]]; then
     if ((MAKE_X)); then
         if ((MAKE_ENLIGHTENMENT)); then
             sh_choose_packages_enlightenment
@@ -930,7 +943,6 @@ if [[ $KEEP_BUILDDIR -eq 0 ]]; then
             sh_choose_packages_xfce_custom
         fi
     fi
-fi
 
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://void.chililinux.com/voidlinux/current"
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://100.97.0.15:92/voidlinux/current --repository=http://100.97.0.15:92/voidlinux/current/extras"
@@ -1077,26 +1089,24 @@ finish_clean
 
 : ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd dhcpcd}
 print_step "Enabling services..."
-enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST}
 if ((MAKE_X)); then
-    if ((MAKE_ENLIGHTENMENT)); then
-        : ${ADDITIONAL_SERVICE_LIST_BASE:=NetworkManager dbus lightdm polkitd }
-    else
-        : ${ADDITIONAL_SERVICE_LIST_BASE:=NetworkManager dbus elogind lxdm polkitd }
-    fi
-   	enable_services ${ADDITIONAL_SERVICE_LIST_BASE}
+    : ${ADDITIONAL_SERVICE_LIST:=NetworkManager dbus elogind lxdm polkitd bluetoothd}
     if ((MAKE_XFCE_CUSTOM)); then
-    	: ${ADDITIONAL_SERVICE_LIST_FULL:=avahi-daemon bluetoothd cupsd irqbalance sshd uuidd }
-    	enable_services ${ADDITIONAL_SERVICE_LIST_FULL}
+    	ADDITIONAL_SERVICE_LIST+=' avahi-daemon cupsd irqbalance sshd uuidd'
     fi
+    if ((MAKE_ENLIGHTENMENT)); then
+    	ADDITIONAL_SERVICE_LIST+=' connmand'
+    fi
+   	enable_services ${ADDITIONAL_SERVICE_LIST}
 else # tty
-    : ${ADDITIONAL_SERVICE_LIST_BASE:=gpm}
-    enable_services ${ADDITIONAL_SERVICE_LIST_BASE}
+    ADDITIONAL_SERVICE_LIST+=' gpm'
+    enable_services ${ADDITIONAL_SERVICE_LIST}
 fi
+enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST} ${ADDITIONAL_SERVICE_LIST}
 
 if [ "${#INCLUDE_DIRS[@]}" -gt 0 ]; then
-	print_step "Copying directory structures into the rootfs ..."
-	copy_include_directories
+    print_step "Copying directory structures into the rootfs ..."
+    copy_include_directories
 fi
 
 print_step "Generating initramfs image ($INITRAMFS_COMPRESSION)..."
