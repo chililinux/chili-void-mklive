@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='1.0.27-20240227'
+readonly _VERSION_='1.0.28-20240228'
 readonly distro=$(uname -n)
 readonly DEPENDENCIES=(rsync sed cat cp umount losetup grep chroot mkfs.vfat tee)
 
@@ -68,6 +68,9 @@ declare -gi MAKE_XFCE_CUSTOM=0
 declare -gi MAKE_AWESOME=0
 declare -gi MAKE_ENLIGHTENMENT=0
 declare -gi MAKE_FLUXBOX=0
+declare -gi MAKE_KDE=0
+declare -gi MAKE_GNOME=0
+declare -gi MAKE_FULL_X=0
 #declare -gi KEEP_BUILDDIR=0
 declare -gi LBIND=0
 declare -gi QUIET=0
@@ -77,16 +80,20 @@ declare -g title
 declare -g name
 readonly true=1
 readonly false=0
-declare -g SQUASHFS_COMPRESSION=zstd
-declare -g INITRAM_COMPRESSION=zstd
+declare -g SQUASHFS_COMPRESSION=xz
+declare -g INITRAM_COMPRESSION=xz
 
-sh_choose_packages() {
+sh_choose_packages_base() {
     print_step "Selecionando pacotes essenciais"
 	declare -a INCLUDE_DIRS=()
 	declare -g PROGNAME=$(basename "$0")
 	declare -g REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
 	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut-network openresolv"
-	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted tree htop rsync lynx parallel tmate gpm evtest acpi"
+	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano vim parted"
+	#--repository=https://chililinux.com/void/current
+    ADDITIONAL_PKGS+=" duf dfc nano-syntax-highlighting"
+    ADDITIONAL_PKGS+=" btop htop"
+    ADDITIONAL_PKGS+=" tree rsync lynx parallel tmate gpm evtest acpi"
 	ADDITIONAL_PKGS+=" grub-void-theme"
 	ADDITIONAL_PKGS+=" xz zstd porg"
 	ADDITIONAL_PKGS+=" bc geoip geoipupdate iputils lvm2 cryptsetup pigz"
@@ -94,126 +101,92 @@ sh_choose_packages() {
 	ADDITIONAL_PKGS+=" bash-completion"
 	#   ADDITIONAL_PKGS+=" wifi-firmware"
 	#   ADDITIONAL_PKGS+=" rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
-	ADDITIONAL_PKGS+=" pacman"
 	ADDITIONAL_PKGS+=" cifs-utils ntfs-3g"
 	ADDITIONAL_PKGS+=" bubblewrap"
+#	#pacman
+	ADDITIONAL_PKGS+=" pacman fakeroot bsdtar"
+}
+
+sh_choose_packages_common_X() {
+    print_step "Selecionando pacotes X Common"
+    #xorg
+    ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 dbus-elogind polkit-elogind xdg-user-dirs xrdb"
+    #file manager
+    ADDITIONAL_PKGS+=" Thunar"
+    #browser
+	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
+	#fonts
+	ADDITIONAL_PKGS+=" noto-fonts-emoji ttf-ubuntu-font-family font-iosevka nerd-fonts-symbols-ttf"
+	#themes
+    ADDITIONAL_PKGS+=" Adapta"
+    #network
+    ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
+    #terminal
+    ADDITIONAL_PKGS+=" xfce4-terminal"
+	ADDITIONAL_PKGS+=" cool-retro-term"
+    #bluetooth
+	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
+    #audio
+    ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
+    ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
+#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
+    ADDITIONAL_PKGS+=" gnome-keyring"
+    ADDITIONAL_PKGS+=" orca"
+ 	ADDITIONAL_PKGS+=" setxkbmap"
+    ADDITIONAL_PKGS+=" numlockx"
+    ADDITIONAL_PKGS+=" nitrogen"
+    ADDITIONAL_PKGS+=" evtest-qt"
+	ADDITIONAL_PKGS+=" gparted"
+    ADDITIONAL_PKGS+=" connman"
+	ADDITIONAL_PKGS+=" inxi"
+	ADDITIONAL_PKGS+=" octoxbps"
+	#login manager
+	ADDITIONAL_PKGS+=" lxdm lxdm-theme-vdojo"
+	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
+	#ADDITIONAL_PKGS+=" slim"
+	#ADDITIONAL_PKGS+=" lightdm"
 }
 
 sh_choose_packages_awesome() {
-    print_step "Selecionando pacotes X Awesome Custom"
-    #xorg
-    ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
-    #xfce
+    print_step "Selecionando pacotes Awesome Custom"
+    #awesome
     ADDITIONAL_PKGS+=" awesome polybar"
-    ADDITIONAL_PKGS+=" pcmanfm Thunar"
-	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
-	ADDITIONAL_PKGS+=" font-awesome noto-fonts-emoji ttf-ubuntu-font-family font-iosevka nerd-fonts-symbols-ttf"
-    ADDITIONAL_PKGS+=" Adapta"
-    ADDITIONAL_PKGS+=" xfce4-terminal"
-    ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
-    ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
-#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
-	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
-    ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
-    ADDITIONAL_PKGS+=" gnome-keyring"
-    ADDITIONAL_PKGS+=" orca"
- 	ADDITIONAL_PKGS+=" setxkbmap"
-    ADDITIONAL_PKGS+=" numlockx"
-    ADDITIONAL_PKGS+=" nitrogen"
-    ADDITIONAL_PKGS+=" evtest-qt"
-	#login manager
-	ADDITIONAL_PKGS+=" lxdm lxdm-theme-vdojo"
-	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
-	#ADDITIONAL_PKGS+=" slim"
-	#ADDITIONAL_PKGS+=" lightdm"
+    ADDITIONAL_PKGS+=" pcmanfm"
+    ADDITIONAL_PKGS+=" font-awesome"
+}
+
+sh_choose_packages_kde() {
+    print_step "Selecionando pacotes Kde Custom"
+    #kde5
+    ADDITIONAL_PKGS+=" kde5"
+}
+
+sh_choose_packages_gnome() {
+    print_step "Selecionando pacotes Gnome Custom"
+    #gnome
+    ADDITIONAL_PKGS+=" gnome"
 }
 
 sh_choose_packages_fluxbox() {
-    print_step "Selecionando pacotes X Fluxbox Custom"
-    #xorg
-    ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
-    #xfce
+    print_step "Selecionando pacotes Fluxbox Custom"
+    #fluxbox
     ADDITIONAL_PKGS+=" fluxbox polybar"
-    ADDITIONAL_PKGS+=" pcmanfm Thunar"
-	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
-	ADDITIONAL_PKGS+=" noto-fonts-emoji ttf-ubuntu-font-family font-iosevka nerd-fonts-symbols-ttf"
-    ADDITIONAL_PKGS+=" Adapta"
-    ADDITIONAL_PKGS+=" xfce4-terminal"
-    ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
-    ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
-#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
-	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
-    ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
-    ADDITIONAL_PKGS+=" gnome-keyring"
-    ADDITIONAL_PKGS+=" orca"
- 	ADDITIONAL_PKGS+=" setxkbmap"
-    ADDITIONAL_PKGS+=" numlockx"
-    ADDITIONAL_PKGS+=" nitrogen"
-    ADDITIONAL_PKGS+=" evtest-qt"
-	#login manager
-	ADDITIONAL_PKGS+=" lxdm lxdm-theme-vdojo"
-	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
-	#ADDITIONAL_PKGS+=" slim"
-	#ADDITIONAL_PKGS+=" lightdm"
+    ADDITIONAL_PKGS+=" pcmanfm"
 }
 
 sh_choose_packages_enlightenment() {
-    title='Void Linux Enlightenment Custom'
-    print_step "Selecionando pacotes X Enlightenment Custom"
-    #xorg
-    ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
-    #xfce
+    print_step "Selecionando pacotes Enlightenment Custom"
+    #enlightenment
     ADDITIONAL_PKGS+=" enlightenment efl exquisite"
-    ADDITIONAL_PKGS+=" Thunar"
-	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
-	ADDITIONAL_PKGS+=" noto-fonts-emoji ttf-ubuntu-font-family font-iosevka nerd-fonts-symbols-ttf"
-    ADDITIONAL_PKGS+=" Adapta"
-    ADDITIONAL_PKGS+=" xfce4-terminal terminology"
-    ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
-    ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
-    ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
-#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
-	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
-    ADDITIONAL_PKGS+=" gnome-keyring"
-    ADDITIONAL_PKGS+=" orca"
- 	ADDITIONAL_PKGS+=" setxkbmap"
-    ADDITIONAL_PKGS+=" numlockx"
-    ADDITIONAL_PKGS+=" evtest-qt"
-    ADDITIONAL_PKGS+=" connman"
-	ADDITIONAL_PKGS+=" gparted"
-	#login manager
-	ADDITIONAL_PKGS+=" lxdm lxdm-theme-vdojo"
-#	ADDITIONAL_PKGS+=" lightdm"
-	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
-	#ADDITIONAL_PKGS+=" slim"
 }
 
 sh_choose_packages_xfce_base() {
-    title='Void Linux XFCE Base'
     print_step "Selecionando pacotes XFCE Base"
-    #xorg
-    ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 dbus-elogind polkit-elogind xdg-user-dirs xrdb"
-    #xfce
     ADDITIONAL_PKGS+=" xfce4"
 	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
-	ADDITIONAL_PKGS+=" noto-fonts-emoji"
-    ADDITIONAL_PKGS+=" Adapta"
-    ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
-    ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
-#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
-    ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
-    ADDITIONAL_PKGS+=" gnome-keyring"
-    ADDITIONAL_PKGS+=" orca"
-    ADDITIONAL_PKGS+=" evtest-qt"
-	#login manager
-	ADDITIONAL_PKGS+=" lxdm lxdm-theme-vdojo"
-	#ADDITIONAL_PKGS+=" lxappearance lxinput lxrandr lxtask"
-	#ADDITIONAL_PKGS+=" slim"
-	#ADDITIONAL_PKGS+=" lightdm"
 }
 
 sh_choose_packages_xfce_custom() {
-    title='Void Linux XFCE Custom'
     print_step "Selecionando pacotes XFCE Custom"
 	ADDITIONAL_PKGS+=" xfce4-screenshooter xfce4-dict"
     ADDITIONAL_PKGS+=" xfce4-battery-plugin"
@@ -237,40 +210,27 @@ sh_choose_packages_xfce_custom() {
  	ADDITIONAL_PKGS+=" xfce4-wavelan-plugin"
     ADDITIONAL_PKGS+=" xfce4-xkb-plugin"
     ADDITIONAL_PKGS+=" xfce4-plugins"
- 	ADDITIONAL_PKGS+=" setxkbmap"
-    ADDITIONAL_PKGS+=" numlockx"
-    ADDITIONAL_PKGS+=" nitrogen"
     ADDITIONAL_PKGS+=" mate-notification-daemon"
+	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
  	ADDITIONAL_PKGS+=" plank"
 	ADDITIONAL_PKGS+=" adwaita-icon-theme"
-	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
-	ADDITIONAL_PKGS+=" cool-retro-term"
 	ADDITIONAL_PKGS+=" xarchiver unrar zip unzip 7zip p7zip bzip2 file-roller"
-	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
-##  ADDITIONAL_PKGS+=" pcmanfm"
 #	#ADDITIONAL_PKGS+=" fonts-roboto-ttf liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font font-emoji-one-color google-fonts-ttf"
-	ADDITIONAL_PKGS+=" noto-fonts-emoji ttf-ubuntu-font-family font-iosevka nerd-fonts-symbols-ttf"
 	ADDITIONAL_PKGS+=" avahi irqbalance"
 	ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver"
     ADDITIONAL_PKGS+=" brother-brlaser cups-pdf"
 	ADDITIONAL_PKGS+=" gvfs gvfs-smb gvfs-cdda inetutils iputils"
 #	#ADDITIONAL_PKGS+=" lxterminal rxvt-unicode"
-	ADDITIONAL_PKGS+=" nano vim"
-	ADDITIONAL_PKGS+=" nano-syntax-highlighting"
-	ADDITIONAL_PKGS+=" gparted"
 	ADDITIONAL_PKGS+=" bat"
 	ADDITIONAL_PKGS+=" vlc celluloid"
 	ADDITIONAL_PKGS+=" evince"
 	ADDITIONAL_PKGS+=" mate-calc cmatrix xkill menulibre mugshot ocs-url"
 	ADDITIONAL_PKGS+=" nvme-cli"
-	ADDITIONAL_PKGS+=" inxi"
-	ADDITIONAL_PKGS+=" evtest-qt"
-#
+	ADDITIONAL_PKGS+=" remmina remmina-kwallet"
+
 #	#office
 	ADDITIONAL_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
 #
-#	#pacman
-	ADDITIONAL_PKGS+=" pacman fakeroot bsdtar octoxbps"
 }
 
 debug() {
@@ -424,8 +384,11 @@ info_msg() {
 }
 
 print_step() {
+    local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
+    local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
+    local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
 	CURRENT_STEP=$((CURRENT_STEP + 1))
-	info_msg "$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
+	info_msg "$script_name1=>$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
 }
 
 mount_pseudofs() {
@@ -483,6 +446,10 @@ copy_void_keys() {
 copy_dracut_files() {
 	mkdir -p "$1"/usr/lib/dracut/modules.d/01vmklive
 	cp dracut/vmklive/* "$1"/usr/lib/dracut/modules.d/01vmklive/
+	# autologin none
+	if ((MAKE_FULL_X)); then
+		touch "$1"/usr/lib/dracut/modules.d/01vmklive/noautologin
+	fi
 }
 
 copy_autoinstaller_files() {
@@ -515,14 +482,14 @@ install_packages() {
 #	result="${PIPESTATUS[0]}"
 #	[ $result -ne 0 ] && die "Failed to install $PACKAGE_LIST"
 
-    print_step "Instalando pacotes void BASE INITRAMFS em $ROOTFS..."
+    print_step "Instalando void meta pkgs BASE INITRAMFS em $ROOTFS..."
     {
 		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $PACKAGE_LIST $INITRAMFS_PKGS
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	result="${PIPESTATUS[0]}"
 	[ $result -ne 0 ] && die "Failed to install $PACKAGE_LIST"
 
-    print_step "Instalando void pkgs ADDITIONAL em rootfs..."
+    print_step "Instalando void meta pkgs ADDITIONAL em rootfs..."
     {
 		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $ADDITIONAL_PKGS
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
@@ -553,104 +520,143 @@ get_conf_path() {
     echo "$path"
 }
 
-install_skel() {
-    local path=$(get_conf_path)
+install_skel_user() {
+    local path
 
-	#skel
-	print_step "Copiando skel into $ROOTFS/etc/skel"
-	{
-		[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
-		cp -Rpva $path/etc/. "$ROOTFS/etc/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    #skel
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+           	print_step "Copiando user skel de ${cyan}$path${reset} into $ROOTFS/etc/skel"
+        	{
+        		[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
+        		cp -Rpva $path/etc/. "$ROOTFS/etc/"
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
+}
 
-	print_step "Copiando configuracoes into $ROOTFS/root/"
-	{
-		cp -Rpva $path/etc/skel/.bash* $ROOTFS/root/
-		cp -Rpva $path/etc/skel/.git-prompt.sh $ROOTFS/root/
-		cp -Rpva $path/etc/skel/.dircolors $ROOTFS/root/
-		rsync -a $path/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+install_skel_root() {
+    local path='config-common'
+
+    #skel root
+	if [[ -d "$path" ]]; then
+		print_step "Copiando root skel de ${cyan}$path${reset} para $ROOTFS/root/"
+		{
+      		cp -Rpva $path/etc/skel/.bash* $ROOTFS/root/
+       		cp -Rpva $path/etc/skel/.git-prompt.sh $ROOTFS/root/
+       		cp -Rpva $path/etc/skel/.dircolors $ROOTFS/root/
+       		rsync -a $path/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/
+		} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	fi
 }
 
 install_wallpapers() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando wallpapers into $ROOTFS/usr/share/backgrounds"
-	{
-		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-		cp -Rpva $path/usr/share/backgrounds -t "$ROOTFS/usr/share/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+        	print_step "Copiando wallpapers from $path into $ROOTFS/usr/share/backgrounds"
+	        {
+		        [ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
+        		cp -Rpva $path/usr/share/backgrounds -t "$ROOTFS/usr/share/"
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_installer() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando installer into $ROOTFS/usr/share/applications"
-	{
-		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-		cp -Rpva $path/usr/share/applications -t "$ROOTFS/usr/share/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+        	print_step "Copiando installer from $path into $ROOTFS/usr/share/applications"
+     	    {
+        		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
+        		cp -Rpva $path/usr/share/applications -t "$ROOTFS/usr/share/"
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_usr() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando /usr into $ROOTFS/usr/"
-	{
-		[ -d "$ROOTFS/usr" ] && mkdir -p "$ROOTFS"/usr/
-		rsync -a $path/usr/ $ROOTFS/usr/
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+           	print_step "Copiando /usr from $path into $ROOTFS/usr/"
+    	    {
+	    	    [ -d "$ROOTFS/usr" ] && mkdir -p "$ROOTFS"/usr/
+    		    rsync -a $path/usr/ $ROOTFS/usr/
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_common() {
     local common_path='config-common'
 
-	print_step "Copiando config-common into $ROOTFS/usr/"
+	print_step "Copiando config-common para $ROOTFS/"
 	{
         rsync -a --copy-links $common_path/ $ROOTFS/
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_themes() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando temas into $ROOTFS/usr/share/themes"
-	{
-		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-		cp -Rpva $path/usr/share/themes -t "$ROOTFS/usr/share/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+        	print_step "Copiando themes from $path into $ROOTFS/usr/share/themes"
+	        {
+    	    	[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
+        		cp -Rpva $path/usr/share/themes -t "$ROOTFS/usr/share/"
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_icons() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando icones into $ROOTFS/usr/share/icons"
-	{
-		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-		cp -Rpva $path/usr/share/icons -t "$ROOTFS/usr/share/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+        	print_step "Copiando icons from $path into $ROOTFS/usr/share/icons"
+        	{
+    	    	[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
+    		    cp -Rpva $path/usr/share/icons -t "$ROOTFS/usr/share/"
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_grub_themes() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando grub themes into $ROOTFS/boot/grub/themes"
-	{
-		[ -d "$ROOTFS/boot/grub/themes/" ] && mkdir -p "$ROOTFS"/boot/grub/
-		cp -Rpva $path/boot/grub/themes -t "$ROOTFS/boot/grub/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+        	print_step "Copiando grub themes from $path into $ROOTFS/boot/grub/themes"
+        	{
+    	    	[ -d "$ROOTFS/boot/grub/themes/" ] && mkdir -p "$ROOTFS"/boot/grub/
+    	    	cp -Rpva $path/boot/grub/themes -t "$ROOTFS/boot/grub/"
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_chili_apps() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando aplicativos into $ROOTFS/usr/bin"
-	{
-		[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/
-		for x in $path/usr/bin/*; do
-			install -Dm755 $x "$ROOTFS"/usr/bin/
-		done
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+        	print_step "Copiando apps binarios de $path para $ROOTFS/usr/bin"
+        	{
+	        	[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/
+    		    for x in $path/usr/bin/*; do
+        			install -Dm755 $x "$ROOTFS"/usr/bin/
+        		done
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_pacman() {
@@ -817,6 +823,7 @@ get_compression_options() {
 
 generate_squashfs() {
     local options=$(get_compression_options "$SQUASHFS_COMPRESSION")
+
 	umount_pseudofs
 	{
 		# Find out required size for the rootfs and create an ext3fs image off it.
@@ -830,9 +837,9 @@ generate_squashfs() {
 		umount -f "$BUILDDIR/tmp-rootfs"
 		mkdir -p "$IMAGEDIR/LiveOS"
 
-#			-comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
+#       "$options" || die "Failed to generate squashfs image"
 		"$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR/tmp" "$IMAGEDIR/LiveOS/squashfs.img" \
-			"$options" || die "Failed to generate squashfs image"
+			-comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
 		chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
 
 		# Remove rootfs and temporary dirs, we don't need them anymore.
@@ -894,27 +901,57 @@ usage() {
                 -W                 Make AWESOME iso custom.
                 -E                 Make ENLIGHTNMENT iso custom.
                 -F                 Make FLUXBOX iso custom.
+                -A                 Make ALL X iso custom.
+                -G                 Make GNOME X iso custom.
+                -P                 Make KDE PLASM X iso custom.
                 -Q                 Quiet mode (default: 0)
 
 	EOF
 }
 
 set_config_distro() {
-    if ((MAKE_ENLIGHTENMENT)); then
+    declare -ga name
+
+    if ((MAKE_FULL_X)); then
+        title='Void Linux Full X Custom'
+        name='fullx-custom'
+        aname=( config-fullx-custom
+                config-enlightenment-custom
+                config-awesome-custom
+                config-fluxbox-custom
+                config-xfce-base
+                config-xfce-custom
+                config-kde-custom
+                config-gnome-custom)
+    elif ((MAKE_ENLIGHTENMENT)); then
         title='Void Linux Enlightenment Custom'
         name='enlightenment-custom'
+        aname=('config-enlightenment-custom')
+        aname=('config-enlightenment-custom')
     elif ((MAKE_AWESOME)); then
         title='Void Linux Awesome Custom'
         name='awesome-custom'
+        aname=('config-awesome-custom')
     elif ((MAKE_FLUXBOX)); then
         title='Void Linux Fluxbox Custom'
         name='fluxfox-custom'
+        aname=('config-fluxbox-custom')
+    elif ((MAKE_KDE)); then
+        title='Void Linux Kde Custom'
+        name='kde-custom'
+        aname=('config-kde-custom')
+    elif ((MAKE_GNOME)); then
+        title='Void Linux Gnome Custom'
+        name='gnome-custom'
+        aname=('config-gnome-custom')
     elif ((MAKE_XFCE_BASE)); then
         title='Void Linux Xfce Base'
         name='xfce-base'
+        aname=('config-xfce-base')
     elif ((MAKE_XFCE_CUSTOM)); then
         title='Void Linux Xfce Custom'
         name='xfce-custom'
+        aname=('config-xfce-custom')
     else
         title='Void Linux Base Custom'
         name='base-custom'
@@ -936,7 +973,7 @@ sh_setLanguage
 sh_checkDependencies
 sh_setAsciiLines
 
-while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFf" opt; do
+while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFfAGP" opt; do
 	case $opt in
 	a) BASE_ARCH="$OPTARG" ;;
 	b) BASE_SYSTEM_PKG="$OPTARG" ;;
@@ -959,6 +996,9 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFf" opt; do
 	w|W) MAKE_X=1; MAKE_AWESOME=1;;
 	e|E) MAKE_X=1; MAKE_ENLIGHTENMENT=1;;
 	f|F) MAKE_X=1; MAKE_FLUXBOX=1;;
+	G)   MAKE_X=1; MAKE_GNOME=1;;
+	P)   MAKE_X=1; MAKE_KDE=1;;
+	A)   MAKE_X=1; MAKE_FULL_X=1;;
     q|Q) QUIET=1 ;;
 	v) LINUX_VERSION="$OPTARG" ;;
 	V)
@@ -983,26 +1023,33 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 set_config_distro
-
-sh_choose_packages
-    if ((MAKE_X)); then
-        if ((MAKE_ENLIGHTENMENT)); then
-            sh_choose_packages_enlightenment
-        fi
-        if ((MAKE_AWESOME)); then
-            sh_choose_packages_awesome
-        fi
-        if ((MAKE_FLUXBOX)); then
-            sh_choose_packages_fluxbox
-        fi
-        if ((MAKE_XFCE_BASE)); then
-            sh_choose_packages_xfce_base
-        fi
-        if ((MAKE_XFCE_CUSTOM)); then
-            sh_choose_packages_xfce_base
-            sh_choose_packages_xfce_custom
-        fi
-    fi
+sh_choose_packages_base
+if (( MAKE_FULL_X)); then
+	STEP_COUNT=59
+    sh_choose_packages_common_X
+    sh_choose_packages_awesome
+    sh_choose_packages_enlightenment
+    sh_choose_packages_fluxbox
+    sh_choose_packages_xfce_base
+    sh_choose_packages_xfce_custom
+    sh_choose_packages_gnome
+    sh_choose_packages_kde
+elif ((MAKE_ENLIGHTENMENT)); then
+    sh_choose_packages_enlightenment
+elif ((MAKE_AWESOME)); then
+    sh_choose_packages_awesome
+elif ((MAKE_FLUXBOX)); then
+    sh_choose_packages_fluxbox
+elif ((MAKE_KDE)); then
+    sh_choose_packages_kde
+elif ((MAKE_GNOME)); then
+    sh_choose_packages_gnome
+elif ((MAKE_XFCE_BASE)); then
+    sh_choose_packages_xfce_base
+elif ((MAKE_XFCE_CUSTOM)); then
+    sh_choose_packages_xfce_base
+    sh_choose_packages_xfce_custom
+fi
 
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://void.chililinux.com/voidlinux/current"
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://100.97.0.15:92/voidlinux/current --repository=http://100.97.0.15:92/voidlinux/current/extras"
@@ -1016,6 +1063,7 @@ XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-fastly.voidlinux.org
  --repository=https://repo-fastly.voidlinux.org/current/nonfree""\
  --repository=https://repo-fastly.voidlinux.org/current/multilib""\
  --repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree""\
+ --repository=https://chililinux.com/void/current""\
  --repository=/home/vcatafesta/github/void-packages/hostdir/binpkgs"
 
 # Configure dracut to use overlayfs for the writable overlay.
@@ -1030,8 +1078,8 @@ ARCH=$(xbps-uhelper arch)
 #: ${LOCALE:=en_US.UTF-8}
 : ${KEYMAP:=br-abnt2}
 : ${LOCALE:=pt_BR.UTF-8}
-: ${INITRAMFS_COMPRESSION:=zstd}
-: ${SQUASHFS_COMPRESSION:=zstd}
+: ${INITRAMFS_COMPRESSION:=xz}
+: ${SQUASHFS_COMPRESSION:=xz}
 : ${BASE_SYSTEM_PKG:=base-system}
 : ${BOOT_TITLE:="$title"}
 
@@ -1062,7 +1110,7 @@ BOOT_DIR="$IMAGEDIR/boot"
 ISOLINUX_DIR="$BOOT_DIR/isolinux"
 GRUB_DIR="$BOOT_DIR/grub"
 ISOLINUX_CFG="$ISOLINUX_DIR/isolinux.cfg"
-CURRENT_STEP=0
+#CURRENT_STEP=0
 #STEP_COUNT=16
 
 [ "${#INCLUDE_DIRS[@]}" -gt 0 ] && STEP_COUNT=$((STEP_COUNT + 1))
@@ -1079,12 +1127,6 @@ CURRENT_STEP=0
 : ${XBPS_RECONFIGURE_CMD:=xbps-reconfigure}
 
 mkdir -p "$ROOTFS" "$VOIDHOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR"
-
-sh_monitor() {
-    if [ $QUIET -eq 1 ]; then
-        tee -i -a "$BOOTLOG" >$LOGGER
-    fi
-}
 
 print_step "Sincronizando dados do repositório XBPS..."
 {
@@ -1130,9 +1172,11 @@ fi
 
 print_step "Instalando pacotes void em $ROOTFS..."
 install_packages
-install_skel
+install_skel_user
+install_skel_root
 if ((MAKE_X)); then
-    install_installer
+#   install_installer
+    :
 fi
 if ((MAKE_XFCE_CUSTOM)); then
     install_wallpapers
@@ -1141,27 +1185,22 @@ if ((MAKE_XFCE_CUSTOM)); then
 fi
 install_usr
 install_common
-install_chili_apps
-install_grub_themes
+#install_chili_apps
+#install_grub_themes
 reconfigure_packages
 install_pacman
 finish_clean
 
 : ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd dhcpcd}
-print_step "Enabling services..."
 if ((MAKE_X)); then
-    : ${ADDITIONAL_SERVICE_LIST:=NetworkManager dbus elogind lxdm polkitd bluetoothd}
+    : ${ADDITIONAL_SERVICE_LIST:=NetworkManager dbus elogind lxdm polkitd bluetoothd connmand acpid}
     if ((MAKE_XFCE_CUSTOM)); then
     	ADDITIONAL_SERVICE_LIST+=' avahi-daemon cupsd irqbalance sshd uuidd'
     fi
-    if ((MAKE_ENLIGHTENMENT)); then
-    	ADDITIONAL_SERVICE_LIST+=' connmand acpid'
-    fi
-   	enable_services ${ADDITIONAL_SERVICE_LIST}
 else # tty
     ADDITIONAL_SERVICE_LIST+=' gpm'
-    enable_services ${ADDITIONAL_SERVICE_LIST}
 fi
+print_step "Enabling services... ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST} ${ADDITIONAL_SERVICE_LIST}"
 enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST} ${ADDITIONAL_SERVICE_LIST}
 
 if [ "${#INCLUDE_DIRS[@]}" -gt 0 ]; then

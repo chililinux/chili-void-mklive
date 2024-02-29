@@ -24,7 +24,9 @@ install() {
     fi
 
     inst_hook pre-pivot 01 "$moddir/adduser.sh"
-    inst_hook pre-pivot 02 "$moddir/display-manager-autologin.sh"
+    if [ ! -e /usr/lib/dracut/modules.d/01vmklive/noautologin ]; then
+	    inst_hook pre-pivot 02 "$moddir/display-manager-autologin.sh"
+    fi
     inst_hook pre-pivot 02 "$moddir/getty-serial.sh"
     inst_hook pre-pivot 03 "$moddir/locale.sh"
     inst_hook pre-pivot 04 "$moddir/repository.sh"

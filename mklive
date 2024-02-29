@@ -68,6 +68,7 @@ declare -gi MAKE_XFCE_CUSTOM=0
 declare -gi MAKE_AWESOME=0
 declare -gi MAKE_ENLIGHTENMENT=0
 declare -gi MAKE_FLUXBOX=0
+declare -gi MAKE_FULL_X=0
 #declare -gi KEEP_BUILDDIR=0
 declare -gi LBIND=0
 declare -gi QUIET=0
@@ -77,8 +78,8 @@ declare -g title
 declare -g name
 readonly true=1
 readonly false=0
-declare -g SQUASHFS_COMPRESSION=zstd
-declare -g INITRAM_COMPRESSION=zstd
+declare -g SQUASHFS_COMPRESSION=xz
+declare -g INITRAM_COMPRESSION=xz
 
 sh_choose_packages() {
     print_step "Selecionando pacotes essenciais"
@@ -554,52 +555,68 @@ get_conf_path() {
 }
 
 install_skel() {
-    local path=$(get_conf_path)
+    local path
 
-	#skel
-	print_step "Copiando skel into $ROOTFS/etc/skel"
-	{
-		[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
-		cp -Rpva $path/etc/. "$ROOTFS/etc/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    #skel
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+           	print_step "Copiando skel from ${cyan}$path${reset} into $ROOTFS/etc/skel"
+        	{
+        		[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
+        		cp -Rpva $path/etc/. "$ROOTFS/etc/"
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 
-	print_step "Copiando configuracoes into $ROOTFS/root/"
-	{
-		cp -Rpva $path/etc/skel/.bash* $ROOTFS/root/
-		cp -Rpva $path/etc/skel/.git-prompt.sh $ROOTFS/root/
-		cp -Rpva $path/etc/skel/.dircolors $ROOTFS/root/
-		rsync -a $path/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        	print_step "Copiando configuration from $path into $ROOTFS/root/"
+        	{
+        		cp -Rpva $path/etc/skel/.bash* $ROOTFS/root/
+        		cp -Rpva $path/etc/skel/.git-prompt.sh $ROOTFS/root/
+        		cp -Rpva $path/etc/skel/.dircolors $ROOTFS/root/
+        		rsync -a $path/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_wallpapers() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando wallpapers into $ROOTFS/usr/share/backgrounds"
-	{
-		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-		cp -Rpva $path/usr/share/backgrounds -t "$ROOTFS/usr/share/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+        	print_step "Copiando wallpapers from $path into $ROOTFS/usr/share/backgrounds"
+	        {
+		        [ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
+        		cp -Rpva $path/usr/share/backgrounds -t "$ROOTFS/usr/share/"
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_installer() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando installer into $ROOTFS/usr/share/applications"
-	{
-		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-		cp -Rpva $path/usr/share/applications -t "$ROOTFS/usr/share/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+        	print_step "Copiando installer from $path into $ROOTFS/usr/share/applications"
+     	    {
+        		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
+        		cp -Rpva $path/usr/share/applications -t "$ROOTFS/usr/share/"
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_usr() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando /usr into $ROOTFS/usr/"
-	{
-		[ -d "$ROOTFS/usr" ] && mkdir -p "$ROOTFS"/usr/
-		rsync -a $path/usr/ $ROOTFS/usr/
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+           	print_step "Copiando /usr from $path into $ROOTFS/usr/"
+    	    {
+	    	    [ -d "$ROOTFS/usr" ] && mkdir -p "$ROOTFS"/usr/
+    		    rsync -a $path/usr/ $ROOTFS/usr/
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_common() {
@@ -612,45 +629,61 @@ install_common() {
 }
 
 install_themes() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando temas into $ROOTFS/usr/share/themes"
-	{
-		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-		cp -Rpva $path/usr/share/themes -t "$ROOTFS/usr/share/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+        	print_step "Copiando themes from $path into $ROOTFS/usr/share/themes"
+	        {
+    	    	[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
+        		cp -Rpva $path/usr/share/themes -t "$ROOTFS/usr/share/"
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_icons() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando icones into $ROOTFS/usr/share/icons"
-	{
-		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-		cp -Rpva $path/usr/share/icons -t "$ROOTFS/usr/share/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+        	print_step "Copiando icons from $path into $ROOTFS/usr/share/icons"
+        	{
+    	    	[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
+    		    cp -Rpva $path/usr/share/icons -t "$ROOTFS/usr/share/"
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_grub_themes() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando grub themes into $ROOTFS/boot/grub/themes"
-	{
-		[ -d "$ROOTFS/boot/grub/themes/" ] && mkdir -p "$ROOTFS"/boot/grub/
-		cp -Rpva $path/boot/grub/themes -t "$ROOTFS/boot/grub/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+        	print_step "Copying grub themes from $path into $ROOTFS/boot/grub/themes"
+        	{
+    	    	[ -d "$ROOTFS/boot/grub/themes/" ] && mkdir -p "$ROOTFS"/boot/grub/
+    	    	cp -Rpva $path/boot/grub/themes -t "$ROOTFS/boot/grub/"
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_chili_apps() {
-    local path=$(get_conf_path)
+    local path
 
-	print_step "Copiando aplicativos into $ROOTFS/usr/bin"
-	{
-		[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/
-		for x in $path/usr/bin/*; do
-			install -Dm755 $x "$ROOTFS"/usr/bin/
-		done
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+    for path in "${aname[@]}"; do
+        if [[ -d "$path" ]]; then
+        	print_step "Copying apps from $path into $ROOTFS/usr/bin"
+        	{
+	        	[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/
+    		    for x in $path/usr/bin/*; do
+        			install -Dm755 $x "$ROOTFS"/usr/bin/
+        		done
+        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+        fi
+    done
 }
 
 install_pacman() {
@@ -817,6 +850,7 @@ get_compression_options() {
 
 generate_squashfs() {
     local options=$(get_compression_options "$SQUASHFS_COMPRESSION")
+
 	umount_pseudofs
 	{
 		# Find out required size for the rootfs and create an ext3fs image off it.
@@ -830,9 +864,9 @@ generate_squashfs() {
 		umount -f "$BUILDDIR/tmp-rootfs"
 		mkdir -p "$IMAGEDIR/LiveOS"
 
-#			-comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
+#       "$options" || die "Failed to generate squashfs image"
 		"$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR/tmp" "$IMAGEDIR/LiveOS/squashfs.img" \
-			"$options" || die "Failed to generate squashfs image"
+			-comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
 		chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
 
 		# Remove rootfs and temporary dirs, we don't need them anymore.
@@ -894,27 +928,45 @@ usage() {
                 -W                 Make AWESOME iso custom.
                 -E                 Make ENLIGHTNMENT iso custom.
                 -F                 Make FLUXBOX iso custom.
+                -A                 Make ALL X iso custom.
                 -Q                 Quiet mode (default: 0)
 
 	EOF
 }
 
 set_config_distro() {
-    if ((MAKE_ENLIGHTENMENT)); then
+    declare -ga name
+
+    if ((MAKE_FULL_X)); then
+        title='Void Linux Full X Custom'
+        name='fullx-custom'
+        aname=( config-fullx-custom
+                config-enlightenment-custom
+                config-awesome-custom
+                config-fluxbox-custom
+                config-xfce-base
+                config-xfce-custom)
+    elif ((MAKE_ENLIGHTENMENT)); then
         title='Void Linux Enlightenment Custom'
         name='enlightenment-custom'
+        aname=('config-enlightenment-custom')
+        aname=('config-enlightenment-custom')
     elif ((MAKE_AWESOME)); then
         title='Void Linux Awesome Custom'
         name='awesome-custom'
+        aname=('config-awesome-custom')
     elif ((MAKE_FLUXBOX)); then
         title='Void Linux Fluxbox Custom'
         name='fluxfox-custom'
+        aname=('config-fluxbox-custom')
     elif ((MAKE_XFCE_BASE)); then
         title='Void Linux Xfce Base'
         name='xfce-base'
+        aname=('config-xfce-base')
     elif ((MAKE_XFCE_CUSTOM)); then
         title='Void Linux Xfce Custom'
         name='xfce-custom'
+        aname=('config-xfce-custom')
     else
         title='Void Linux Base Custom'
         name='base-custom'
@@ -936,7 +988,7 @@ sh_setLanguage
 sh_checkDependencies
 sh_setAsciiLines
 
-while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFf" opt; do
+while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFfA" opt; do
 	case $opt in
 	a) BASE_ARCH="$OPTARG" ;;
 	b) BASE_SYSTEM_PKG="$OPTARG" ;;
@@ -959,6 +1011,7 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFf" opt; do
 	w|W) MAKE_X=1; MAKE_AWESOME=1;;
 	e|E) MAKE_X=1; MAKE_ENLIGHTENMENT=1;;
 	f|F) MAKE_X=1; MAKE_FLUXBOX=1;;
+	A)   MAKE_X=1; MAKE_FULL_X=1;;
     q|Q) QUIET=1 ;;
 	v) LINUX_VERSION="$OPTARG" ;;
 	V)
@@ -985,24 +1038,26 @@ fi
 set_config_distro
 
 sh_choose_packages
-    if ((MAKE_X)); then
-        if ((MAKE_ENLIGHTENMENT)); then
-            sh_choose_packages_enlightenment
-        fi
-        if ((MAKE_AWESOME)); then
-            sh_choose_packages_awesome
-        fi
-        if ((MAKE_FLUXBOX)); then
-            sh_choose_packages_fluxbox
-        fi
-        if ((MAKE_XFCE_BASE)); then
-            sh_choose_packages_xfce_base
-        fi
-        if ((MAKE_XFCE_CUSTOM)); then
-            sh_choose_packages_xfce_base
-            sh_choose_packages_xfce_custom
-        fi
+if ((MAKE_X)); then
+    if ((MAKE_FULL_X)); then
+        sh_choose_packages_awesome
+        sh_choose_packages_enlightenment
+        sh_choose_packages_fluxbox
+        sh_choose_packages_xfce_base
+        sh_choose_packages_xfce_custom
+    elif ((MAKE_ENLIGHTENMENT)); then
+        sh_choose_packages_enlightenment
+    elif ((MAKE_AWESOME)); then
+        sh_choose_packages_awesome
+    elif ((MAKE_FLUXBOX)); then
+        sh_choose_packages_fluxbox
+    elif ((MAKE_XFCE_BASE)); then
+        sh_choose_packages_xfce_base
+    elif ((MAKE_XFCE_CUSTOM)); then
+        sh_choose_packages_xfce_base
+        sh_choose_packages_xfce_custom
     fi
+fi
 
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://void.chililinux.com/voidlinux/current"
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://100.97.0.15:92/voidlinux/current --repository=http://100.97.0.15:92/voidlinux/current/extras"
@@ -1030,8 +1085,8 @@ ARCH=$(xbps-uhelper arch)
 #: ${LOCALE:=en_US.UTF-8}
 : ${KEYMAP:=br-abnt2}
 : ${LOCALE:=pt_BR.UTF-8}
-: ${INITRAMFS_COMPRESSION:=zstd}
-: ${SQUASHFS_COMPRESSION:=zstd}
+: ${INITRAMFS_COMPRESSION:=xz}
+: ${SQUASHFS_COMPRESSION:=xz}
 : ${BASE_SYSTEM_PKG:=base-system}
 : ${BOOT_TITLE:="$title"}
 
