@@ -50,6 +50,8 @@ if [ -r "${NEWROOT}"/etc/lxdm/lxdm.conf ]; then
 		sed -e "s,.*session.*=.*,session=/usr/bin/enlightenment_start," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
 	elif [ -x "${NEWROOT}"/usr/bin/awesome ]; then
 		sed -e "s,.*session.*=.*,session=/usr/bin/awesome," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
+	elif [ -x "${NEWROOT}"/usr/bin/gnome-session ]; then
+		sed -e "s,.*session.*=.*,session=/usr/bin/gnome-session," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
 	elif [ -x "${NEWROOT}"/usr/bin/mate-session ]; then
 		sed -e "s,.*session.*=.*,session=/usr/bin/mate-session," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
 	elif [ -x "${NEWROOT}"/usr/bin/cinnamon-session ]; then

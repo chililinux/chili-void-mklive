@@ -901,9 +901,9 @@ usage() {
                 -W                 Make AWESOME iso custom.
                 -E                 Make ENLIGHTNMENT iso custom.
                 -F                 Make FLUXBOX iso custom.
-                -A                 Make ALL X iso custom.
                 -G                 Make GNOME X iso custom.
                 -P                 Make KDE PLASM X iso custom.
+                -A                 Make ALL X iso custom.
                 -Q                 Quiet mode (default: 0)
 
 	EOF
@@ -1024,31 +1024,33 @@ fi
 
 set_config_distro
 sh_choose_packages_base
-if (( MAKE_FULL_X)); then
-	STEP_COUNT=59
-    sh_choose_packages_common_X
-    sh_choose_packages_awesome
-    sh_choose_packages_enlightenment
-    sh_choose_packages_fluxbox
-    sh_choose_packages_xfce_base
-    sh_choose_packages_xfce_custom
-    sh_choose_packages_gnome
-    sh_choose_packages_kde
-elif ((MAKE_ENLIGHTENMENT)); then
-    sh_choose_packages_enlightenment
-elif ((MAKE_AWESOME)); then
-    sh_choose_packages_awesome
-elif ((MAKE_FLUXBOX)); then
-    sh_choose_packages_fluxbox
-elif ((MAKE_KDE)); then
-    sh_choose_packages_kde
-elif ((MAKE_GNOME)); then
-    sh_choose_packages_gnome
-elif ((MAKE_XFCE_BASE)); then
-    sh_choose_packages_xfce_base
-elif ((MAKE_XFCE_CUSTOM)); then
-    sh_choose_packages_xfce_base
-    sh_choose_packages_xfce_custom
+if ((MAKE_X)); then
+	sh_choose_packages_common_X
+	if ((MAKE_FULL_X)); then
+		STEP_COUNT=59
+	    sh_choose_packages_awesome
+	    sh_choose_packages_enlightenment
+	    sh_choose_packages_fluxbox
+	    sh_choose_packages_xfce_base
+	    sh_choose_packages_xfce_custom
+	    sh_choose_packages_gnome
+	    sh_choose_packages_kde
+	elif ((MAKE_ENLIGHTENMENT)); then
+	    sh_choose_packages_enlightenment
+	elif ((MAKE_AWESOME)); then
+	    sh_choose_packages_awesome
+	elif ((MAKE_FLUXBOX)); then
+	    sh_choose_packages_fluxbox
+	elif ((MAKE_KDE)); then
+	    sh_choose_packages_kde
+	elif ((MAKE_GNOME)); then
+	    sh_choose_packages_gnome
+	elif ((MAKE_XFCE_BASE)); then
+	    sh_choose_packages_xfce_base
+	elif ((MAKE_XFCE_CUSTOM)); then
+	    sh_choose_packages_xfce_base
+	    sh_choose_packages_xfce_custom
+	fi
 fi
 
 #XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://void.chililinux.com/voidlinux/current"
@@ -1132,8 +1134,8 @@ print_step "Sincronizando dados do repositório XBPS..."
 {
 	copy_void_keys "$ROOTFS"
 	copy_void_keys "$VOIDHOSTDIR"
-	LC_ALL=C XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -r "$ROOTFS" ${XBPS_REPOSITORY} -Sy
-	LC_ALL=C XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -Sy
+	LC_ALL=C XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -Sy -r "$ROOTFS" ${XBPS_REPOSITORY}
+	LC_ALL=C XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -Sy -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY}
 } 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 result="${PIPESTATUS[0]}"
 [ $result -ne 0 ] && die "Failed to synchronizing, exiting..."
