@@ -94,7 +94,7 @@ sh_choose_packages_base() {
     ADDITIONAL_PKGS+=" duf dfc nano-syntax-highlighting"
     ADDITIONAL_PKGS+=" btop htop"
     ADDITIONAL_PKGS+=" tree rsync lynx parallel tmate gpm evtest acpi"
-	ADDITIONAL_PKGS+=" grub-void-theme"
+	ADDITIONAL_PKGS+=" grub-void-theme grub-btrfs-runit"
 	ADDITIONAL_PKGS+=" xz zstd porg"
 	ADDITIONAL_PKGS+=" bc geoip geoipupdate iputils lvm2 cryptsetup pigz"
 	ADDITIONAL_PKGS+=" xtools vpm vsv neofetch"

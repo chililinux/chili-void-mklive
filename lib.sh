@@ -358,9 +358,8 @@ rk33xx_flash_uboot() {
     --repository=https://repo-fastly.voidlinux.org/current\
     --repository=https://repo-fastly.voidlinux.org/current/nonfree\
     --repository=https://repo-fastly.voidlinux.org/current/multilib\
-    --repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree}"
-
-
+    --repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree\
+	--repository=https://chililinux.com/void/current}"
 
 # This library is the authoritative source of the platform map,
 # because of this we may need to get this information from the command

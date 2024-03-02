@@ -30,11 +30,14 @@ readonly ARCH=$(uname -m)
 readonly REQTOOLS="xbps-install xbps-reconfigure tar xz"
 readonly aSysPkg=(base-minimal base-voidstrap base-system base-custom)
 declare ADDITIONAL_PKGS="gettext dbus grub wireless_tools xz wpa_supplicant"
-ADDITIONAL_PKGS+=" dialog nano neofetch pfetch wget curl lvm2 cryptsetup zstd lynx vsv vpm opendoas"
-ADDITIONAL_PKGS+=" openntpd pv cpio kpartx dracut ipw2100-firmware ipw2200-firmware zd1211-firmware"
-ADDITIONAL_PKGS+=" wifi-firmware linux-firmware-broadcom"
-#ADDITIONAL_PKGS+=" grub-void-theme"
-#ADDITIONAL_PKGS+=" nano-syntax-highlighting"
+ADDITIONAL_PKGS+=" os-prober grub-i386-efi grub-x86_64-efi grub-utils grub-terminus efivar efibootmgr"
+ADDITIONAL_PKGS+=" dialog nano neofetch pfetch wget curl lvm2 cryptsetup zstd lynx vsv vpm"
+ADDITIONAL_PKGS+=" openntpd pv cpio kpartx dracut"
+#ADDITIONAL_PKGS+=" linux"
+#ADDITIONAL_PKGS+=" ipw2100-firmware ipw2200-firmware zd1211-firmware"
+#ADDITIONAL_PKGS+=" wifi-firmware linux-firmware-broadcom"
+ADDITIONAL_PKGS+=" grub-void-theme"				# repository=https://chililinux.com/void/current
+ADDITIONAL_PKGS+=" nano-syntax-highlighting"	# repository=https://chililinux.com/void/current
 declare -i quiet=0
 declare -i njobs=12
 declare -i ncontador=0
