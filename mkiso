@@ -74,7 +74,7 @@ declare -gi MAKE_FULL_X=0
 #declare -gi KEEP_BUILDDIR=0
 declare -gi LBIND=0
 declare -gi QUIET=0
-declare -gi STEP_COUNT=27
+declare -gi STEP_COUNT=72
 declare -g VOL_ID='VOID_LIVE'
 declare -g title
 declare -g name
@@ -89,16 +89,16 @@ sh_choose_packages_base() {
 	declare -g PROGNAME=$(basename "$0")
 	declare -g REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
 	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut-network openresolv"
-	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano vim parted"
-	#--repository=https://chililinux.com/void/current
-    ADDITIONAL_PKGS+=" duf dfc nano-syntax-highlighting"
+	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted"
     ADDITIONAL_PKGS+=" btop htop"
-    ADDITIONAL_PKGS+=" tree rsync lynx parallel tmate gpm evtest acpi"
-	ADDITIONAL_PKGS+=" grub-void-theme grub-btrfs-runit"
-	ADDITIONAL_PKGS+=" xz zstd porg"
-	ADDITIONAL_PKGS+=" bc geoip geoipupdate iputils lvm2 cryptsetup pigz"
-	ADDITIONAL_PKGS+=" xtools vpm vsv neofetch"
+    ADDITIONAL_PKGS+=" tree rsync lynx parallel tmate gpm evtest acpi acpid"
+	ADDITIONAL_PKGS+=" xz zstd cryptsetup lvm2 wireless_tools wpa_supplicant socklog-void openntpd"
+	ADDITIONAL_PKGS+=" bc geoip geoipupdate iputils"
+	ADDITIONAL_PKGS+=" xtools vpm vsv neofetch pfetch"
 	ADDITIONAL_PKGS+=" bash-completion"
+	ADDITIONAL_PKGS+=" grub-btrfs-runit"
+	#--repository=https://chililinux.com/void/current
+    ADDITIONAL_PKGS+=" grub-void-theme duf dfc nano-syntax-highlighting"
 	#   ADDITIONAL_PKGS+=" wifi-firmware"
 	#   ADDITIONAL_PKGS+=" rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
 	ADDITIONAL_PKGS+=" cifs-utils ntfs-3g"
@@ -1027,7 +1027,7 @@ sh_choose_packages_base
 if ((MAKE_X)); then
 	sh_choose_packages_common_X
 	if ((MAKE_FULL_X)); then
-		STEP_COUNT=59
+		STEP_COUNT=72
 	    sh_choose_packages_awesome
 	    sh_choose_packages_enlightenment
 	    sh_choose_packages_fluxbox
