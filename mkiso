@@ -97,12 +97,14 @@ sh_choose_packages_base() {
 	ADDITIONAL_PKGS+=" xtools vpm vsv neofetch pfetch"
 	ADDITIONAL_PKGS+=" bash-completion"
 	ADDITIONAL_PKGS+=" grub-btrfs-runit"
-	#--repository=https://chililinux.com/void/current
-    ADDITIONAL_PKGS+=" grub-void-theme duf dfc nano-syntax-highlighting"
-	#   ADDITIONAL_PKGS+=" wifi-firmware"
-	#   ADDITIONAL_PKGS+=" rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
+	ADDITIONAL_PKGS+=" duf"
+	ADDITIONAL_PKGS+=" dfc"
 	ADDITIONAL_PKGS+=" cifs-utils ntfs-3g"
 	ADDITIONAL_PKGS+=" bubblewrap"
+	#--repository=https://chililinux.com/void/current
+    ADDITIONAL_PKGS+=" chili-grub-void-theme nano-syntax-highlighting"
+	#   ADDITIONAL_PKGS+=" wifi-firmware"
+	#   ADDITIONAL_PKGS+=" rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
 #	#pacman
 	ADDITIONAL_PKGS+=" pacman fakeroot bsdtar"
 }
@@ -124,6 +126,7 @@ sh_choose_packages_common_X() {
     #terminal
     ADDITIONAL_PKGS+=" xfce4-terminal"
 	ADDITIONAL_PKGS+=" cool-retro-term"
+	ADDITIONAL_PKGS+=" rxvt-unicode"
     #bluetooth
 	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
     #audio
@@ -211,7 +214,6 @@ sh_choose_packages_xfce_custom() {
     ADDITIONAL_PKGS+=" xfce4-xkb-plugin"
     ADDITIONAL_PKGS+=" xfce4-plugins"
     ADDITIONAL_PKGS+=" mate-notification-daemon"
-	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
  	ADDITIONAL_PKGS+=" plank"
 	ADDITIONAL_PKGS+=" adwaita-icon-theme"
 	ADDITIONAL_PKGS+=" xarchiver unrar zip unzip 7zip p7zip bzip2 file-roller"
@@ -220,14 +222,14 @@ sh_choose_packages_xfce_custom() {
 	ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver"
     ADDITIONAL_PKGS+=" brother-brlaser cups-pdf"
 	ADDITIONAL_PKGS+=" gvfs gvfs-smb gvfs-cdda inetutils iputils"
-#	#ADDITIONAL_PKGS+=" lxterminal rxvt-unicode"
 	ADDITIONAL_PKGS+=" bat"
 	ADDITIONAL_PKGS+=" vlc celluloid"
 	ADDITIONAL_PKGS+=" evince"
 	ADDITIONAL_PKGS+=" mate-calc cmatrix xkill menulibre mugshot ocs-url"
 	ADDITIONAL_PKGS+=" nvme-cli"
 	ADDITIONAL_PKGS+=" remmina remmina-kwallet"
-
+	#--repository=https://chililinux.com/void/current
+	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
 #	#office
 	ADDITIONAL_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
 #
