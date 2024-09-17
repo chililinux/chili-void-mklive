@@ -3,6 +3,7 @@
 # This contains the COMPLETE list of binaries that this script needs
 # to function.  The only exception is the QEMU binary since it is not
 # known in advance which one wil be required.
+export TERM=${TERM:-xterm}
 readonly LIBTOOLS="cp echo cat printf which mountpoint mount umount modprobe"
 readonly HOSTARCH=$(xbps-uhelper arch)
 tput sgr0 # reset colors
