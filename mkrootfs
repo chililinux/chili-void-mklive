@@ -33,8 +33,8 @@ declare ADDITIONAL_PKGS="gettext dbus grub wireless_tools xz zstd wpa_supplicant
 ADDITIONAL_PKGS+=" os-prober grub-i386-efi grub-x86_64-efi grub-utils grub-terminus efivar efibootmgr"
 ADDITIONAL_PKGS+=" dialog nano neofetch pfetch wget curl lvm2 cryptsetup lynx vsv vpm"
 ADDITIONAL_PKGS+=" rsync tree git openntpd pv cpio kpartx dracut"
-ADDITIONAL_PKGS+=" chili-void-grub-theme"		# repository=https://chililinux.com/void/current
-ADDITIONAL_PKGS+=" nano-syntax-highlighting"	# repository=https://chililinux.com/void/current
+#ADDITIONAL_PKGS+=" chili-void-grub-theme"		# repository=https://chililinux.com/void/current
+#ADDITIONAL_PKGS+=" nano-syntax-highlighting"	# repository=https://chililinux.com/void/current
 #ADDITIONAL_PKGS+=" linux"
 #ADDITIONAL_PKGS+=" ipw2100-firmware ipw2200-firmware zd1211-firmware"
 #ADDITIONAL_PKGS+=" wifi-firmware linux-firmware-broadcom"
