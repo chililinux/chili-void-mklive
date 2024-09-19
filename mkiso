@@ -30,6 +30,7 @@
 #xbps-install -U -r /tmp/fakeroot --repository=https://repo-fastly.voidlinux.org/current bash -S
 
 #export LANGUAGE=pt_BR
+export TERM=${TERM:-xterm}
 export TEXTDOMAINDIR=/usr/share/locale
 export TEXTDOMAIN=void-install
 # flag languages
