@@ -63,24 +63,22 @@ trap "eval \"$OLD_ALIASES\"" EXIT
 trap 'error_out $? $LINENO' INT TERM 0
 
 umask 022
-declare -gi MAKE_X=0
-declare -gi MAKE_XFCE_BASE=0
-declare -gi MAKE_XFCE_CUSTOM=0
-declare -gi MAKE_AWESOME=0
-declare -gi MAKE_ENLIGHTENMENT=0
-declare -gi MAKE_FLUXBOX=0
-declare -gi MAKE_KDE=0
-declare -gi MAKE_GNOME=0
-declare -gi MAKE_FULL_X=0
-#declare -gi KEEP_BUILDDIR=0
-declare -gi LBIND=0
-declare -gi QUIET=0
+declare -gi MAKE_X=false
+declare -gi MAKE_XFCE_BASE=false
+declare -gi MAKE_XFCE_CUSTOM=false
+declare -gi MAKE_AWESOME=false
+declare -gi MAKE_ENLIGHTENMENT=false
+declare -gi MAKE_FLUXBOX=false
+declare -gi MAKE_KDE=false
+declare -gi MAKE_GNOME=false
+declare -gi MAKE_FULL_X=false
+#declare -gi KEEP_BUILDDIR=false
+declare -gi LBIND=false
+declare -gi QUIET=false
 declare -gi STEP_COUNT=72
 declare -g VOL_ID='VOID_LIVE'
 declare -g title
 declare -g name
-readonly true=1
-readonly false=0
 declare -g SQUASHFS_COMPRESSION=xz
 declare -g INITRAM_COMPRESSION=xz
 
@@ -295,19 +293,23 @@ readconf() {
 	else
 		read -r -p "$@ [Y/n]"
 	fi
-	[[ ${REPLY^} == "" ]] && return $false
-	[[ ${REPLY^} == N ]] && return $true || return $false
+	[[ ${REPLY^} == "" ]] && return 0
+	[[ ${REPLY^} == N ]] && return 1 || return 0
 }
 
 sh_checkDependencies() {
 	local d
-	local errorFound=0
+	local errorFound=false
 	declare -a missing
 
 	for d in "${DEPENDENCIES[@]}"; do
-		[[ -z $(command -v "$d") ]] && missing+=("$d") && errorFound=1 && printf '%s\n' "${red}${cmsg_ERRO[$LC_DEFAULT]}${reset}: ${cmsg_CommandNotFound[$LC_DEFAULT]} ${cyan}'$d'${reset}"
+		if [[ -z $(command -v "$d") ]]; then
+		  missing+=("$d")
+		  errorFound=true
+		  printf '%s\n' "${red}${cmsg_ERRO[$LC_DEFAULT]}${reset}: ${cmsg_CommandNotFound[$LC_DEFAULT]} ${cyan}'$d'${reset}"
+    fi
 	done
-	if ((errorFound)); then
+	if $errorFound; then
 		echo "${yellow}--------------${cmsg_ImpossivelContinuar[$LC_DEFAULT]}-------------${reset}"
 		echo "${cmsg_ImpossivelContinuar1[$LC_DEFAULT]}" >&2
 		echo "${cmsg_ImpossivelContinuar2[$LC_DEFAULT]} \$PATH" >&2
@@ -317,7 +319,7 @@ sh_checkDependencies() {
 			echo
 			if readconf "${yellow}${cmsg_InstCommand[$LC_DEFAULT]} '${cyan}${missing[*]}${reset}' ?"; then
 				if xbps-install -Sy "${missing[@]}"; then
-					errorFound=0
+					errorFound=false
 					sh_checkDependencies
 				else
 					die "${cmsg_RunNewErro[$LC_DEFAULT]}"
@@ -403,19 +405,19 @@ mount_pseudofs() {
 	for f in sys dev proc; do
 		mkdir -p "$ROOTFS"/$f
 		mount --rbind /$f "$ROOTFS"/$f
-		LBIND=1
+		LBIND=true
 	done
 }
 
 umount_pseudofs() {
 	for f in sys dev proc; do
 		if ! umount -R -f "$ROOTFS/$f" >/dev/null 2>&-; then
-			if ((LBIND)); then
+			if $LBIND; then
 				info_msg "ERROR: failed to unmount $ROOTFS/$f/"
 				return 1
 			fi
 		fi
-		LBIND=0
+		LBIND=true
 	done
 }
 
@@ -455,7 +457,7 @@ copy_dracut_files() {
 	mkdir -p "$1"/usr/lib/dracut/modules.d/01vmklive
 	cp dracut/vmklive/* "$1"/usr/lib/dracut/modules.d/01vmklive/
 	# autologin none
-	if ((MAKE_FULL_X)); then
+	if $MAKE_FULL_X; then
 		touch "$1"/usr/lib/dracut/modules.d/01vmklive/noautologin
 	fi
 }
@@ -669,7 +671,7 @@ install_chili_apps() {
 
 install_pacman() {
 	sh_chroot_job "Instalando pacman App" "/usr/bin/pacman -Sydd pacman-contrib paru --noconfirm --overwrite \*"
-	if ((MAKE_X)); then
+	if $MAKE_X; then
 		sh_chroot_job "Instalando Brave-Browser" "/usr/bin/pacman -Sdd brave-browser --noconfirm --overwrite \*"
 		sh_chroot_job "Instalando Google Chrome" "/usr/bin/paru -Sdd google-chrome --noconfirm --overwrite \*"
 	fi
@@ -920,7 +922,7 @@ usage() {
 set_config_distro() {
 	declare -ga name
 
-	if ((MAKE_FULL_X)); then
+	if $MAKE_FULL_X; then
 		title='Void Linux Full X Custom'
 		name='fullx-custom'
 		aname=(config-fullx-custom
@@ -931,32 +933,32 @@ set_config_distro() {
 			config-xfce-custom
 			config-kde-custom
 			config-gnome-custom)
-	elif ((MAKE_ENLIGHTENMENT)); then
+	elif $MAKE_ENLIGHTENMENT; then
 		title='Void Linux Enlightenment Custom'
 		name='enlightenment-custom'
 		aname=('config-enlightenment-custom')
 		aname=('config-enlightenment-custom')
-	elif ((MAKE_AWESOME)); then
+	elif $MAKE_AWESOME; then
 		title='Void Linux Awesome Custom'
 		name='awesome-custom'
 		aname=('config-awesome-custom')
-	elif ((MAKE_FLUXBOX)); then
+	elif $MAKE_FLUXBOX; then
 		title='Void Linux Fluxbox Custom'
 		name='fluxfox-custom'
 		aname=('config-fluxbox-custom')
-	elif ((MAKE_KDE)); then
+	elif $MAKE_KDE; then
 		title='Void Linux Kde Custom'
 		name='kde-custom'
 		aname=('config-kde-custom')
-	elif ((MAKE_GNOME)); then
+	elif $MAKE_GNOME; then
 		title='Void Linux Gnome Custom'
 		name='gnome-custom'
 		aname=('config-gnome-custom')
-	elif ((MAKE_XFCE_BASE)); then
+	elif $MAKE_XFCE_BASE; then
 		title='Void Linux Xfce Base'
 		name='xfce-base'
 		aname=('config-xfce-base')
-	elif ((MAKE_XFCE_CUSTOM)); then
+	elif $MAKE_XFCE_CUSTOM; then
 		title='Void Linux Xfce Custom'
 		name='xfce-custom'
 		aname=('config-xfce-custom')
@@ -1000,38 +1002,38 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFfAGP" opt; do
 	C) BOOT_CMDLINE="$OPTARG" ;;
 	T) BOOT_TITLE="$OPTARG" ;;
 	x | X)
-		MAKE_X=1
-		MAKE_XFCE_BASE=1
+		MAKE_X=true
+		MAKE_XFCE_BASE=true
 		;;
 	y | Y)
-		MAKE_X=1
-		MAKE_XFCE_CUSTOM=1
+		MAKE_X=true
+		MAKE_XFCE_CUSTOM=true
 		;;
 	w | W)
-		MAKE_X=1
-		MAKE_AWESOME=1
+		MAKE_X=true
+		MAKE_AWESOME=true
 		;;
 	e | E)
-		MAKE_X=1
-		MAKE_ENLIGHTENMENT=1
+		MAKE_X=true
+		MAKE_ENLIGHTENMENT=true
 		;;
 	f | F)
-		MAKE_X=1
-		MAKE_FLUXBOX=1
+		MAKE_X=true
+		MAKE_FLUXBOX=true
 		;;
 	G)
-		MAKE_X=1
-		MAKE_GNOME=1
+		MAKE_X=true
+		MAKE_GNOME=true
 		;;
 	P)
-		MAKE_X=1
-		MAKE_KDE=1
+		MAKE_X=true
+		MAKE_KDE=true
 		;;
 	A)
-		MAKE_X=1
-		MAKE_FULL_X=1
+		MAKE_X=true
+		MAKE_FULL_X=true
 		;;
-	q | Q) QUIET=1 ;;
+	q | Q) QUIET=true ;;
 	v) LINUX_VERSION="$OPTARG" ;;
 	V)
 		version
@@ -1056,9 +1058,9 @@ fi
 
 set_config_distro
 sh_choose_packages_base
-if ((MAKE_X)); then
+if $MAKE_X; then
 	sh_choose_packages_common_X
-	if ((MAKE_FULL_X)); then
+	if $MAKE_FULL_X; then
 		STEP_COUNT=72
 		sh_choose_packages_awesome
 		sh_choose_packages_enlightenment
@@ -1067,19 +1069,19 @@ if ((MAKE_X)); then
 		sh_choose_packages_xfce_custom
 		sh_choose_packages_gnome
 		sh_choose_packages_kde
-	elif ((MAKE_ENLIGHTENMENT)); then
+	elif $MAKE_ENLIGHTENMENT; then
 		sh_choose_packages_enlightenment
-	elif ((MAKE_AWESOME)); then
+	elif $MAKE_AWESOME; then
 		sh_choose_packages_awesome
-	elif ((MAKE_FLUXBOX)); then
+	elif $MAKE_FLUXBOX; then
 		sh_choose_packages_fluxbox
-	elif ((MAKE_KDE)); then
+	elif $MAKE_KDE; then
 		sh_choose_packages_kde
-	elif ((MAKE_GNOME)); then
+	elif $MAKE_GNOME; then
 		sh_choose_packages_gnome
-	elif ((MAKE_XFCE_BASE)); then
+	elif $MAKE_XFCE_BASE; then
 		sh_choose_packages_xfce_base
-	elif ((MAKE_XFCE_CUSTOM)); then
+	elif $MAKE_XFCE_CUSTOM; then
 		sh_choose_packages_xfce_base
 		sh_choose_packages_xfce_custom
 	fi
@@ -1208,11 +1210,11 @@ print_step "Instalando pacotes void em $ROOTFS..."
 install_packages
 install_skel_user
 install_skel_root
-if ((MAKE_X)); then
+if $MAKE_X; then
 	#   install_installer
 	:
 fi
-if ((MAKE_XFCE_CUSTOM)); then
+if $MAKE_XFCE_CUSTOM; then
 	install_wallpapers
 	install_themes
 	install_icons
@@ -1226,9 +1228,9 @@ install_pacman
 finish_clean
 
 : ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd dhcpcd}
-if ((MAKE_X)); then
+if $MAKE_X; then
 	: ${ADDITIONAL_SERVICE_LIST:=NetworkManager dbus elogind lxdm polkitd bluetoothd connmand acpid}
-	if ((MAKE_XFCE_CUSTOM)); then
+	if $MAKE_XFCE_CUSTOM; then
 		ADDITIONAL_SERVICE_LIST+=' avahi-daemon cupsd irqbalance sshd uuidd'
 	fi
 else # tty
