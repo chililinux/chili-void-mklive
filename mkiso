@@ -103,7 +103,8 @@ sh_choose_packages_base() {
 	ADDITIONAL_PKGS+=" cifs-utils ntfs-3g"
 	ADDITIONAL_PKGS+=" bubblewrap"
 	#--repository=https://chililinux.com/void/current
-	ADDITIONAL_PKGS+=" chili-grub-void-theme"
+	#ADDITIONAL_PKGS+=" chili-grub-void-theme"
+	ADDITIONAL_PKGS+=" grub-void-theme"
 	ADDITIONAL_PKGS+=" nano-syntax-highlighting"
 	ADDITIONAL_PKGS+=" blueberry"
 	ADDITIONAL_PKGS+=" porg"

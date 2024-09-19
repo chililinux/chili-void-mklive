@@ -49,7 +49,7 @@ is_target_native() {
 }
 
 info_msg() {
-	( (++ncontador))
+	((++ncontador))
 	# This function handles the printing that is bold within all
 	# scripts.  This is a convenience function so that the rather ugly
 	# looking ASCII escape codes live in only one place.
