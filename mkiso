@@ -129,7 +129,8 @@ sh_choose_packages_common_X() {
 	ADDITIONAL_PKGS+=" cool-retro-term"
 	ADDITIONAL_PKGS+=" rxvt-unicode"
 	#bluetooth
-	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
+	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups gnome-bluetooth1"
+#	ADDITIONAL_PKGS+=" blueberry"
 	#audio
 	ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
 	ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
