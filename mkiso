@@ -231,7 +231,7 @@ sh_choose_packages_xfce_custom() {
 	ADDITIONAL_PKGS+=" nvme-cli"
 	ADDITIONAL_PKGS+=" remmina remmina-kwallet"
 	#--repository=https://chililinux.com/void/current
-	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
+#	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
 	#	#office
 	ADDITIONAL_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
 	#
