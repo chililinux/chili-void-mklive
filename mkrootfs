@@ -59,7 +59,7 @@ trap 'die "Interrupted! exiting..."' INT TERM HUP
 # in the script, and it makes it easier to consume the contents of
 # these down the road in later scripts.
 usage() {
-    cat <<_EOF
+	cat <<_EOF
 Usage: $PROGNAME [options] <arch>
 
 Supported architectures: i686, i686-musl, x86_64, x86_64-musl,
@@ -95,17 +95,23 @@ _EOF
 # Boilerplate option parsing.  This script supports the bare minimum
 # needed to build an image.
 while getopts "b:C:c:hr:x:o:vV:qQ" opt; do
-    case $opt in
-        b) SYSPKG="$OPTARG";;
-        C) XBPS_CONFFILE="-C $OPTARG";;
-        c) XBPS_CACHEDIR="--cachedir=$OPTARG";;
-        h) usage; exit 0;;
-        r) XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=$OPTARG";;
-        x) COMPRESSOR_THREADS="$OPTARG" ;;
-        o) FILENAME="$OPTARG" ;;
-        v|V) echo "$PROGNAME @@MKLIVE_VERSION@@"; exit 0;;
-        q|Q) quiet=1;;
-    esac
+	case $opt in
+	b) SYSPKG="$OPTARG" ;;
+	C) XBPS_CONFFILE="-C $OPTARG" ;;
+	c) XBPS_CACHEDIR="--cachedir=$OPTARG" ;;
+	h)
+		usage
+		exit 0
+		;;
+	r) XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=$OPTARG" ;;
+	x) COMPRESSOR_THREADS="$OPTARG" ;;
+	o) FILENAME="$OPTARG" ;;
+	v | V)
+		echo "$PROGNAME @@MKLIVE_VERSION@@"
+		exit 0
+		;;
+	q | Q) quiet=1 ;;
+	esac
 done
 shift $((OPTIND - 1))
 #XBPS_TARGET_ARCH="$1"
@@ -117,7 +123,7 @@ set_cachedir
 # This is an aweful hack since the script isn't using privesc
 # mechanisms selectively.  This is a TODO item.
 if [ "$(id -u)" -ne 0 ]; then
-    die "need root perms to continue, exiting."
+	die "need root perms to continue, exiting."
 fi
 
 main() {
@@ -129,18 +135,19 @@ main() {
 	# If the arch wasn't set let's bail out now, nothing else in this
 	# script will work without knowing what we're trying to build for.
 	if [ -z "$XBPS_TARGET_ARCH" ]; then
-	    echo "$PROGNAME: arch was not set!"
-	    usage; exit 1
+		echo "$PROGNAME: arch was not set!"
+		usage
+		exit 1
 	fi
 
 	# We need to operate on a tempdir, if this fails to create, it is
 	# absolutely crucial to bail out so that we don't hose the system that
 	# is running the script.
-	if (( quiet )); then
-#		ROOTFS=$(mktemp -d) || die "failed to create tempdir, exiting..." >/dev/null 2>&-
+	if ((quiet)); then
+		#		ROOTFS=$(mktemp -d) || die "failed to create tempdir, exiting..." >/dev/null 2>&-
 		ROOTFS="base-custom"
 	else
-#		ROOTFS=$(mktemp -d) || die "failed to create tempdir, exiting..."
+		#		ROOTFS=$(mktemp -d) || die "failed to create tempdir, exiting..."
 		ROOTFS="base-custom"
 	fi
 	mkdir -p "$ROOTFS"
@@ -152,7 +159,7 @@ main() {
 	# tampered with.  Its much easier to use these since the will always
 	# exist.
 
-	if (( quiet )); then
+	if ((quiet)); then
 		mkdir -p "$ROOTFS/var/db/xbps/keys" >/dev/null 2>&-
 		cp keys/*.plist "$ROOTFS/var/db/xbps/keys" >/dev/null 2>&-
 	else
@@ -162,7 +169,7 @@ main() {
 
 	# This sets up files that are important for XBPS to work on the new
 	# filesystem.  It does not actually install anything.
-	if (( quiet )); then
+	if ((quiet)); then
 		run_cmd_target "xbps-install -Sy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS" >/dev/null 2>&-
 	else
 		run_cmd_target "xbps-install -Sy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS"
@@ -182,7 +189,7 @@ main() {
 	# system package into the rootfs.  This will not produce a
 	# bootable system but will instead produce a base component that can
 	# be quickly expanded to perform other actions on.
-	if (( quiet )); then
+	if ((quiet)); then
 		run_cmd_target "xbps-install -SUy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS -y $SYSPKG $ADDITIONAL_PKGS" >/dev/null 2>&-
 	else
 		run_cmd_target "xbps-install -SUy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS -y $SYSPKG $ADDITIONAL_PKGS"
@@ -195,9 +202,9 @@ main() {
 	# language at least enough to enable thier preferred locale.  If this
 	# truly becomes an issue in the future this hack can be revisited.
 	if [ -e "$ROOTFS/etc/default/libc-locales" ]; then
-#	    LOCALE=en_US.UTF-8
-	    LOCALE=pt_BR.UTF-8
-	    sed -e "s/\#\(${LOCALE}.*\)/\1/g" -i "$ROOTFS/etc/default/libc-locales"
+		#	    LOCALE=en_US.UTF-8
+		LOCALE=pt_BR.UTF-8
+		sed -e "s/\#\(${LOCALE}.*\)/\1/g" -i "$ROOTFS/etc/default/libc-locales"
 	fi
 
 	# The reconfigure step needs to execute code that's been compiled for
@@ -211,9 +218,9 @@ main() {
 	# architecture, but we may need to set up XBPS_ARCH for the target
 	# architecture (but only when compatible).
 	if is_target_native "$XBPS_TARGET_ARCH"; then
-	    run_cmd_target "xbps-reconfigure --rootdir $ROOTFS base-files"
+		run_cmd_target "xbps-reconfigure --rootdir $ROOTFS base-files"
 	else
-	    run_cmd "xbps-reconfigure --rootdir $ROOTFS base-files"
+		run_cmd "xbps-reconfigure --rootdir $ROOTFS base-files"
 	fi
 
 	# Now running as the target system, this step reconfigures the
@@ -232,60 +239,60 @@ main() {
 	# lock on the passwd database, lest it be left in the system and
 	# propogated to other points.
 	info_msg "Setting the default root password ('voidlinux')"
-	if [ ! -f "$ROOTFS/etc/shadow" ] ; then
-	    run_cmd_chroot "$ROOTFS" pwconv
+	if [ ! -f "$ROOTFS/etc/shadow" ]; then
+		run_cmd_chroot "$ROOTFS" pwconv
 	fi
 	echo root:voidlinux | run_cmd_chroot "$ROOTFS" "chpasswd -c SHA512" || die "Could not set default credentials"
 	rm -f "$ROOTFS/etc/.pwd.lock"
 
-	 #perfumery BR
-	 info_msg "Ativando bash para o usuario root"
-	 run_cmd_chroot "$ROOTFS" "chsh -s /bin/bash root"
+	#perfumery BR
+	info_msg "Ativando bash para o usuario root"
+	run_cmd_chroot "$ROOTFS" "chsh -s /bin/bash root"
 
-	 info_msg "Configurando teclado para br-abnt2"
- 	 _KEYMAP=br-abnt2
-    [[ ! -e "$ROOTFS/etc/rc.conf" ]] && >| "$ROOTFS/etc/rc.conf"
-	 #echo "KEYMAP=$_KEYMAP" >> "$dir_install/etc/rc.conf"
-    sed -i -e "s|KEYMAP=.*|KEYMAP=$_KEYMAP|g" "$ROOTFS/etc/rc.conf"
-    sed -i -e "s|#\?KEYMAP=.*|KEYMAP=$_KEYMAP|g" "$ROOTFS/etc/rc.conf"
+	info_msg "Configurando teclado para br-abnt2"
+	_KEYMAP=br-abnt2
+	[[ ! -e "$ROOTFS/etc/rc.conf" ]] && >|"$ROOTFS/etc/rc.conf"
+	#echo "KEYMAP=$_KEYMAP" >> "$dir_install/etc/rc.conf"
+	sed -i -e "s|KEYMAP=.*|KEYMAP=$_KEYMAP|g" "$ROOTFS/etc/rc.conf"
+	sed -i -e "s|#\?KEYMAP=.*|KEYMAP=$_KEYMAP|g" "$ROOTFS/etc/rc.conf"
 
 	info_msg "Configurando grub"
-   echo "GRUB_THEME=/boot/grub/themes/void/theme.txt" >> "$ROOTFS/etc/default/grub"
-   echo "GRUB_DISABLE_OS_PROBER=true"                 >> "$ROOTFS/etc/default/grub"
+	echo "GRUB_THEME=/boot/grub/themes/void/theme.txt" >>"$ROOTFS/etc/default/grub"
+	echo "GRUB_DISABLE_OS_PROBER=true" >>"$ROOTFS/etc/default/grub"
 
 	info_msg "Configurando nanorc"
-	[ -e .bashrc             ] && install -Dm644 nanorc "$ROOTFS"/etc/nanorc
+	[ -e .bashrc ] && install -Dm644 nanorc "$ROOTFS"/etc/nanorc
 
 	info_msg "Ajustando bashrc into the rootfs $ROOTFS"
 	[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
-	[ -e .bashrc             ] && install -Dm755 .bashrc        "$ROOTFS"/etc/skel/.bashrc
-	[ -e .bashrc             ] && install -Dm755 .bashrc        "$ROOTFS"/root/.bashrc
-	[ -e .ps1                ] && install -Dm755 .ps1           "$ROOTFS"/etc/skel/.ps1
-	[ -e .ps1                ] && install -Dm755 .ps1           "$ROOTFS"/root/.ps1
-	[ -e .git-prompt.sh      ] && install -Dm755 .git-prompt.sh "$ROOTFS"/etc/skel/.git-prompt.sh
-	[ -e .git-prompt.sh      ] && install -Dm755 .git-prompt.sh "$ROOTFS"/root/.git-prompt.sh
-	[ -e .dircolors          ] && install -Dm755 .dircolors     "$ROOTFS"/etc/skel/.dircolors
-	[ -e .dircolors          ] && install -Dm755 .dircolors     "$ROOTFS"/root/.dircolors
-	[ -e bashrc.sh           ] && install -Dm755 bashrc.sh      "$ROOTFS"/etc/bash/bashrc.d/bashrc.sh
-	[ -e .bash_profile       ] && install -Dm755 .bash_profile  "$ROOTFS"/etc/skel/.bash_profile
-	[ -e .bash_profile       ] && install -Dm755 .bash_profile  "$ROOTFS"/root/.bash_profile
-	[ -e .bashrckali         ] && install -Dm755 .bashrckali    "$ROOTFS"/root/.bashrckali
-	[ -e .bashrckali         ] && install -Dm755 .bashrckali    "$ROOTFS"/etc/skel/.bashrckali
-	[ -e .bashrcfull         ] && install -Dm755 .bashrcfull    "$ROOTFS"/root/.bashrcfull
+	[ -e .bashrc ] && install -Dm755 .bashrc "$ROOTFS"/etc/skel/.bashrc
+	[ -e .bashrc ] && install -Dm755 .bashrc "$ROOTFS"/root/.bashrc
+	[ -e .ps1 ] && install -Dm755 .ps1 "$ROOTFS"/etc/skel/.ps1
+	[ -e .ps1 ] && install -Dm755 .ps1 "$ROOTFS"/root/.ps1
+	[ -e .git-prompt.sh ] && install -Dm755 .git-prompt.sh "$ROOTFS"/etc/skel/.git-prompt.sh
+	[ -e .git-prompt.sh ] && install -Dm755 .git-prompt.sh "$ROOTFS"/root/.git-prompt.sh
+	[ -e .dircolors ] && install -Dm755 .dircolors "$ROOTFS"/etc/skel/.dircolors
+	[ -e .dircolors ] && install -Dm755 .dircolors "$ROOTFS"/root/.dircolors
+	[ -e bashrc.sh ] && install -Dm755 bashrc.sh "$ROOTFS"/etc/bash/bashrc.d/bashrc.sh
+	[ -e .bash_profile ] && install -Dm755 .bash_profile "$ROOTFS"/etc/skel/.bash_profile
+	[ -e .bash_profile ] && install -Dm755 .bash_profile "$ROOTFS"/root/.bash_profile
+	[ -e .bashrckali ] && install -Dm755 .bashrckali "$ROOTFS"/root/.bashrckali
+	[ -e .bashrckali ] && install -Dm755 .bashrckali "$ROOTFS"/etc/skel/.bashrckali
+	[ -e .bashrcfull ] && install -Dm755 .bashrcfull "$ROOTFS"/root/.bashrcfull
 
-	[ -e void-install        ] && install -Dm755 void-install    "$ROOTFS"/usr/bin/
-	[ -e void-clonedisk      ] && install -Dm755 void-clonedisk  "$ROOTFS"/usr/bin/
-	[ -e void-gitclone       ] && install -Dm755 void-gitclone   "$ROOTFS"/usr/bin/
-	[ -e void-mirror         ] && install -Dm755 void-mirror     "$ROOTFS"/usr/bin/
-	[ -e void-remove-vg      ] && install -Dm755 void-remove-vg  "$ROOTFS"/usr/bin/
-	[ -e void-services       ] && install -Dm755 void-services   "$ROOTFS"/usr/bin/
-	[ -e void-testmirror     ] && install -Dm755 void-testmirror "$ROOTFS"/usr/bin/
-	[ -e void-wifi           ] && install -Dm755 void-wifi       "$ROOTFS"/usr/bin/
-	[ -e void-xrandr         ] && install -Dm755 void-xrandr     "$ROOTFS"/usr/bin/
-	[ -e void-runimage       ] && install -Dm755 void-runimage   "$ROOTFS"/usr/bin/
-	[ -e void-maketar        ] && install -Dm755 void-maketar    "$ROOTFS"/usr/bin/
-	[ -e void-parted         ] && install -Dm755 void-parted     "$ROOTFS"/usr/bin/
-	[ -e fetch		         ] && install -Dm755 fetch           "$ROOTFS"/usr/bin/
+	[ -e void-install ] && install -Dm755 void-install "$ROOTFS"/usr/bin/
+	[ -e void-clonedisk ] && install -Dm755 void-clonedisk "$ROOTFS"/usr/bin/
+	[ -e void-gitclone ] && install -Dm755 void-gitclone "$ROOTFS"/usr/bin/
+	[ -e void-mirror ] && install -Dm755 void-mirror "$ROOTFS"/usr/bin/
+	[ -e void-remove-vg ] && install -Dm755 void-remove-vg "$ROOTFS"/usr/bin/
+	[ -e void-services ] && install -Dm755 void-services "$ROOTFS"/usr/bin/
+	[ -e void-testmirror ] && install -Dm755 void-testmirror "$ROOTFS"/usr/bin/
+	[ -e void-wifi ] && install -Dm755 void-wifi "$ROOTFS"/usr/bin/
+	[ -e void-xrandr ] && install -Dm755 void-xrandr "$ROOTFS"/usr/bin/
+	[ -e void-runimage ] && install -Dm755 void-runimage "$ROOTFS"/usr/bin/
+	[ -e void-maketar ] && install -Dm755 void-maketar "$ROOTFS"/usr/bin/
+	[ -e void-parted ] && install -Dm755 void-parted "$ROOTFS"/usr/bin/
+	[ -e fetch ] && install -Dm755 fetch "$ROOTFS"/usr/bin/
 
 	# At this point we're done running things in the chroot and we can
 	# clean up the shims.  Failure to do this can result in things hanging
@@ -309,13 +316,13 @@ main() {
 	#: "${FILENAME:=void-${XBPS_TARGET_ARCH}-${SYSPKG}-$(date '+%Y%m%d').tar.gz}"
 	#run_cmd "tar -cp --posix --xattrs -C $ROOTFS . | gzip -9 > $FILENAME "
 
-#	FILENAME=void-"${XBPS_TARGET_ARCH}-${SYSPKG}"-$(date '+%Y%m%d').tar.xz
+	#	FILENAME=void-"${XBPS_TARGET_ARCH}-${SYSPKG}"-$(date '+%Y%m%d').tar.xz
 	FILENAME=void-"${XBPS_TARGET_ARCH}-base-custom"-$(date '+%Y%m%d').tar.xz
 	run_cmd "tar -cp --posix --xattrs -C $ROOTFS . | xz -T${COMPRESSOR_THREADS:-0} -9 > $FILENAME "
 
 	# Now that we have the tarball we don't need the rootfs anymore, so we
 	# can get rid of it.
-#	rm -rf "$ROOTFS"
+	#	rm -rf "$ROOTFS"
 
 	# Last thing to do before closing out is to let the user know that
 	# this succeeded.  This also ensures that there's something visible
@@ -331,8 +338,7 @@ SYSPKG="base-voidstrap"
 main
 exit
 
-for i in "${aSysPkg[@]}";
-do
+for i in "${aSysPkg[@]}"; do
 	SYSPKG="$i"
 	main
 done
