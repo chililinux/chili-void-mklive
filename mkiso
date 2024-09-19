@@ -103,7 +103,7 @@ sh_choose_packages_base() {
 	ADDITIONAL_PKGS+=" cifs-utils ntfs-3g"
 	ADDITIONAL_PKGS+=" bubblewrap"
 	#--repository=https://chililinux.com/void/current
-	ADDITIONAL_PKGS+=" chili-grub-void-theme nano-syntax-highlighting"
+	#ADDITIONAL_PKGS+=" chili-grub-void-theme nano-syntax-highlighting"
 	#   ADDITIONAL_PKGS+=" wifi-firmware"
 	#   ADDITIONAL_PKGS+=" rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
 	#	#pacman
