@@ -103,7 +103,10 @@ sh_choose_packages_base() {
 	ADDITIONAL_PKGS+=" cifs-utils ntfs-3g"
 	ADDITIONAL_PKGS+=" bubblewrap"
 	#--repository=https://chililinux.com/void/current
-	#ADDITIONAL_PKGS+=" chili-grub-void-theme nano-syntax-highlighting"
+	ADDITIONAL_PKGS+=" chili-grub-void-theme"
+	ADDITIONAL_PKGS+=" nano-syntax-highlighting"
+	ADDITIONAL_PKGS+=" blueberry"
+	ADDITIONAL_PKGS+=" porg"
 	#   ADDITIONAL_PKGS+=" wifi-firmware"
 	#   ADDITIONAL_PKGS+=" rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
 	#	#pacman
@@ -130,7 +133,6 @@ sh_choose_packages_common_X() {
 	ADDITIONAL_PKGS+=" rxvt-unicode"
 	#bluetooth
 	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups gnome-bluetooth1"
-#	ADDITIONAL_PKGS+=" blueberry"
 	#audio
 	ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
 	ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
@@ -231,7 +233,7 @@ sh_choose_packages_xfce_custom() {
 	ADDITIONAL_PKGS+=" nvme-cli"
 	ADDITIONAL_PKGS+=" remmina remmina-kwallet"
 	#--repository=https://chililinux.com/void/current
-#	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
+	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
 	#	#office
 	ADDITIONAL_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
 	#
@@ -1090,12 +1092,12 @@ fi
 # --repository=https://mirrors.servercentral.com/voidlinux/current/multilib/nonfree""\
 # --repository=https://chililinux.com/void/current""\
 # --repository=/github/void-packages/hostdir/binpkgs"
+# --repository=/home/vcatafesta/github/void-packages/hostdir/binpkgs"
 XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-fastly.voidlinux.org/current""\
  --repository=https://repo-fastly.voidlinux.org/current/nonfree""\
  --repository=https://repo-fastly.voidlinux.org/current/multilib""\
  --repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree""\
- --repository=https://chililinux.com/void/current""\
- --repository=/home/vcatafesta/github/void-packages/hostdir/binpkgs"
+ --repository=https://chililinux.com/void/current"
 
 # Configure dracut to use overlayfs for the writable overlay.
 BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "

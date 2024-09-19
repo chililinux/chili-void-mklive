@@ -91,12 +91,13 @@ sh_choose_packages_base() {
 	declare -g REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
 	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut-network openresolv"
 	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano vim parted"
-	#--repository=https://chililinux.com/void/current
-	ADDITIONAL_PKGS+=" duf dfc nano-syntax-highlighting"
+	ADDITIONAL_PKGS+=" nano-syntax-highlighting"	#--repository=https://chililinux.com/void/current
+	ADDITIONAL_PKGS+=" porg"                      #--repository=https://chililinux.com/void/current
+	ADDITIONAL_PKGS+=" duf dfc"
 	ADDITIONAL_PKGS+=" btop htop"
 	ADDITIONAL_PKGS+=" tree rsync lynx parallel tmate gpm evtest acpi"
 	ADDITIONAL_PKGS+=" grub-void-theme"
-	ADDITIONAL_PKGS+=" xz zstd porg"
+	ADDITIONAL_PKGS+=" xz zstd"
 	ADDITIONAL_PKGS+=" bc geoip geoipupdate iputils lvm2 cryptsetup pigz"
 	ADDITIONAL_PKGS+=" xtools vpm vsv neofetch"
 	ADDITIONAL_PKGS+=" bash-completion"
@@ -133,7 +134,7 @@ sh_choose_packages_common_X() {
 	#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
 	ADDITIONAL_PKGS+=" gnome-keyring"
 	ADDITIONAL_PKGS+=" orca"
-	ADDITIONAL_PKGS+=" setxkbmap"
+	xADDITIONAL_PKGS+=" setxkbmap"
 	ADDITIONAL_PKGS+=" numlockx"
 	ADDITIONAL_PKGS+=" nitrogen"
 	ADDITIONAL_PKGS+=" evtest-qt"
@@ -212,7 +213,7 @@ sh_choose_packages_xfce_custom() {
 	ADDITIONAL_PKGS+=" xfce4-xkb-plugin"
 	ADDITIONAL_PKGS+=" xfce4-plugins"
 	ADDITIONAL_PKGS+=" mate-notification-daemon"
-	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
+	ADDITIONAL_PKGS+=" xfwm-axiom-theme"  #--repository=https://chililinux.com/void/current
 	ADDITIONAL_PKGS+=" plank"
 	ADDITIONAL_PKGS+=" adwaita-icon-theme"
 	ADDITIONAL_PKGS+=" xarchiver unrar zip unzip 7zip p7zip bzip2 file-roller"
@@ -1092,7 +1093,8 @@ fi
 XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-fastly.voidlinux.org/current""\
  --repository=https://repo-fastly.voidlinux.org/current/nonfree""\
  --repository=https://repo-fastly.voidlinux.org/current/multilib""\
- --repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree"
+ --repository=https://repo-fastly.voidlinux.org/current/multilib/nonfree""\
+ --repository=https://chililinux.com/void/current"
 
 # Configure dracut to use overlayfs for the writable overlay.
 BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "
