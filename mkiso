@@ -84,14 +84,14 @@ declare -g SQUASHFS_COMPRESSION=xz
 declare -g INITRAM_COMPRESSION=xz
 
 sh_choose_packages_base() {
-    print_step "Selecionando pacotes essenciais"
+	print_step "Selecionando pacotes essenciais"
 	declare -a INCLUDE_DIRS=()
 	declare -g PROGNAME=$(basename "$0")
 	declare -g REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
 	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut-network openresolv"
 	declare -g ADDITIONAL_PKGS="dialog gettext curl wget git pv nano parted"
-    ADDITIONAL_PKGS+=" btop htop"
-    ADDITIONAL_PKGS+=" tree rsync lynx parallel tmate gpm evtest acpi acpid"
+	ADDITIONAL_PKGS+=" btop htop"
+	ADDITIONAL_PKGS+=" tree rsync lynx parallel tmate gpm evtest acpi acpid"
 	ADDITIONAL_PKGS+=" xz zstd cryptsetup lvm2 wireless_tools wpa_supplicant socklog-void openntpd"
 	ADDITIONAL_PKGS+=" bc geoip geoipupdate iputils"
 	ADDITIONAL_PKGS+=" xtools vpm vsv neofetch pfetch"
@@ -102,45 +102,45 @@ sh_choose_packages_base() {
 	ADDITIONAL_PKGS+=" cifs-utils ntfs-3g"
 	ADDITIONAL_PKGS+=" bubblewrap"
 	#--repository=https://chililinux.com/void/current
-    ADDITIONAL_PKGS+=" chili-grub-void-theme nano-syntax-highlighting"
+	ADDITIONAL_PKGS+=" chili-grub-void-theme nano-syntax-highlighting"
 	#   ADDITIONAL_PKGS+=" wifi-firmware"
 	#   ADDITIONAL_PKGS+=" rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
-#	#pacman
+	#	#pacman
 	ADDITIONAL_PKGS+=" pacman fakeroot bsdtar"
 }
 
 sh_choose_packages_common_X() {
-    print_step "Selecionando pacotes X Common"
-    #xorg
-    ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 dbus-elogind polkit-elogind xdg-user-dirs xrdb"
-    #file manager
-    ADDITIONAL_PKGS+=" Thunar"
-    #browser
+	print_step "Selecionando pacotes X Common"
+	#xorg
+	ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 dbus-elogind polkit-elogind xdg-user-dirs xrdb"
+	#file manager
+	ADDITIONAL_PKGS+=" Thunar"
+	#browser
 	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
 	#fonts
 	ADDITIONAL_PKGS+=" noto-fonts-emoji ttf-ubuntu-font-family font-iosevka nerd-fonts-symbols-ttf"
 	#themes
-    ADDITIONAL_PKGS+=" Adapta"
-    #network
-    ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
-    #terminal
-    ADDITIONAL_PKGS+=" xfce4-terminal"
+	ADDITIONAL_PKGS+=" Adapta"
+	#network
+	ADDITIONAL_PKGS+=" NetworkManager network-manager-applet"
+	#terminal
+	ADDITIONAL_PKGS+=" xfce4-terminal"
 	ADDITIONAL_PKGS+=" cool-retro-term"
 	ADDITIONAL_PKGS+=" rxvt-unicode"
-    #bluetooth
+	#bluetooth
 	ADDITIONAL_PKGS+=" bluez bluez-deprecated bluez-alsa bluedevil blueman bluez-cups blueberry gnome-bluetooth1"
-    #audio
-    ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
-    ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
-#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
-    ADDITIONAL_PKGS+=" gnome-keyring"
-    ADDITIONAL_PKGS+=" orca"
- 	ADDITIONAL_PKGS+=" setxkbmap"
-    ADDITIONAL_PKGS+=" numlockx"
-    ADDITIONAL_PKGS+=" nitrogen"
-    ADDITIONAL_PKGS+=" evtest-qt"
+	#audio
+	ADDITIONAL_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
+	ADDITIONAL_PKGS+=" xfce4-pulseaudio-plugin"
+	#	#ADDITIONAL_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
+	ADDITIONAL_PKGS+=" gnome-keyring"
+	ADDITIONAL_PKGS+=" orca"
+	ADDITIONAL_PKGS+=" setxkbmap"
+	ADDITIONAL_PKGS+=" numlockx"
+	ADDITIONAL_PKGS+=" nitrogen"
+	ADDITIONAL_PKGS+=" evtest-qt"
 	ADDITIONAL_PKGS+=" gparted"
-    ADDITIONAL_PKGS+=" connman"
+	ADDITIONAL_PKGS+=" connman"
 	ADDITIONAL_PKGS+=" inxi"
 	ADDITIONAL_PKGS+=" octoxbps"
 	#login manager
@@ -151,76 +151,76 @@ sh_choose_packages_common_X() {
 }
 
 sh_choose_packages_awesome() {
-    print_step "Selecionando pacotes Awesome Custom"
-    #awesome
-    ADDITIONAL_PKGS+=" awesome polybar"
-    ADDITIONAL_PKGS+=" pcmanfm"
-    ADDITIONAL_PKGS+=" font-awesome"
+	print_step "Selecionando pacotes Awesome Custom"
+	#awesome
+	ADDITIONAL_PKGS+=" awesome polybar"
+	ADDITIONAL_PKGS+=" pcmanfm"
+	ADDITIONAL_PKGS+=" font-awesome"
 }
 
 sh_choose_packages_kde() {
-    print_step "Selecionando pacotes Kde Custom"
-    #kde5
-    ADDITIONAL_PKGS+=" kde5"
+	print_step "Selecionando pacotes Kde Custom"
+	#kde5
+	ADDITIONAL_PKGS+=" kde5"
 }
 
 sh_choose_packages_gnome() {
-    print_step "Selecionando pacotes Gnome Custom"
-    #gnome
-    ADDITIONAL_PKGS+=" gnome"
+	print_step "Selecionando pacotes Gnome Custom"
+	#gnome
+	ADDITIONAL_PKGS+=" gnome"
 }
 
 sh_choose_packages_fluxbox() {
-    print_step "Selecionando pacotes Fluxbox Custom"
-    #fluxbox
-    ADDITIONAL_PKGS+=" fluxbox polybar"
-    ADDITIONAL_PKGS+=" pcmanfm"
+	print_step "Selecionando pacotes Fluxbox Custom"
+	#fluxbox
+	ADDITIONAL_PKGS+=" fluxbox polybar"
+	ADDITIONAL_PKGS+=" pcmanfm"
 }
 
 sh_choose_packages_enlightenment() {
-    print_step "Selecionando pacotes Enlightenment Custom"
-    #enlightenment
-    ADDITIONAL_PKGS+=" enlightenment efl exquisite"
+	print_step "Selecionando pacotes Enlightenment Custom"
+	#enlightenment
+	ADDITIONAL_PKGS+=" enlightenment efl exquisite"
 }
 
 sh_choose_packages_xfce_base() {
-    print_step "Selecionando pacotes XFCE Base"
-    ADDITIONAL_PKGS+=" xfce4"
+	print_step "Selecionando pacotes XFCE Base"
+	ADDITIONAL_PKGS+=" xfce4"
 	ADDITIONAL_PKGS+=" firefox firefox-i18n-pt-BR"
 }
 
 sh_choose_packages_xfce_custom() {
-    print_step "Selecionando pacotes XFCE Custom"
+	print_step "Selecionando pacotes XFCE Custom"
 	ADDITIONAL_PKGS+=" xfce4-screenshooter xfce4-dict"
-    ADDITIONAL_PKGS+=" xfce4-battery-plugin"
-    ADDITIONAL_PKGS+=" xfce4-clipman-plugin"
-    ADDITIONAL_PKGS+=" xfce4-cpufreq-plugin"
+	ADDITIONAL_PKGS+=" xfce4-battery-plugin"
+	ADDITIONAL_PKGS+=" xfce4-clipman-plugin"
+	ADDITIONAL_PKGS+=" xfce4-cpufreq-plugin"
 	ADDITIONAL_PKGS+=" xfce4-sensors-plugin"
 	ADDITIONAL_PKGS+=" xfce4-systemload-plugin"
 	ADDITIONAL_PKGS+=" xfce4-cpugraph-plugin"
 	ADDITIONAL_PKGS+=" xfce4-datetime-plugin"
-    ADDITIONAL_PKGS+=" xfce4-diskperf-plugin"
-    ADDITIONAL_PKGS+=" xfce4-fsguard-plugin"
+	ADDITIONAL_PKGS+=" xfce4-diskperf-plugin"
+	ADDITIONAL_PKGS+=" xfce4-fsguard-plugin"
 	ADDITIONAL_PKGS+=" xfce4-genmon-plugin"
-    ADDITIONAL_PKGS+=" xfce4-mailwatch-plugin"
-    ADDITIONAL_PKGS+=" xfce4-mpc-plugin"
-    ADDITIONAL_PKGS+=" xfce4-netload-plugin"
+	ADDITIONAL_PKGS+=" xfce4-mailwatch-plugin"
+	ADDITIONAL_PKGS+=" xfce4-mpc-plugin"
+	ADDITIONAL_PKGS+=" xfce4-netload-plugin"
 	ADDITIONAL_PKGS+=" xfce4-time-out-plugin"
-    ADDITIONAL_PKGS+=" xfce4-timer-plugin"
-    ADDITIONAL_PKGS+=" xfce4-verve-plugin"
-    ADDITIONAL_PKGS+=" xfce4-whiskermenu-plugin"
-    ADDITIONAL_PKGS+=" xfce4-weather-plugin"
- 	ADDITIONAL_PKGS+=" xfce4-wavelan-plugin"
-    ADDITIONAL_PKGS+=" xfce4-xkb-plugin"
-    ADDITIONAL_PKGS+=" xfce4-plugins"
-    ADDITIONAL_PKGS+=" mate-notification-daemon"
- 	ADDITIONAL_PKGS+=" plank"
+	ADDITIONAL_PKGS+=" xfce4-timer-plugin"
+	ADDITIONAL_PKGS+=" xfce4-verve-plugin"
+	ADDITIONAL_PKGS+=" xfce4-whiskermenu-plugin"
+	ADDITIONAL_PKGS+=" xfce4-weather-plugin"
+	ADDITIONAL_PKGS+=" xfce4-wavelan-plugin"
+	ADDITIONAL_PKGS+=" xfce4-xkb-plugin"
+	ADDITIONAL_PKGS+=" xfce4-plugins"
+	ADDITIONAL_PKGS+=" mate-notification-daemon"
+	ADDITIONAL_PKGS+=" plank"
 	ADDITIONAL_PKGS+=" adwaita-icon-theme"
 	ADDITIONAL_PKGS+=" xarchiver unrar zip unzip 7zip p7zip bzip2 file-roller"
-#	#ADDITIONAL_PKGS+=" fonts-roboto-ttf liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font font-emoji-one-color google-fonts-ttf"
+	#	#ADDITIONAL_PKGS+=" fonts-roboto-ttf liberation-fonts-ttf dejavu-fonts-ttf fonts-droid-ttf fonts-croscore-ttf terminus-font font-emoji-one-color google-fonts-ttf"
 	ADDITIONAL_PKGS+=" avahi irqbalance"
 	ADDITIONAL_PKGS+=" cups system-config-printer system-config-printer-udev splix samsung-unified-driver"
-    ADDITIONAL_PKGS+=" brother-brlaser cups-pdf"
+	ADDITIONAL_PKGS+=" brother-brlaser cups-pdf"
 	ADDITIONAL_PKGS+=" gvfs gvfs-smb gvfs-cdda inetutils iputils"
 	ADDITIONAL_PKGS+=" bat"
 	ADDITIONAL_PKGS+=" vlc celluloid"
@@ -230,9 +230,9 @@ sh_choose_packages_xfce_custom() {
 	ADDITIONAL_PKGS+=" remmina remmina-kwallet"
 	#--repository=https://chililinux.com/void/current
 	ADDITIONAL_PKGS+=" xfwm-axiom-theme"
-#	#office
+	#	#office
 	ADDITIONAL_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
-#
+	#
 }
 
 debug() {
@@ -259,77 +259,77 @@ sh_setEnvironment() {
 	declare -g BOOTLOG="/tmp/void-mklive-$(sh_diahora).log"
 	declare -g LOGGER='/dev/tty8'
 
-    # flag languages
-    : PT_BR=0
-    : "${EN_US=1}"
-    : "${DE_DE=2}"
-    : "${FR_FR=3}"
-    : "${LC_DEFAULT=$(sh_getLocale)}"
+	# flag languages
+	: PT_BR=0
+	: "${EN_US=1}"
+	: "${DE_DE=2}"
+	: "${FR_FR=3}"
+	: "${LC_DEFAULT=$(sh_getLocale)}"
 }
 
 sh_setLanguage() {
-    #   langmsg=('lang=("pt_BR" "en_US" "de_DE" "fr_FR" "es_ES" "it_IT")')
-    #   for xmsg in "${langmsg[@]}"; do eval "$xmsg"; done
-    #   #echo "lang       ${#lang[@]} ${lang[@]} ${lang[$PT_BR]} ${lang[$EN_US]}"
-    #   #echo "cmsg_ERRO ${#cmsg_ERRO[@]} ${cmsg_ERRO[@]} ${cmsg_ERRO[$PT_BR]} ${cmsg_ERRO[$EN_US]}"
+	#   langmsg=('lang=("pt_BR" "en_US" "de_DE" "fr_FR" "es_ES" "it_IT")')
+	#   for xmsg in "${langmsg[@]}"; do eval "$xmsg"; done
+	#   #echo "lang       ${#lang[@]} ${lang[@]} ${lang[$PT_BR]} ${lang[$EN_US]}"
+	#   #echo "cmsg_ERRO ${#cmsg_ERRO[@]} ${cmsg_ERRO[@]} ${cmsg_ERRO[$PT_BR]} ${cmsg_ERRO[$EN_US]}"
 
-    #   cmsg_LABEL[pt_BR]=$(gettext "Usar as teclas ${RED}↑ PARA CIMA ${RESET}e ${RED}↓ PARA BAIXO ${RESET}para navegar.\nUsar ${RED}T>
-    #   cmsg_LBL_check[pt_BR]=$(gettext "Usar as teclas ${RED}PARA CIMA ${RESET}e ${RED}PARA BAIXO ${RESET}para navegar.\nUsar ${RED}B>
-    #   cmsg_Tarball_Corrompido[pt_BR]=$(gettext "\n${RED}Aparentemente o tarball rootfs ${_TARBALL_ROOTFS} está corrompido.\n\n${BOLD>
-    cmsg_CommandNotFound[pt_BR]=$(gettext "não encontrei o comando")
-    cmsg_ImpossivelContinuar[pt_BR]=$(gettext "IMPOSSÍVEL CONTINUAR")
-    cmsg_ImpossivelContinuar1[pt_BR]=$(gettext "Esse script precisa dos comandos listados acima")
-    cmsg_ImpossivelContinuar2[pt_BR]=$(gettext "Instale-os e/ou verifique se estão no seu")
-    cmsg_InstCommand[pt_BR]=$(gettext "Instalar o(s) comando(s)")
-    cmsg_RunNew[pt_BR]=$(gettext "INFO: Rode novamente o aplicativo")
-    cmsg_RunNewErro[pt_BR]=$(gettext "ERRO na instalação dos comandos. Tente manualmente")
+	#   cmsg_LABEL[pt_BR]=$(gettext "Usar as teclas ${RED}↑ PARA CIMA ${RESET}e ${RED}↓ PARA BAIXO ${RESET}para navegar.\nUsar ${RED}T>
+	#   cmsg_LBL_check[pt_BR]=$(gettext "Usar as teclas ${RED}PARA CIMA ${RESET}e ${RED}PARA BAIXO ${RESET}para navegar.\nUsar ${RED}B>
+	#   cmsg_Tarball_Corrompido[pt_BR]=$(gettext "\n${RED}Aparentemente o tarball rootfs ${_TARBALL_ROOTFS} está corrompido.\n\n${BOLD>
+	cmsg_CommandNotFound[pt_BR]=$(gettext "não encontrei o comando")
+	cmsg_ImpossivelContinuar[pt_BR]=$(gettext "IMPOSSÍVEL CONTINUAR")
+	cmsg_ImpossivelContinuar1[pt_BR]=$(gettext "Esse script precisa dos comandos listados acima")
+	cmsg_ImpossivelContinuar2[pt_BR]=$(gettext "Instale-os e/ou verifique se estão no seu")
+	cmsg_InstCommand[pt_BR]=$(gettext "Instalar o(s) comando(s)")
+	cmsg_RunNew[pt_BR]=$(gettext "INFO: Rode novamente o aplicativo")
+	cmsg_RunNewErro[pt_BR]=$(gettext "ERRO na instalação dos comandos. Tente manualmente")
 }
 readconf() {
-    if [[ $LC_DEFAULT -eq 0 ]]; then
-        read -r -p "$@ [S/n]"
-    else
-        read -r -p "$@ [Y/n]"
-    fi
-    [[ ${REPLY^} == "" ]] && return $false
-    [[ ${REPLY^} == N ]] && return $true || return $false
+	if [[ $LC_DEFAULT -eq 0 ]]; then
+		read -r -p "$@ [S/n]"
+	else
+		read -r -p "$@ [Y/n]"
+	fi
+	[[ ${REPLY^} == "" ]] && return $false
+	[[ ${REPLY^} == N ]] && return $true || return $false
 }
 
 sh_checkDependencies() {
-    local d
-    local errorFound=0
-    declare -a missing
+	local d
+	local errorFound=0
+	declare -a missing
 
-    for d in "${DEPENDENCIES[@]}"; do
-        [[ -z $(command -v "$d") ]] && missing+=("$d") && errorFound=1 && printf '%s\n' "${red}${cmsg_ERRO[$LC_DEFAULT]}${reset}: ${cmsg_CommandNotFound[$LC_DEFAULT]} ${cyan}'$d'${reset}"
-    done
-    if ((errorFound)); then
-        echo "${yellow}--------------${cmsg_ImpossivelContinuar[$LC_DEFAULT]}-------------${reset}"
-        echo "${cmsg_ImpossivelContinuar1[$LC_DEFAULT]}" >&2
-        echo "${cmsg_ImpossivelContinuar2[$LC_DEFAULT]} \$PATH" >&2
-        echo "${yellow}-----------------------------------------------${reset}"
+	for d in "${DEPENDENCIES[@]}"; do
+		[[ -z $(command -v "$d") ]] && missing+=("$d") && errorFound=1 && printf '%s\n' "${red}${cmsg_ERRO[$LC_DEFAULT]}${reset}: ${cmsg_CommandNotFound[$LC_DEFAULT]} ${cyan}'$d'${reset}"
+	done
+	if ((errorFound)); then
+		echo "${yellow}--------------${cmsg_ImpossivelContinuar[$LC_DEFAULT]}-------------${reset}"
+		echo "${cmsg_ImpossivelContinuar1[$LC_DEFAULT]}" >&2
+		echo "${cmsg_ImpossivelContinuar2[$LC_DEFAULT]} \$PATH" >&2
+		echo "${yellow}-----------------------------------------------${reset}"
 
-        if [[ "$distro" = @(void|void-live|voidlinux) ]]; then
-            echo
-            if readconf "${yellow}${cmsg_InstCommand[$LC_DEFAULT]} '${cyan}${missing[*]}${reset}' ?"; then
-                if xbps-install -Sy "${missing[@]}"; then
-                    errorFound=0
-                    sh_checkDependencies
-                else
-                    die "${cmsg_RunNewErro[$LC_DEFAULT]}"
-                fi
-            fi
-        else
-            die "${cmsg_ERRO[$LC_DEFAULT]}: ${cmsg_InstalacaoAbortada[$LC_DEFAULT]}..."
-        fi
-    fi
+		if [[ "$distro" = @(void|void-live|voidlinux) ]]; then
+			echo
+			if readconf "${yellow}${cmsg_InstCommand[$LC_DEFAULT]} '${cyan}${missing[*]}${reset}' ?"; then
+				if xbps-install -Sy "${missing[@]}"; then
+					errorFound=0
+					sh_checkDependencies
+				else
+					die "${cmsg_RunNewErro[$LC_DEFAULT]}"
+				fi
+			fi
+		else
+			die "${cmsg_ERRO[$LC_DEFAULT]}: ${cmsg_InstalacaoAbortada[$LC_DEFAULT]}..."
+		fi
+	fi
 }
 
 sh_setAsciiLines() {
-    if [[ "$LANG" =~ 'UTF-8' ]]; then
-        export NCURSES_NO_UTF8_ACS=0
-    else
-        export NCURSES_NO_UTF8_ACS=1
-    fi
+	if [[ "$LANG" =~ 'UTF-8' ]]; then
+		export NCURSES_NO_UTF8_ACS=0
+	else
+		export NCURSES_NO_UTF8_ACS=1
+	fi
 }
 
 sh_setVarColors() {
@@ -363,20 +363,20 @@ sh_setVarColors() {
 }
 
 sh_getLocale() {
-    local lc
+	local lc
 
-    LC_DEFAULT="${Alanguage[pt_BR]}"
-    LOCALE="pt_BR"
-    #   if lc=$(grep _ <(locale -a) | head -1 | cut -c1-5); then
-    #       LOCALE="$lc"
-    #       LC_DEFAULT="${Alanguage[$lc]}"
-    #   fi
+	LC_DEFAULT="${Alanguage[pt_BR]}"
+	LOCALE="pt_BR"
+	#   if lc=$(grep _ <(locale -a) | head -1 | cut -c1-5); then
+	#       LOCALE="$lc"
+	#       LC_DEFAULT="${Alanguage[$lc]}"
+	#   fi
 }
 
 die() {
-    local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
-    local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
-    local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
+	local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
+	local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
+	local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
 	info_msg "ERROR: ${script_name0} $@"
 	error_out 1 $LINENO
 }
@@ -386,11 +386,12 @@ info_msg() {
 }
 
 print_step() {
-    local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
-    local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
-    local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
+	local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
+	local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
+	local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
 	CURRENT_STEP=$((CURRENT_STEP + 1))
-	info_msg "$script_name1=>$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
+	#info_msg "$script_name1=>$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
+	info_msg "=>$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
 }
 
 mount_pseudofs() {
@@ -403,11 +404,11 @@ mount_pseudofs() {
 
 umount_pseudofs() {
 	for f in sys dev proc; do
-		if ! umount -R -f "$ROOTFS/$f"  > /dev/null 2>&-; then
-    	    if (( LBIND )); then
-	    		info_msg "ERROR: failed to unmount $ROOTFS/$f/"
-		    	return 1
-		    fi
+		if ! umount -R -f "$ROOTFS/$f" >/dev/null 2>&-; then
+			if ((LBIND)); then
+				info_msg "ERROR: failed to unmount $ROOTFS/$f/"
+				return 1
+			fi
 		fi
 		LBIND=0
 	done
@@ -416,7 +417,7 @@ umount_pseudofs() {
 error_out() {
 	trap - INT TERM 0
 	umount_pseudofs || exit "${1:-0}"
-  	[ -d "$BUILDDIR" ] && [ -z "$KEEP_BUILDDIR" ] && rm -rf --one-file-system "$BUILDDIR"
+	[ -d "$BUILDDIR" ] && [ -z "$KEEP_BUILDDIR" ] && rm -rf --one-file-system "$BUILDDIR"
 	exit "${1:-0}"
 }
 
@@ -460,15 +461,15 @@ copy_autoinstaller_files() {
 }
 
 install_prereqs() {
-{
-   	LC_ALL=C XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -c "$XBPS_HOST_CACHEDIR" -y $REQUIRED_PKGS -S
-} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-    result="${PIPESTATUS[0]}"
+	{
+		LC_ALL=C XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -c "$XBPS_HOST_CACHEDIR" -y $REQUIRED_PKGS -S
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	result="${PIPESTATUS[0]}"
 	[ $result -ne 0 ] && die "Failed to install required software, exiting..."
 }
 
 install_packages() {
-    print_step "Running dry-run for packages list selected..."
+	print_step "Running dry-run for packages list selected..."
 	{
 		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
@@ -477,29 +478,29 @@ install_packages() {
 
 	mount_pseudofs
 
-#    print_step "Atualizando pacotes essenciais em $ROOTFS..."
-#    {
-#		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -Sf -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y xbps cryptsetup linux
-#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-#	result="${PIPESTATUS[0]}"
-#	[ $result -ne 0 ] && die "Failed to install $PACKAGE_LIST"
+	#    print_step "Atualizando pacotes essenciais em $ROOTFS..."
+	#    {
+	#		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -Sf -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y xbps cryptsetup linux
+	#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	#	result="${PIPESTATUS[0]}"
+	#	[ $result -ne 0 ] && die "Failed to install $PACKAGE_LIST"
 
-    print_step "Instalando void meta pkgs BASE INITRAMFS em $ROOTFS..."
-    {
+	print_step "Instalando void meta pkgs BASE INITRAMFS em $ROOTFS..."
+	{
 		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $PACKAGE_LIST $INITRAMFS_PKGS
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	result="${PIPESTATUS[0]}"
 	[ $result -ne 0 ] && die "Failed to install $PACKAGE_LIST"
 
-    print_step "Instalando void meta pkgs ADDITIONAL em rootfs..."
-    {
+	print_step "Instalando void meta pkgs ADDITIONAL em rootfs..."
+	{
 		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $ADDITIONAL_PKGS
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	result="${PIPESTATUS[0]}"
 	[ $result -ne 0 ] && die "Failed to install $ADDITIONAL_PKGS"
 
 	print_step "Reconfigurando o ambiente - pass 1"
-    {
+	{
 		xbps-reconfigure -r "$ROOTFS" -f base-files >/dev/null 2>&1
 		chroot "$ROOTFS" env -i xbps-reconfigure -f base-files
 
@@ -518,156 +519,156 @@ ignore_packages() {
 }
 
 get_conf_path() {
-    local path="config-$name"
-    echo "$path"
+	local path="config-$name"
+	echo "$path"
 }
 
 install_skel_user() {
-    local path
+	local path
 
-    #skel
-    for path in "${aname[@]}"; do
-        if [[ -d "$path" ]]; then
-           	print_step "Copiando user skel de ${cyan}$path${reset} into $ROOTFS/etc/skel"
-        	{
-        		[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
-        		cp -Rpva $path/etc/. "$ROOTFS/etc/"
-        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-        fi
-    done
+	#skel
+	for path in "${aname[@]}"; do
+		if [[ -d "$path" ]]; then
+			print_step "Copiando user skel de ${cyan}$path${reset} into $ROOTFS/etc/skel"
+			{
+				[ -d "$ROOTFS/etc/skel/" ] && mkdir -p "$ROOTFS"/etc/skel/
+				cp -Rpva $path/etc/. "$ROOTFS/etc/"
+			} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		fi
+	done
 }
 
 install_skel_root() {
-    local path='config-common'
+	local path='config-common'
 
-    #skel root
+	#skel root
 	if [[ -d "$path" ]]; then
 		print_step "Copiando root skel de ${cyan}$path${reset} para $ROOTFS/root/"
 		{
-      		cp -Rpva $path/etc/skel/.bash* $ROOTFS/root/
-       		cp -Rpva $path/etc/skel/.git-prompt.sh $ROOTFS/root/
-       		cp -Rpva $path/etc/skel/.dircolors $ROOTFS/root/
-       		rsync -a $path/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/
+			cp -Rpva $path/etc/skel/.bash* $ROOTFS/root/
+			cp -Rpva $path/etc/skel/.git-prompt.sh $ROOTFS/root/
+			cp -Rpva $path/etc/skel/.dircolors $ROOTFS/root/
+			rsync -a $path/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/
 		} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	fi
 }
 
 install_wallpapers() {
-    local path
+	local path
 
-    for path in "${aname[@]}"; do
-        if [[ -d "$path" ]]; then
-        	print_step "Copiando wallpapers from $path into $ROOTFS/usr/share/backgrounds"
-	        {
-		        [ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-        		cp -Rpva $path/usr/share/backgrounds -t "$ROOTFS/usr/share/"
-        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-        fi
-    done
+	for path in "${aname[@]}"; do
+		if [[ -d "$path" ]]; then
+			print_step "Copiando wallpapers from $path into $ROOTFS/usr/share/backgrounds"
+			{
+				[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
+				cp -Rpva $path/usr/share/backgrounds -t "$ROOTFS/usr/share/"
+			} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		fi
+	done
 }
 
 install_installer() {
-    local path
+	local path
 
-    for path in "${aname[@]}"; do
-        if [[ -d "$path" ]]; then
-        	print_step "Copiando installer from $path into $ROOTFS/usr/share/applications"
-     	    {
-        		[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-        		cp -Rpva $path/usr/share/applications -t "$ROOTFS/usr/share/"
-        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-        fi
-    done
+	for path in "${aname[@]}"; do
+		if [[ -d "$path" ]]; then
+			print_step "Copiando installer from $path into $ROOTFS/usr/share/applications"
+			{
+				[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
+				cp -Rpva $path/usr/share/applications -t "$ROOTFS/usr/share/"
+			} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		fi
+	done
 }
 
 install_usr() {
-    local path
+	local path
 
-    for path in "${aname[@]}"; do
-        if [[ -d "$path" ]]; then
-           	print_step "Copiando /usr from $path into $ROOTFS/usr/"
-    	    {
-	    	    [ -d "$ROOTFS/usr" ] && mkdir -p "$ROOTFS"/usr/
-    		    rsync -a $path/usr/ $ROOTFS/usr/
-        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-        fi
-    done
+	for path in "${aname[@]}"; do
+		if [[ -d "$path" ]]; then
+			print_step "Copiando /usr from $path into $ROOTFS/usr/"
+			{
+				[ -d "$ROOTFS/usr" ] && mkdir -p "$ROOTFS"/usr/
+				rsync -a $path/usr/ $ROOTFS/usr/
+			} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		fi
+	done
 }
 
 install_common() {
-    local common_path='config-common'
+	local common_path='config-common'
 
 	print_step "Copiando config-common para $ROOTFS/"
 	{
-        rsync -a --copy-links $common_path/ $ROOTFS/
+		rsync -a --copy-links $common_path/ $ROOTFS/
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 install_themes() {
-    local path
+	local path
 
-    for path in "${aname[@]}"; do
-        if [[ -d "$path" ]]; then
-        	print_step "Copiando themes from $path into $ROOTFS/usr/share/themes"
-	        {
-    	    	[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-        		cp -Rpva $path/usr/share/themes -t "$ROOTFS/usr/share/"
-        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-        fi
-    done
+	for path in "${aname[@]}"; do
+		if [[ -d "$path" ]]; then
+			print_step "Copiando themes from $path into $ROOTFS/usr/share/themes"
+			{
+				[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
+				cp -Rpva $path/usr/share/themes -t "$ROOTFS/usr/share/"
+			} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		fi
+	done
 }
 
 install_icons() {
-    local path
+	local path
 
-    for path in "${aname[@]}"; do
-        if [[ -d "$path" ]]; then
-        	print_step "Copiando icons from $path into $ROOTFS/usr/share/icons"
-        	{
-    	    	[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
-    		    cp -Rpva $path/usr/share/icons -t "$ROOTFS/usr/share/"
-        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-        fi
-    done
+	for path in "${aname[@]}"; do
+		if [[ -d "$path" ]]; then
+			print_step "Copiando icons from $path into $ROOTFS/usr/share/icons"
+			{
+				[ -d "$ROOTFS/usr/share/" ] && mkdir -p "$ROOTFS"/usr/share/
+				cp -Rpva $path/usr/share/icons -t "$ROOTFS/usr/share/"
+			} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		fi
+	done
 }
 
 install_grub_themes() {
-    local path
+	local path
 
-    for path in "${aname[@]}"; do
-        if [[ -d "$path" ]]; then
-        	print_step "Copiando grub themes from $path into $ROOTFS/boot/grub/themes"
-        	{
-    	    	[ -d "$ROOTFS/boot/grub/themes/" ] && mkdir -p "$ROOTFS"/boot/grub/
-    	    	cp -Rpva $path/boot/grub/themes -t "$ROOTFS/boot/grub/"
-        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-        fi
-    done
+	for path in "${aname[@]}"; do
+		if [[ -d "$path" ]]; then
+			print_step "Copiando grub themes from $path into $ROOTFS/boot/grub/themes"
+			{
+				[ -d "$ROOTFS/boot/grub/themes/" ] && mkdir -p "$ROOTFS"/boot/grub/
+				cp -Rpva $path/boot/grub/themes -t "$ROOTFS/boot/grub/"
+			} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		fi
+	done
 }
 
 install_chili_apps() {
-    local path
+	local path
 
-    for path in "${aname[@]}"; do
-        if [[ -d "$path" ]]; then
-        	print_step "Copiando apps binarios de $path para $ROOTFS/usr/bin"
-        	{
-	        	[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/
-    		    for x in $path/usr/bin/*; do
-        			install -Dm755 $x "$ROOTFS"/usr/bin/
-        		done
-        	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-        fi
-    done
+	for path in "${aname[@]}"; do
+		if [[ -d "$path" ]]; then
+			print_step "Copiando apps binarios de $path para $ROOTFS/usr/bin"
+			{
+				[ -d "$ROOTFS/usr/bin/" ] && mkdir -p "$ROOTFS"/usr/bin/
+				for x in $path/usr/bin/*; do
+					install -Dm755 $x "$ROOTFS"/usr/bin/
+				done
+			} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		fi
+	done
 }
 
 install_pacman() {
-    sh_chroot_job "Instalando pacman App" "/usr/bin/pacman -Sydd pacman-contrib paru --noconfirm --overwrite \*"
-    if ((MAKE_X)); then
-        sh_chroot_job "Instalando Brave-Browser" "/usr/bin/pacman -Sdd brave-browser --noconfirm --overwrite \*"
-        sh_chroot_job "Instalando Google Chrome" "/usr/bin/paru -Sdd google-chrome --noconfirm --overwrite \*"
-    fi
-    sh_chroot_job "Removendo Cache" "/usr/bin/paccache -k0 -r -v"
+	sh_chroot_job "Instalando pacman App" "/usr/bin/pacman -Sydd pacman-contrib paru --noconfirm --overwrite \*"
+	if ((MAKE_X)); then
+		sh_chroot_job "Instalando Brave-Browser" "/usr/bin/pacman -Sdd brave-browser --noconfirm --overwrite \*"
+		sh_chroot_job "Instalando Google Chrome" "/usr/bin/paru -Sdd google-chrome --noconfirm --overwrite \*"
+	fi
+	sh_chroot_job "Removendo Cache" "/usr/bin/paccache -k0 -r -v"
 }
 
 reconfigure_packages() {
@@ -812,19 +813,19 @@ generate_grub_efi_boot() {
 }
 
 get_compression_options() {
-    local param
-    case $1 in
-        gzip) param=" -noappend -ef exclude_dir -comp gzip -Xcompression-level 1" ;;
-        xz)   param=" -noappend -ef exclude_dir -b 1048576 -comp xz -Xdict-size 100%" ;;
-        zstd) param=" -noappend -ef exclude_dir -b 1M -comp zstd -Xcompression-level 1" ;;
-        lzma) param=" -noappend -ef exclude_dir -b 1M -comp lzma" ;;
-        lz4)  param=" -noappend -ef exclude_dir -b 1M -comp lz4 -Xhc" ;;
-    esac
-    echo "$param"
+	local param
+	case $1 in
+	gzip) param=" -noappend -ef exclude_dir -comp gzip -Xcompression-level 1" ;;
+	xz) param=" -noappend -ef exclude_dir -b 1048576 -comp xz -Xdict-size 100%" ;;
+	zstd) param=" -noappend -ef exclude_dir -b 1M -comp zstd -Xcompression-level 1" ;;
+	lzma) param=" -noappend -ef exclude_dir -b 1M -comp lzma" ;;
+	lz4) param=" -noappend -ef exclude_dir -b 1M -comp lz4 -Xhc" ;;
+	esac
+	echo "$param"
 }
 
 generate_squashfs() {
-    local options=$(get_compression_options "$SQUASHFS_COMPRESSION")
+	local options=$(get_compression_options "$SQUASHFS_COMPRESSION")
 
 	umount_pseudofs
 	{
@@ -839,13 +840,13 @@ generate_squashfs() {
 		umount -f "$BUILDDIR/tmp-rootfs"
 		mkdir -p "$IMAGEDIR/LiveOS"
 
-#       "$options" || die "Failed to generate squashfs image"
+		#       "$options" || die "Failed to generate squashfs image"
 		"$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR/tmp" "$IMAGEDIR/LiveOS/squashfs.img" \
 			-comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
 		chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
 
 		# Remove rootfs and temporary dirs, we don't need them anymore.
-        [ -z "$KEEP_BUILDDIR" ] && rm -rf "$ROOTFS"
+		[ -z "$KEEP_BUILDDIR" ] && rm -rf "$ROOTFS"
 		rm -rf "$BUILDDIR/tmp-rootfs"
 		rm -rf "$BUILDDIR/tmp"
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
@@ -878,91 +879,91 @@ usage() {
 		        To generate a more complete live ISO image, use build-x86-images.sh.
 
 		        OPTIONS
-                -a <arch>          Set XBPS_ARCH in the ISO image
-                -b <system-pkg>    Set an alternative base package (default: base-system)
-                -r <repo>          Use this XBPS repository. May be specified multiple times
-                -c <cachedir>      Use this XBPS cache directory (default: ./xbps-cachedir-<arch>)
-                -k <keymap>        Default keymap to use (default: us)
-                -l <locale>        Default locale to use (default: en_US.UTF-8)
-                -i <lz4|gzip|bzip2|xz|zstd|lzma|lzo> Compression type for the initramfs image (default: xz)
-                -s <lz4|gzip|bzip2|xz|zstd|lzma|lz4|lzo>   Compression type for the squashfs image (default: xz)
-                -o <file>          Output file name for the ISO image (default: automatic)
-                -p "<pkg> ..."     Install additional packages in the ISO image
-                -g "<pkg> ..."     Ignore packages when building the ISO image
-                -I <includedir>    Include directory structure under given path in the ROOTFS
-                -S "<service> ..." Enable services in the ISO image
-                -C "<arg> ..."     Add additional kernel command line arguments
-                -T <title>         Modify the bootloader title (default: Void Linux)
-                -v linux<version>  Install a custom Linux version on ISO image (default: linux metapackage)
-                -K                 Do not remove builddir
-                -h                 Show this help and exit
-                -V                 Show version and exit
-                -n                 NAO cria squashfs, usa antigo
-                -X                 Make XFCE iso base.
-                -Y                 Make XFCE iso custom.
-                -W                 Make AWESOME iso custom.
-                -E                 Make ENLIGHTNMENT iso custom.
-                -F                 Make FLUXBOX iso custom.
-                -G                 Make GNOME X iso custom.
-                -P                 Make KDE PLASM X iso custom.
-                -A                 Make ALL X iso custom.
-                -Q                 Quiet mode (default: 0)
+		                -a <arch>          Set XBPS_ARCH in the ISO image
+		                -b <system-pkg>    Set an alternative base package (default: base-system)
+		                -r <repo>          Use this XBPS repository. May be specified multiple times
+		                -c <cachedir>      Use this XBPS cache directory (default: ./xbps-cachedir-<arch>)
+		                -k <keymap>        Default keymap to use (default: us)
+		                -l <locale>        Default locale to use (default: en_US.UTF-8)
+		                -i <lz4|gzip|bzip2|xz|zstd|lzma|lzo> Compression type for the initramfs image (default: xz)
+		                -s <lz4|gzip|bzip2|xz|zstd|lzma|lz4|lzo>   Compression type for the squashfs image (default: xz)
+		                -o <file>          Output file name for the ISO image (default: automatic)
+		                -p "<pkg> ..."     Install additional packages in the ISO image
+		                -g "<pkg> ..."     Ignore packages when building the ISO image
+		                -I <includedir>    Include directory structure under given path in the ROOTFS
+		                -S "<service> ..." Enable services in the ISO image
+		                -C "<arg> ..."     Add additional kernel command line arguments
+		                -T <title>         Modify the bootloader title (default: Void Linux)
+		                -v linux<version>  Install a custom Linux version on ISO image (default: linux metapackage)
+		                -K                 Do not remove builddir
+		                -h                 Show this help and exit
+		                -V                 Show version and exit
+		                -n                 NAO cria squashfs, usa antigo
+		                -X                 Make XFCE iso base.
+		                -Y                 Make XFCE iso custom.
+		                -W                 Make AWESOME iso custom.
+		                -E                 Make ENLIGHTNMENT iso custom.
+		                -F                 Make FLUXBOX iso custom.
+		                -G                 Make GNOME X iso custom.
+		                -P                 Make KDE PLASM X iso custom.
+		                -A                 Make ALL X iso custom.
+		                -Q                 Quiet mode (default: 0)
 
 	EOF
 }
 
 set_config_distro() {
-    declare -ga name
+	declare -ga name
 
-    if ((MAKE_FULL_X)); then
-        title='Void Linux Full X Custom'
-        name='fullx-custom'
-        aname=( config-fullx-custom
-                config-enlightenment-custom
-                config-awesome-custom
-                config-fluxbox-custom
-                config-xfce-base
-                config-xfce-custom
-                config-kde-custom
-                config-gnome-custom)
-    elif ((MAKE_ENLIGHTENMENT)); then
-        title='Void Linux Enlightenment Custom'
-        name='enlightenment-custom'
-        aname=('config-enlightenment-custom')
-        aname=('config-enlightenment-custom')
-    elif ((MAKE_AWESOME)); then
-        title='Void Linux Awesome Custom'
-        name='awesome-custom'
-        aname=('config-awesome-custom')
-    elif ((MAKE_FLUXBOX)); then
-        title='Void Linux Fluxbox Custom'
-        name='fluxfox-custom'
-        aname=('config-fluxbox-custom')
-    elif ((MAKE_KDE)); then
-        title='Void Linux Kde Custom'
-        name='kde-custom'
-        aname=('config-kde-custom')
-    elif ((MAKE_GNOME)); then
-        title='Void Linux Gnome Custom'
-        name='gnome-custom'
-        aname=('config-gnome-custom')
-    elif ((MAKE_XFCE_BASE)); then
-        title='Void Linux Xfce Base'
-        name='xfce-base'
-        aname=('config-xfce-base')
-    elif ((MAKE_XFCE_CUSTOM)); then
-        title='Void Linux Xfce Custom'
-        name='xfce-custom'
-        aname=('config-xfce-custom')
-    else
-        title='Void Linux Base Custom'
-        name='base-custom'
-    fi
-    print_step "Building ISO    => ${yellow}$title${reset}"
-    print_step "Output file ISO => ${yellow}$OUTPUT_FILE${reset}"
-    print_step "Compression SFS => ${yellow}$SQUASHFS_COMPRESSION${reset}"
-    print_step "Compression RAM => ${yellow}$INITRAM_COMPRESSION${reset}"
-    print_step "ISO LABEL       => ${yellow}$VOL_ID${reset}"
+	if ((MAKE_FULL_X)); then
+		title='Void Linux Full X Custom'
+		name='fullx-custom'
+		aname=(config-fullx-custom
+			config-enlightenment-custom
+			config-awesome-custom
+			config-fluxbox-custom
+			config-xfce-base
+			config-xfce-custom
+			config-kde-custom
+			config-gnome-custom)
+	elif ((MAKE_ENLIGHTENMENT)); then
+		title='Void Linux Enlightenment Custom'
+		name='enlightenment-custom'
+		aname=('config-enlightenment-custom')
+		aname=('config-enlightenment-custom')
+	elif ((MAKE_AWESOME)); then
+		title='Void Linux Awesome Custom'
+		name='awesome-custom'
+		aname=('config-awesome-custom')
+	elif ((MAKE_FLUXBOX)); then
+		title='Void Linux Fluxbox Custom'
+		name='fluxfox-custom'
+		aname=('config-fluxbox-custom')
+	elif ((MAKE_KDE)); then
+		title='Void Linux Kde Custom'
+		name='kde-custom'
+		aname=('config-kde-custom')
+	elif ((MAKE_GNOME)); then
+		title='Void Linux Gnome Custom'
+		name='gnome-custom'
+		aname=('config-gnome-custom')
+	elif ((MAKE_XFCE_BASE)); then
+		title='Void Linux Xfce Base'
+		name='xfce-base'
+		aname=('config-xfce-base')
+	elif ((MAKE_XFCE_CUSTOM)); then
+		title='Void Linux Xfce Custom'
+		name='xfce-custom'
+		aname=('config-xfce-custom')
+	else
+		title='Void Linux Base Custom'
+		name='base-custom'
+	fi
+	print_step "Building ISO    => ${yellow}$title${reset}"
+	print_step "Output file ISO => ${yellow}$OUTPUT_FILE${reset}"
+	print_step "Compression SFS => ${yellow}$SQUASHFS_COMPRESSION${reset}"
+	print_step "Compression RAM => ${yellow}$INITRAM_COMPRESSION${reset}"
+	print_step "ISO LABEL       => ${yellow}$VOL_ID${reset}"
 }
 
 #
@@ -993,15 +994,39 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFfAGP" opt; do
 	p) PACKAGE_LIST="$PACKAGE_LIST $OPTARG" ;;
 	C) BOOT_CMDLINE="$OPTARG" ;;
 	T) BOOT_TITLE="$OPTARG" ;;
-	x|X) MAKE_X=1; MAKE_XFCE_BASE=1;;
-	y|Y) MAKE_X=1; MAKE_XFCE_CUSTOM=1;;
-	w|W) MAKE_X=1; MAKE_AWESOME=1;;
-	e|E) MAKE_X=1; MAKE_ENLIGHTENMENT=1;;
-	f|F) MAKE_X=1; MAKE_FLUXBOX=1;;
-	G)   MAKE_X=1; MAKE_GNOME=1;;
-	P)   MAKE_X=1; MAKE_KDE=1;;
-	A)   MAKE_X=1; MAKE_FULL_X=1;;
-    q|Q) QUIET=1 ;;
+	x | X)
+		MAKE_X=1
+		MAKE_XFCE_BASE=1
+		;;
+	y | Y)
+		MAKE_X=1
+		MAKE_XFCE_CUSTOM=1
+		;;
+	w | W)
+		MAKE_X=1
+		MAKE_AWESOME=1
+		;;
+	e | E)
+		MAKE_X=1
+		MAKE_ENLIGHTENMENT=1
+		;;
+	f | F)
+		MAKE_X=1
+		MAKE_FLUXBOX=1
+		;;
+	G)
+		MAKE_X=1
+		MAKE_GNOME=1
+		;;
+	P)
+		MAKE_X=1
+		MAKE_KDE=1
+		;;
+	A)
+		MAKE_X=1
+		MAKE_FULL_X=1
+		;;
+	q | Q) QUIET=1 ;;
 	v) LINUX_VERSION="$OPTARG" ;;
 	V)
 		version
@@ -1030,28 +1055,28 @@ if ((MAKE_X)); then
 	sh_choose_packages_common_X
 	if ((MAKE_FULL_X)); then
 		STEP_COUNT=72
-	    sh_choose_packages_awesome
-	    sh_choose_packages_enlightenment
-	    sh_choose_packages_fluxbox
-	    sh_choose_packages_xfce_base
-	    sh_choose_packages_xfce_custom
-	    sh_choose_packages_gnome
-	    sh_choose_packages_kde
+		sh_choose_packages_awesome
+		sh_choose_packages_enlightenment
+		sh_choose_packages_fluxbox
+		sh_choose_packages_xfce_base
+		sh_choose_packages_xfce_custom
+		sh_choose_packages_gnome
+		sh_choose_packages_kde
 	elif ((MAKE_ENLIGHTENMENT)); then
-	    sh_choose_packages_enlightenment
+		sh_choose_packages_enlightenment
 	elif ((MAKE_AWESOME)); then
-	    sh_choose_packages_awesome
+		sh_choose_packages_awesome
 	elif ((MAKE_FLUXBOX)); then
-	    sh_choose_packages_fluxbox
+		sh_choose_packages_fluxbox
 	elif ((MAKE_KDE)); then
-	    sh_choose_packages_kde
+		sh_choose_packages_kde
 	elif ((MAKE_GNOME)); then
-	    sh_choose_packages_gnome
+		sh_choose_packages_gnome
 	elif ((MAKE_XFCE_BASE)); then
-	    sh_choose_packages_xfce_base
+		sh_choose_packages_xfce_base
 	elif ((MAKE_XFCE_CUSTOM)); then
-	    sh_choose_packages_xfce_base
-	    sh_choose_packages_xfce_custom
+		sh_choose_packages_xfce_base
+		sh_choose_packages_xfce_custom
 	fi
 fi
 
@@ -1101,7 +1126,7 @@ ROOTDIR="/lfs/voidlinux"
 if [ -n "$ROOTDIR" ]; then
 	#	BUILDDIR=$(mktemp --tmpdir="$ROOTDIR" -d)
 	BUILDDIR="$ROOTDIR/$name"
-    [ -d "$BUILDDIR" ] && [ -z "$KEEP_BUILDDIR" ] && rm -rf --one-file-system "$BUILDDIR"
+	[ -d "$BUILDDIR" ] && [ -z "$KEEP_BUILDDIR" ] && rm -rf --one-file-system "$BUILDDIR"
 	mkdir -p "$BUILDDIR"
 else
 	BUILDDIR=$(mktemp --tmpdir="$(pwd -P)" -d)
@@ -1179,13 +1204,13 @@ install_packages
 install_skel_user
 install_skel_root
 if ((MAKE_X)); then
-#   install_installer
-    :
+	#   install_installer
+	:
 fi
 if ((MAKE_XFCE_CUSTOM)); then
-    install_wallpapers
-    install_themes
-    install_icons
+	install_wallpapers
+	install_themes
+	install_icons
 fi
 install_usr
 install_common
@@ -1197,19 +1222,19 @@ finish_clean
 
 : ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd dhcpcd}
 if ((MAKE_X)); then
-    : ${ADDITIONAL_SERVICE_LIST:=NetworkManager dbus elogind lxdm polkitd bluetoothd connmand acpid}
-    if ((MAKE_XFCE_CUSTOM)); then
-    	ADDITIONAL_SERVICE_LIST+=' avahi-daemon cupsd irqbalance sshd uuidd'
-    fi
+	: ${ADDITIONAL_SERVICE_LIST:=NetworkManager dbus elogind lxdm polkitd bluetoothd connmand acpid}
+	if ((MAKE_XFCE_CUSTOM)); then
+		ADDITIONAL_SERVICE_LIST+=' avahi-daemon cupsd irqbalance sshd uuidd'
+	fi
 else # tty
-    ADDITIONAL_SERVICE_LIST+=' gpm'
+	ADDITIONAL_SERVICE_LIST+=' gpm'
 fi
 print_step "Enabling services... ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST} ${ADDITIONAL_SERVICE_LIST}"
 enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST} ${ADDITIONAL_SERVICE_LIST}
 
 if [ "${#INCLUDE_DIRS[@]}" -gt 0 ]; then
-    print_step "Copying directory structures into the rootfs ..."
-    copy_include_directories
+	print_step "Copying directory structures into the rootfs ..."
+	copy_include_directories
 fi
 
 print_step "Generating initramfs image ($INITRAMFS_COMPRESSION)..."
@@ -1232,4 +1257,3 @@ generate_iso_image
 
 hsize=$(du -sh "$OUTPUT_FILE" | awk '{print $1}')
 info_msg "${green}Created $(readlink -f "$OUTPUT_FILE") ($hsize) successfully.${reset}"
-
