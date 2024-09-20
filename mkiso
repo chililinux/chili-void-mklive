@@ -31,6 +31,7 @@
 
 #export LANGUAGE=pt_BR
 export TERM=${TERM:-xterm}
+export TERM=${TERM:-xterm-256color}
 export TEXTDOMAINDIR=/usr/share/locale
 export TEXTDOMAIN=void-install
 # flag languages
