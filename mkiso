@@ -63,18 +63,18 @@ trap "eval \"$OLD_ALIASES\"" EXIT
 trap 'error_out $? $LINENO' INT TERM 0
 
 umask 022
-declare -gi MAKE_X=false
-declare -gi MAKE_XFCE_BASE=false
-declare -gi MAKE_XFCE_CUSTOM=false
-declare -gi MAKE_AWESOME=false
-declare -gi MAKE_ENLIGHTENMENT=false
-declare -gi MAKE_FLUXBOX=false
-declare -gi MAKE_KDE=false
-declare -gi MAKE_GNOME=false
-declare -gi MAKE_FULL_X=false
-#declare -gi KEEP_BUILDDIR=false
-declare -gi LBIND=false
-declare -gi QUIET=false
+declare -g MAKE_X=false
+declare -g MAKE_XFCE_BASE=false
+declare -g MAKE_XFCE_CUSTOM=false
+declare -g MAKE_AWESOME=false
+declare -g MAKE_ENLIGHTENMENT=false
+declare -g MAKE_FLUXBOX=false
+declare -g MAKE_KDE=false
+declare -g MAKE_GNOME=false
+declare -g MAKE_FULL_X=false
+#declare -g KEEP_BUILDDIR=false
+declare -g LBIND=false
+declare -g QUIET=false
 declare -gi STEP_COUNT=72
 declare -g VOL_ID='VOID_LIVE'
 declare -g title
