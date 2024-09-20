@@ -115,7 +115,7 @@ sh_choose_packages_base() {
 sh_choose_packages_common_X() {
 	print_step "Selecionando pacotes X Common"
 	#xorg
-	ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 dbus-elogind polkit-elogind xdg-user-dirs xrdb"
+	ADDITIONAL_PKGS+=" xorg xinit xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs xrdb"
 	#file manager
 	ADDITIONAL_PKGS+=" Thunar"
 	#browser

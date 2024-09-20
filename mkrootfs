@@ -39,7 +39,7 @@ ADDITIONAL_PKGS+=" nano-syntax-highlighting"	  # repository=https://chililinux.c
 #ADDITIONAL_PKGS+=" linux"
 #ADDITIONAL_PKGS+=" ipw2100-firmware ipw2200-firmware zd1211-firmware"
 #ADDITIONAL_PKGS+=" wifi-firmware linux-firmware-broadcom"
-declare -i quiet=0
+declare quiet=true
 declare -i njobs=12
 declare -i ncontador=0
 
@@ -111,7 +111,7 @@ while getopts "b:C:c:hr:x:o:vV:qQ" opt; do
 		echo "$PROGNAME @@MKLIVE_VERSION@@"
 		exit 0
 		;;
-	q | Q) quiet=1 ;;
+	q | Q) quiet=true ;;
 	esac
 done
 shift $((OPTIND - 1))
@@ -144,7 +144,7 @@ main() {
 	# We need to operate on a tempdir, if this fails to create, it is
 	# absolutely crucial to bail out so that we don't hose the system that
 	# is running the script.
-	if ((quiet)); then
+	if $quiet; then
 		#		ROOTFS=$(mktemp -d) || die "failed to create tempdir, exiting..." >/dev/null 2>&-
 		ROOTFS="base-custom"
 	else
@@ -160,7 +160,7 @@ main() {
 	# tampered with.  Its much easier to use these since the will always
 	# exist.
 
-	if ((quiet)); then
+	if $quiet; then
 		mkdir -p "$ROOTFS/var/db/xbps/keys" >/dev/null 2>&-
 		cp keys/*.plist "$ROOTFS/var/db/xbps/keys" >/dev/null 2>&-
 	else
@@ -170,7 +170,7 @@ main() {
 
 	# This sets up files that are important for XBPS to work on the new
 	# filesystem.  It does not actually install anything.
-	if ((quiet)); then
+	if $quiet; then
 		run_cmd_target "xbps-install -Sy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS" >/dev/null 2>&-
 	else
 		run_cmd_target "xbps-install -Sy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS"
@@ -190,7 +190,7 @@ main() {
 	# system package into the rootfs.  This will not produce a
 	# bootable system but will instead produce a base component that can
 	# be quickly expanded to perform other actions on.
-	if ((quiet)); then
+	if $quiet; then
 		run_cmd_target "xbps-install -SUy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS -y $SYSPKG $ADDITIONAL_PKGS" >/dev/null 2>&-
 	else
 		run_cmd_target "xbps-install -SUy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS -y $SYSPKG $ADDITIONAL_PKGS"
