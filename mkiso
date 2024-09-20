@@ -835,7 +835,7 @@ get_compression_options() {
 generate_squashfs() {
 	local options=$(get_compression_options "$SQUASHFS_COMPRESSION")
 
-	umount_pseudofs
+	#umount_pseudofs
 	{
 		# Find out required size for the rootfs and create an ext3fs image off it.
 		ROOTFS_SIZE=$(du --apparent-size -sm "$ROOTFS" | awk '{print $1}')
