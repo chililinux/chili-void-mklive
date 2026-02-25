@@ -1,0 +1,381 @@
+
+set pager="1"
+set locale_dir="(${voidlive})/boot/grub/locale"
+
+if [ -e "${prefix}/${grub_cpu}-${grub_platform}/all_video.mod" ]; then
+    insmod all_video
+else
+    insmod efi_gop
+    insmod efi_uga
+    insmod video_bochs
+    insmod video_cirrus
+fi
+
+insmod font
+insmod regexp
+insmod datehook
+insmod keylayouts
+insmod part_msdos
+insmod part_gpt
+insmod gfxmenu
+insmod jpeg
+insmod png
+theme=(${voidlive})/boot/grub/themes/voidbr/theme.txt
+export theme
+menu_color_normal=cyan/blue
+menu_color_highlight=white/blue
+export loaded
+export koptsok
+export disable_gfxterm
+export bootarch
+export firmware
+export firmware_found
+export from
+export fromiso
+export bootlang
+export keyboard
+export timezone
+export hwclock
+export def_bootlang
+export def_keyboard
+export def_timezone
+export menu_color_normal
+export menu_color_highlight
+export pager
+
+if loadfont "(${voidlive})/boot/grub/fonts/unicode.pf2" ; then
+    insmod gfxterm
+    set gfxmode="auto"
+
+    terminal_input console
+    terminal_output gfxterm
+
+    insmod png
+    background_image "(${voidlive})/boot/isolinux/@@SPLASHIMAGE@@"
+fi
+
+if [ cpuid -l ]; then
+    menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@)" --class void --class gnu-linux --class gnu --class os  {
+        set gfxpayload="keep"
+        linux (${voidlive})/boot/vmlinuz \
+		root=live:CDLABEL=VOIDBR_LIVE_BASE ro init=/sbin/init \
+		splash rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
+		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
+		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
+        initrd (${voidlive})/boot/initrd
+    }
+    menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) (RAM)" --class void --class gnu-linux --class gnu --class os {
+        set gfxpayload="keep"
+        linux (${voidlive})/boot/vmlinuz \
+		root=live:CDLABEL=VOIDBR_LIVE_BASE ro init=/sbin/init \
+		splash rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
+		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
+		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
+        initrd (${voidlive})/boot/initrd
+    }
+    menuentry 'Boot from Hard Disk' \
+        --class harddisk \
+        --class os {
+        exit
+    }
+
+    menuentry "Windows Boot Manager" --class windows --class os {
+        insmod part_gpt
+        insmod part_msdos
+        insmod fat
+        insmod chain
+
+        for disk in (hd0) (hd1) (hd2) (hd3); do
+            for part in ($disk,gpt1) ($disk,gpt2) ($disk,gpt3) ($disk,gpt4) \
+                        ($disk,msdos1) ($disk,msdos2) ($disk,msdos3) ($disk,msdos4); do
+
+                if [ -e "$part/EFI/Microsoft/Boot/bootmgfw.efi" ]; then
+                    echo "Found Windows on $part"
+                    chainloader "$part/EFI/Microsoft/Boot/bootmgfw.efi"
+                    boot
+                fi
+
+            done
+        done
+
+        echo "Windows not found."
+        sleep 3
+    }
+
+#    menuentry "Windows Boot Manager" --class windows --class os {
+#        insmod chain
+#        search --no-floppy --file --set=root /EFI/Microsoft/Boot/bootmgfw.efi
+#        chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+#    }
+
+    if [ "${grub_platform}" == 'efi' -a "${grub_cpu}" == 'x86_64' -a -f '/boot/memtest86+/memtest.efi' ]; then
+        menuentry 'Run Memtest86+ (RAM test)' \
+            --class memtest86 \
+            --class memtest \
+            --class gnu \
+            --class tool {
+            set gfxpayload=800x600,1024x768
+            linux /boot/memtest86+/memtest.efi
+        }
+    fi
+
+    if [ "${grub_platform}" == 'pc' -a -f '/boot/memtest86+/memtest' ]; then
+        menuentry 'Run Memtest86+ (RAM test)' \
+            --class memtest86 \
+            --class memtest \
+            --class gnu \
+            --class tool {
+            set gfxpayload=800x600,1024x768
+            linux /boot/memtest86+/memtest
+        }
+    fi
+
+    if [ "${grub_platform}" == 'pc' -a -f '/boot/memtest86+/memtest' ]; then
+        menuentry 'Run Memtest86+ (RAM test)' \
+            --class memtest86 \
+            --class memtest \
+            --class gnu \
+            --class tool {
+            set gfxpayload=800x600,1024x768
+            linux /boot/memtest86+/memtest
+        }
+    fi
+
+    if [ "${grub_platform}" == 'efi' ]; then
+        if [ "${grub_cpu}" == 'x86_64' -a -f '/shellx64.efi' ]; then
+            menuentry 'UEFI Shell' \
+                --class shell \
+                --class efi {
+                chainloader /shellx64.efi
+            }
+        elif [ "${grub_cpu}" == "i386" -a -f '/shellia32.efi' ]; then
+            menuentry 'UEFI Shell' \
+                --class shell \
+                --class efi {
+                chainloader /shellia32.efi
+            }
+        fi
+        menuentry 'UEFI Firmware Settings' \
+            --id 'uefi-firmware' \
+            --class firmware \
+            --class efi {
+            fwsetup
+        }
+    fi
+
+    efi_detect
+
+    menuentry 'System restart' \
+        --class reboot \
+        --class restart {
+        echo 'System rebooting...'
+        reboot
+    }
+
+    menuentry 'System shutdown' \
+        --class shutdown \
+        --class poweroff {
+        echo 'System shutting down...'
+        halt
+    }
+fi
+
+function menu_reload {
+    configfile /boot/grub/grub.cfg
+}
+
+function prompt {
+    echo -n "> "
+}
+
+function is_efi {
+    if [ "${grub_platform}" = "efi" ]; then
+        return 0
+    fi
+    return 1
+}
+
+function efi_detect {
+    if is_efi ; then
+        submenu --class=find.efi --hotkey=f "Detect EFI bootloaders" {
+            efi_found=false
+            for efi in (*,gpt*)/efi/*/*.efi (*,gpt*)/efi/*/*/*.efi (*,gpt*)/*.efi (*,gpt*)/*/*.efi ; do
+                regexp --set=1:efi_device '^\((.*)\)/' "${efi}"
+                if [ -e "${efi}" ]; then
+                    efi_found=true
+                    menuentry --class=efi "${efi}" "${efi_device}" {
+                        root="${2}"
+                        chainloader "${1}"
+                    }
+                fi
+            done
+            if [ "${efi_found}" != true ]; then
+                menuentry --hotkey=q --class=find.none "No EFI files detected." {menu_reload}
+            else
+                menuentry --hotkey=q --class=cancel "Cancel" {menu_reload}
+            fi
+        }
+    fi
+}
+
+function check {
+    cliname="$1"
+    varname="$2"
+    if [ "${optname}" != "${cliname}" ]; then
+        return 1
+    fi
+    if [ -z "$varname" ]; then
+        varname="${cliname}"
+    fi
+    if [ -z "${optval}" ]; then
+        eval ${varname}="${cliname}"
+    else
+        eval ${varname}="${cliname}=${optval}"
+        if [ "${optname}" = "lang" ]; then
+            lang_setup ${optval}
+        elif [ "${optname}" = "keytable" ]; then
+            def_keyboard="${optval}"
+        elif [ "${optname}" = "tz" ]; then
+            def_timezone="${optval}"
+        fi
+    fi
+    return 0
+}
+
+function checkinput {
+    newinput="$1"
+    newoutput=""
+    for newcli in ${newinput} ; do
+    optname=""
+    optval=""
+    optdone=""
+    regexp -s optname '^(.+)=.*$' "${newcli}"
+    if [ -z "${optname}" ]; then
+        optname="${newcli}"
+    else
+        regexp -s optval '^.+=(.*)$' "${newcli}"
+    fi
+    for tocheck in "lang bootlang" "keytable keyboard" "tz timezone" "utc hwclock"; do
+        if check $tocheck ; then
+            optdone="Y"
+            break
+        fi
+    done
+    if [ -z "${optdone}" ]; then
+        if [ -z "${newoutput}" ]; then
+            newoutput="${newcli}"
+        else
+            newoutput="${newoutput} ${newcli}"
+        fi
+    fi
+    done
+}
+
+function new2cli {
+    newinput="$1"
+    if [ -n "$newinput" ]; then
+        checkinput "$newinput"
+        if [ -n "${newoutput}" ]; then
+            newinput="${newoutput}"
+            if [ -n "$clinput" ]; then
+                clinput="$clinput $newinput"
+            else
+                clinput="$newinput"
+            fi
+            export clinput
+        fi
+    fi
+}
+
+function getargs {
+    args=""
+    for a in $@; do
+        if [ -n "${a}" ]; then
+            args="${args} ${a}"
+        fi
+    done
+}
+
+function bootcheck {
+    getargs
+}
+
+pager=1
+if ! is_efi; then
+    insmod part_gpt
+fi
+
+if is_efi; then
+    insmod efi_gop
+    insmod efi_uga
+fi
+
+if [ -z "${loaded}" ]; then
+    iscd=""
+    auto=""
+    regexp -s iscd '^(cd)' "${root}"
+    if [ "${iscd}" != "cd" -a -e (cd) ]; then
+        probe -s cdp -u cd
+        probe -s hdp -u $root
+        if [ -n "$cdp" -a "$cdp" = "$hdp" ]; then
+            iscd="cd"
+        fi
+    fi
+    if [ "${root}" != "hd96" -a "${iscd}" != "cd" ]; then
+        auto="${auto}"
+    fi
+    source /boot/grub/variable.cfg
+    loaded=true
+
+    if [ "${disable_gfxterm}" != "true" ]; then
+        if loadfont (${voidlive})/boot/grub/unicode.pf2 ; then
+            if [ -z "$gfxmode" ] ; then
+                gfxmode=1024x768,auto
+                gfxpayload=keep
+            fi
+            insmod efi_gop
+            insmod all_video
+            insmod efi_uga
+            insmod ieee1275_fb
+            insmod vbe
+            insmod vga
+            insmod video_bochs
+            insmod video_cirrus
+            insmod gfxterm
+            if terminal_output --append gfxterm; then
+                terminal_output --remove console
+            else
+                disable_gfxterm=true
+            fi
+        else
+            disable_gfxterm=true
+        fi
+    fi
+
+    if [ -n "${iso_path}" ]; then
+        auto="img_dev=/dev/disk/by-uuid/${rootuuid} img_loop=${iso_path}"
+    fi
+    export auto
+fi
+
+for kopt in "${clinput}" "${bootlang}" "${keyboard}" "${timezone}" "${hwclock}" "${auto}"; do
+    if [ -n "${kopt}" ]; then
+        kopts="${kopts} ${kopt}"
+    fi
+done
+
+if [ -n "${bootlang}${keyboard}${timezone}" ]; then
+    koptsok="true"
+fi
+
+if [ -n "$clinput" ]; then
+    menuentry --class=edit "$clinput" {
+        if [ -n "$1" ]; then
+            clinput="$@"
+        else
+            unset clinput
+        fi
+        menu_reload
+    }
+fi
+
