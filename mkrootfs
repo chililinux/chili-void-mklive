@@ -73,7 +73,7 @@ declare AEXTRA_PKGS="voidbr-base-config voidbr-vinstall fzf"
 #         ADDITIONAL_PKGS+=" socklog-void"
 #         ADDITIONAL_PKGS+=" xtools"
 #         ADDITIONAL_PKGS+=" tree"
-#         ADDITIONAL_PKGS+=" pkgmake"                        # repository=https://chililinux.com/void/current
+#         ADDITIONAL_PKGS+=" voidbr-pkgmake"                        # repository=https://chililinux.com/void/current
 #         ADDITIONAL_PKGS+=" git"
 #         ADDITIONAL_PKGS+=" rsync"
 #         ADDITIONAL_PKGS+=" vpm"
