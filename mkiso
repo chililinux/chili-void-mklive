@@ -34,22 +34,6 @@
 #-
 #xbps-install -U -r /tmp/fakeroot --repository=https://repo-fastly.voidlinux.org/current bash -S
 
-automatic=false
-new_args=()
-for arg in "$@"; do
-	if [[ "$arg" == "--automatic" ]]; then
-		automatic=true
-		continue
-	fi
-	new_args+=("$arg")
-done
-
-# substitui os argumentos atuais
-set -- "${new_args[@]}"
-
-# shellcheck source=./lib.sh
-source ./lib.sh
-
 export LANGUAGE="${LANGUAGE:-pt_BR}"
 export TEXTDOMAINDIR=/usr/share/locale
 export TEXTDOMAIN=mkiso
@@ -125,6 +109,7 @@ sh_choose_packages_base() {
 	ADDITIONAL_PKGS+=" duf"
 	ADDITIONAL_PKGS+=" umc"
 	ADDITIONAL_PKGS+=" fzf"
+	ADDITIONAL_PKGS+=" exa"
 
 	ACONFIG_PKGS+=(voidbr-base-config)
     ACONFIG_PKGS+=(voidbr-plymouth-theme)
@@ -174,6 +159,7 @@ sh_choose_packages_common_X() {
 	COMMON_PKGS+=" gvfs gvfs-smb gvfs-cdda inetutils iputils"
 	COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings arc-theme papirus-icon-theme dejavu-fonts-ttf"
 	COMMON_PKGS+=" sddm"
+	COMMON_PKGS+=" libavif libheif gdk-pixbuf libheif-pixbuf-loader"
 
 	AEXTRA_COMMON_PKGS+=" voidbr-wallpapers"
 	AEXTRA_COMMON_PKGS+=" voidbr-tokyo-theme"
@@ -1277,6 +1263,31 @@ sh_remove_etc_xbps_00_repository_main_conf() {
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
 	rm -f $conf
 }
+
+automatic=false
+new_args=()
+for arg in "$@"; do
+	if [[ "$arg" == "--automatic" ]]; then
+		automatic=true
+		continue
+	fi
+	new_args+=("$arg")
+done
+
+# substitui os argumentos atuais
+set -- "${new_args[@]}"
+
+for arg in "$@"; do
+  case "$arg" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+  esac
+done
+
+# shellcheck source=./lib.sh
+source ./lib.sh
 
 # main()
 #
