@@ -77,6 +77,7 @@ declare -g MAKE_FULL_X=false
 declare -g LBIND=false
 declare -g QUIET=false
 declare -gi STEP_COUNT=59
+declare -gi njobs=59
 declare -g VOL_ID='VOIDBR_LIVE'
 declare -g title
 declare -g INITRAM_COMPRESSION=xz
