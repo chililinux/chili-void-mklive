@@ -4,6 +4,7 @@
 *.raw
 *.tar.gz
 *.box
+kernel*.txt
 xbps-cache
 xbps-cachedir*
 base-custom*
