@@ -6,7 +6,7 @@
 # mkiso
 # Created: 2023/09/18 - 09:05
 # Altered: 2024/12/17 - 12:43
-# Updated: dom 25 jan 2026 20:06:15 -04
+# Updated: sáb 25 abr 2026 18:59:09 -04
 #
 # Copyright (c) 2009-2015 Juan Romero Pardines.
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='1.12.14-20241214'
+readonly _VERSION_='0.04.25-20260425'
 readonly distro=$(uname -n)
 readonly DEPENDENCIES=(rsync sed grep cat umount losetup tput chroot mkfs.vfat tee)
 
@@ -373,6 +373,7 @@ sh_checkDependencies() {
 
 sh_setVarColors() {
 	reset=$(tput sgr0)
+	rst=$(tput sgr0)
 	# Definir os estilos de texto como variáveis
 	bold=$(tput bold)
 	underline=$(tput smul)   # Início do sublinhado
@@ -674,7 +675,7 @@ configure_plymouth() {
 file=/var/log/boot.log
 # Exibe uma mensagem inicial usando o Plymouth
 plymouth display-message --text="Booting Void Linux"
-demsg -f daemon,user,auth | while read -r line; do
+dmesg -f daemon,user,auth | while read -r line; do
   # Exibe as últimas 50 caracteres da linha usando o Plymouth
   plymouth display-message --text="${line:0:50}"
   echo "${line:0:50}"
@@ -699,16 +700,19 @@ EOF
 }
 
 configure_service_boot_logger() {
-	print_step "Configurando serviço boot-logger em: $ROOTFS/etc/sv/"
-	mkdir -p "$ROOTFS/etc/sv/boot-logger"
-	tee "$ROOTFS/etc/sv/boot-logger/run" >/dev/null <<EOF
+  print_step "Configurando serviço boot-logger em: $ROOTFS/etc/sv/"
+  mkdir -p "$ROOTFS/etc/sv/boot-logger"
+  tee "$ROOTFS/etc/sv/boot-logger/run" >/dev/null <<'EOF'
 #!/bin/sh
-touch /var/log/boot.log
-[ -r ./conf ] && . ./conf
-exec dmesg > /var/log/boot.log 2>&1
+LOG_FILE="/var/log/boot.log"
+# garante diretório
+mkdir -p /var/log
+# evita sobrescrever sempre (append)
+exec dmesg -w >> "$LOG_FILE" 2>&1
 EOF
-	chmod +x "$ROOTFS/etc/sv/boot-logger/run"
-	ln -sf "/etc/sv/boot-logger" "$ROOTFS/etc/runit/runsvdir/default/"
+  chmod +x "$ROOTFS/etc/sv/boot-logger/run"
+  # link simbólico no runit
+  ln -sf "/etc/sv/boot-logger" "$ROOTFS/etc/runit/runsvdir/default/"
 }
 
 configure_service_plymouth_log() {
@@ -910,45 +914,54 @@ generate_iso_image() {
 	info_msg "${green}Iso file created $(readlink -f "$OUTPUT_FILE") ($hsize) successfully.${reset}"
 }
 
-#		        Usage: $PROGNAME [options]
-#		        Generates a basic live ISO image of Void Linux. This ISO image can be written
-#		        to a CD/DVD-ROM or any USB stick.
-#		        To generate a more complete live ISO image, use build-x86-images.sh.
-#		        OPTIONS
-#		                -a <arch>          Set XBPS_ARCH in the ISO image
-#		                -b <system-pkg>    Set an alternative base package (default: base-system)
-#		                -r <repo>          Use this XBPS repository. May be specified multiple times
-#		                -c <cachedir>      Use this XBPS cache directory (default: ./xbps-cachedir-<arch>)
-#		                -k <keymap>        Default keymap to use (default: us)
-#		                -l <locale>        Default locale to use (default: en_US.UTF-8)
-#		                -i <lz4|gzip|bzip2|xz|zstd|lzma|lzo> Compression type for the initramfs image (default: xz)
-#		                -s <lz4|gzip|bzip2|xz|zstd|lzma|lz4|lzo>   Compression type for the squashfs image (default: xz)
-#		                -o <file>          Output file name for the ISO image (default: automatic)
-#		                -p "<pkg> ..."     Install additional packages in the ISO image
-#		                -g "<pkg> ..."     Ignore packages when building the ISO image
-#		                -I <includedir>    Include directory structure under given path in the ROOTFS
-#		                -S "<service> ..." Enable services in the ISO image
-#		                -C "<arg> ..."     Add additional kernel command line arguments
-#		                -T <title>         Modify the bootloader title (default: Void Linux)
-#		                -v linux<version>  Install a custom Linux version on ISO image (default: linux metapackage)
-#		                -K                 Do not remove builddir
-#		                -h                 Show this help and exit
-#		                -V                 Show version and exit
-#		                -n                 NAO cria squashfs, usa antigo
-
 usage() {
-	cat <<EOF
-		                -W                 ${cyan}Make AWESOME iso.${rst}
-		                -N                 ${cyan}Make CINNAMON iso.${rst}
-		                -E                 ${cyan}Make ENLIGHTNMENT iso.${rst}
-		                -F                 ${cyan}Make FLUXBOX iso.${rst}
-		                -G                 ${cyan}Make GNOME iso.${rst}
-		                -P                 ${cyan}Make KDE PLASMA iso.${rst}
-		                -X                 ${cyan}Make XFCE iso base.${rst}
-		                -Y                 ${cyan}Make XFCE iso.${rst}
-		                -M                 ${cyan}Make MATE iso.${rst}
-		                -A                 ${cyan}Make ALL X iso.${rst}
-		                -Q                 ${cyan}Quiet mode (default: 0)${rst}
+  sh_setVarColors
+  cat <<EOF
+${bold}Usage:${rst} $PROGNAME [options]
+
+${green}Generates a basic live ISO image of Void Linux.${rst}
+This ISO image can be written to a CD/DVD-ROM or any USB stick.
+To generate a more complete live ISO image, use build-x86-images.sh.${rst}
+
+${bold}OPTIONS${rst}
+  -a <arch>          ${cyan}Set XBPS_ARCH in the ISO image${rst}
+  -b <system-pkg>    ${cyan}Set an alternative base package${rst} (default: base-system)
+  -r <repo>          ${cyan}Use this XBPS repository${rst} (can be used multiple times)
+  -c <cachedir>      ${cyan}XBPS cache directory${rst} (default: ./xbps-cachedir-<arch>)
+  -k <keymap>        ${cyan}Default keymap${rst} (default: us)
+  -l <locale>        ${cyan}Default locale${rst} (default: en_US.UTF-8)
+
+  -i <type>          ${cyan}Initramfs compression${rst} (lz4|gzip|bzip2|xz|zstd|lzma|lzo)
+  -s <type>          ${cyan}Squashfs compression${rst} (lz4|gzip|bzip2|xz|zstd|lzma|lzo)
+
+  -o <file>          ${cyan}Output ISO filename${rst}
+  -p "<pkg> ..."     ${cyan}Additional packages${rst}
+  -g "<pkg> ..."     ${cyan}Ignore packages${rst}
+  -I <dir>           ${cyan}Include directory into ROOTFS${rst}
+
+  -S "<service> ..." ${cyan}Enable services${rst}
+  -C "<arg> ..."     ${cyan}Extra kernel cmdline args${rst}
+  -T <title>         ${cyan}Bootloader title${rst} (default: Void Linux)
+  -v linux<ver>      ${cyan}Custom kernel version${rst}
+
+  -K                 ${yellow}Do not remove builddir${rst}
+  -n                 ${yellow}Reuse existing squashfs${rst}
+  -Q                 ${yellow}Quiet mode${rst}
+
+${bold}Desktop presets:${rst}
+  -W  ${green}AWESOME${rst}
+  -N  ${green}CINNAMON${rst}
+  -E  ${green}ENLIGHTENMENT${rst}
+  -F  ${green}FLUXBOX${rst}
+  -G  ${green}GNOME${rst}
+  -P  ${green}KDE PLASMA${rst}
+  -X  ${green}XFCE (base)${rst}
+  -Y  ${green}XFCE${rst}
+  -M  ${green}MATE${rst}
+  -A  ${green}ALL X${rst}
+
+  -h                 Show this help and exit
+  -V                 Show version and exit
 EOF
 }
 
@@ -1227,7 +1240,7 @@ sh_make_iso() {
 	#      Você não precisa ativar os serviços deles no runit.
 	: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 dbus socklog-unix nanoklogd udevd sshd NetworkManager dhcpcd chronyd}
 	if $MAKE_X; then
-		: ${ADDITIONAL_SERVICE_LIST:=lightdm avahi-daemon uuidd}
+		: ${ADDITIONAL_SERVICE_LIST:=lightdm avahi-daemon}
 	fi
 
 	if $MAKE_ENLIGHTENMENT; then
