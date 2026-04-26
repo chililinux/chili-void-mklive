@@ -675,7 +675,7 @@ configure_plymouth() {
 file=/var/log/boot.log
 # Exibe uma mensagem inicial usando o Plymouth
 plymouth display-message --text="Booting Void Linux"
-dmesg -f daemon,user,auth | while read -r line; do
+desg -f daemon,user,auth | while read -r line; do
   # Exibe as últimas 50 caracteres da linha usando o Plymouth
   plymouth display-message --text="${line:0:50}"
   echo "${line:0:50}"
@@ -684,7 +684,6 @@ dmesg -f daemon,user,auth | while read -r line; do
     echo "Plymouth morreu, saindo..."
     break
   fi
-
 done
 # Exibe uma mensagem de encerramento caso o Plymouth morra
 plymouth display-message --text="Initialization completed"
@@ -737,6 +736,17 @@ exec /usr/bin/plymouth --quit
 EOF
 	chmod +x "$ROOTFS/etc/sv/plymouth-stop/run"
 	ln -sf "/etc/sv/plymouth-stop" "$ROOTFS/etc/runit/runsvdir/default/"
+}
+
+configure_etc_runit_core_services_quit_plymouth() {
+	print_step "Configurando script plymouth-stop em: $ROOTFS/etc/runit/core-services/"
+	tee "$ROOTFS/etc/runit/core-services/99-voidbr-plymouth-quit.sh" >/dev/null <<EOF
+#!/bin/sh
+if command -v plymouth >/dev/null; then
+    plymouth quit
+fi
+EOF
+  chmod +x "$ROOTFS/etc/runit/core-services/99-voidbr-plymouth-quit.sh"
 }
 
 generate_initramfs() {
@@ -1260,9 +1270,10 @@ sh_make_iso() {
 	done
 
 	configure_plymouth
-	configure_service_boot_logger
-	configure_service_plymouth_log
-	configure_service_plymouth_stop
+	#configure_service_boot_logger
+	#configure_service_plymouth_log
+	#configure_service_plymouth_stop
+	configure_etc_runit_core_services_quit_plymouth
 	generate_initramfs
 	generate_isolinux_boot
 	generate_grub_efi_boot
