@@ -63,7 +63,7 @@ declare AEXTRA_PKGS="voidbr-base-config voidbr-vinstall fzf"
 #ADDITIONAL_PKGS+=" os-prober grub-x86_64-efi grub-terminus"
 #ADDITIONAL_PKGS+=" bash-completion nano wget curl"
 #ADDITIONAL_PKGS+=" cpio dracut ncurses parted"
-#ADDITIONAL_PKGS+=" void-utils"
+#ADDITIONAL_PKGS+=" voidbr-utils"
 #ADDITIONAL_PKGS+=" chili-utils"
 #ADDITIONAL_PKGS+=" chili-void-grub-theme" # repository=https://chililinux.com/void/current
 #ADDITIONAL_PKGS+=" nano-syntax-highlighting"

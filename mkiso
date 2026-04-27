@@ -95,7 +95,7 @@ sh_choose_packages_base() {
 	ADDITIONAL_PKGS+=" voidbr-vinstall"
 	ADDITIONAL_PKGS+=" voidbr-grub-theme"
 	ADDITIONAL_PKGS+=" void-install"
-	ADDITIONAL_PKGS+=" void-utils"
+	ADDITIONAL_PKGS+=" voidbr-utils"
 	ADDITIONAL_PKGS+=" chili-utils"
 	ADDITIONAL_PKGS+=" grc ncurses dialog gettext curl wget git pv nano parted e2fsprogs bc"
 	ADDITIONAL_PKGS+=" xz zstd pigz cryptsetup lvm2 wireless_tools wpa_supplicant socklog-void chrony"
