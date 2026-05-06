@@ -113,7 +113,7 @@ sh_choose_packages_base() {
 	ADDITIONAL_PKGS+=" exa"
 
 	ACONFIG_PKGS+=(voidbr-base-config)
-    ACONFIG_PKGS+=(voidbr-plymouth-theme)
+	ACONFIG_PKGS+=(voidbr-plymouth-theme)
 	AEXTRA_PKGS+=" vim "
 	AEXTRA_PKGS+=" fastfetch"
 
@@ -158,16 +158,21 @@ sh_choose_packages_common_X() {
 	COMMON_PKGS+=" 7zip p7zip file-roller"
 	COMMON_PKGS+=" avahi avahi-discover"
 	COMMON_PKGS+=" gvfs gvfs-smb gvfs-cdda inetutils iputils"
-	COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings arc-theme papirus-icon-theme dejavu-fonts-ttf"
+	if $MAKE_GNOME; then
+		COMMON_PKGS+=" gdm" #seg 04 mai 2026 11:12:38 -04
+	else
+		COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings arc-theme papirus-icon-theme dejavu-fonts-ttf"
+	  AEXTRA_COMMON_PKGS+=" voidbr-lightdm-themes"
+	fi
 	COMMON_PKGS+=" sddm"
 	COMMON_PKGS+=" libavif libheif gdk-pixbuf libheif-pixbuf-loader"
+	COMMON_PKGS+=" xorg-server-xwayland" #seg 04 mai 2026 11:12:38 -04
 
 	AEXTRA_COMMON_PKGS+=" voidbr-wallpapers"
 	AEXTRA_COMMON_PKGS+=" voidbr-tokyo-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-professional-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-beauty-icons"
 	AEXTRA_COMMON_PKGS+=" sddm voidbr-sddm-themes"
-	AEXTRA_COMMON_PKGS+=" voidbr-lightdm-themes"
 	AEXTRA_COMMON_PKGS+=" voidbr-sddm-themes"
 
 	#	COMMON_PKGS+=" brave-bin"
@@ -233,9 +238,7 @@ sh_choose_packages_gnome() {
 	ADISTRO_PKGS+=" gnome"
 	ADISTRO_PKGS+=" gnome-keyring"
 	ADISTRO_PKGS+=" voidbr-change-gnome-wallpaper"
-
 	ACONFIG_PKGS+=(voidbr-gnome-config)
-
 }
 
 sh_choose_packages_fluxbox() {
@@ -699,9 +702,9 @@ EOF
 }
 
 configure_service_boot_logger() {
-  print_step "Configurando serviço boot-logger em: $ROOTFS/etc/sv/"
-  mkdir -p "$ROOTFS/etc/sv/boot-logger"
-  tee "$ROOTFS/etc/sv/boot-logger/run" >/dev/null <<'EOF'
+	print_step "Configurando serviço boot-logger em: $ROOTFS/etc/sv/"
+	mkdir -p "$ROOTFS/etc/sv/boot-logger"
+	tee "$ROOTFS/etc/sv/boot-logger/run" >/dev/null <<'EOF'
 #!/bin/sh
 LOG_FILE="/var/log/boot.log"
 # garante diretório
@@ -709,9 +712,9 @@ mkdir -p /var/log
 # evita sobrescrever sempre (append)
 exec dmesg -w >> "$LOG_FILE" 2>&1
 EOF
-  chmod +x "$ROOTFS/etc/sv/boot-logger/run"
-  # link simbólico no runit
-  ln -sf "/etc/sv/boot-logger" "$ROOTFS/etc/runit/runsvdir/default/"
+	chmod +x "$ROOTFS/etc/sv/boot-logger/run"
+	# link simbólico no runit
+	ln -sf "/etc/sv/boot-logger" "$ROOTFS/etc/runit/runsvdir/default/"
 }
 
 configure_service_plymouth_log() {
@@ -746,7 +749,7 @@ if command -v plymouth >/dev/null; then
     plymouth quit
 fi
 EOF
-  chmod +x "$ROOTFS/etc/runit/core-services/99-voidbr-plymouth-quit.sh"
+	chmod +x "$ROOTFS/etc/runit/core-services/99-voidbr-plymouth-quit.sh"
 }
 
 generate_initramfs() {
@@ -925,8 +928,8 @@ generate_iso_image() {
 }
 
 usage() {
-  sh_setVarColors
-  cat <<EOF
+	sh_setVarColors
+	cat <<EOF
 ${bold}Usage:${rst} $PROGNAME [options]
 
 ${green}Generates a basic live ISO image of Void Linux.${rst}
@@ -1195,9 +1198,9 @@ sh_configure_linux() {
 	fi
 	OUTPUT_FILE="voidbr-live-$name-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"
 	{
-	    echo "KERNELVERSION=$KERNELVERSION"
-	    echo "OUTPUT_FILE=$OUTPUT_FILE"
-    } > kernel-${name}.txt
+		echo "KERNELVERSION=$KERNELVERSION"
+		echo "OUTPUT_FILE=$OUTPUT_FILE"
+	} >kernel-${name}.txt
 
 	print_step "Kernel Version: $KERNELVERSION"
 
@@ -1250,7 +1253,11 @@ sh_make_iso() {
 	#      Você não precisa ativar os serviços deles no runit.
 	: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 dbus socklog-unix nanoklogd udevd sshd NetworkManager dhcpcd chronyd}
 	if $MAKE_X; then
-		: ${ADDITIONAL_SERVICE_LIST:=lightdm avahi-daemon}
+		if $MAKE_GNOME; then
+			: ${ADDITIONAL_SERVICE_LIST:=gdm avahi-daemon}
+		else
+			: ${ADDITIONAL_SERVICE_LIST:=lightdm avahi-daemon}
+		fi
 	fi
 
 	if $MAKE_ENLIGHTENMENT; then
@@ -1303,12 +1310,12 @@ done
 set -- "${new_args[@]}"
 
 for arg in "$@"; do
-  case "$arg" in
-    -h|--help)
-      usage
-      exit 0
-      ;;
-  esac
+	case "$arg" in
+	-h | --help)
+		usage
+		exit 0
+		;;
+	esac
 done
 
 # shellcheck source=./lib.sh

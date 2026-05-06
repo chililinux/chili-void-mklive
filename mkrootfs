@@ -55,7 +55,7 @@ LCUSTOM=false
 SYSPKG="base-voidstrap"
 
 # MINIMAL
-declare ADDITIONAL_PKGS="bash bash-completion dhcpcd"
+declare ADDITIONAL_PKGS="bash bash-completion dhcpcd dracut"
 declare AEXTRA_PKGS="voidbr-base-config voidbr-vinstall fzf"
 
 # SOMENTE ROOTFS
