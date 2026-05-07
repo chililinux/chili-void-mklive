@@ -91,7 +91,7 @@ sh_choose_packages_base() {
 	declare -a INCLUDE_DIRS=()
 	declare -g PROGNAME=$(basename "$0")
 	declare -g REQUIRED_PKGS="base-files dash bash bash-completion coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
-	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut-network"
+	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut dracut-network"
 	ADDITIONAL_PKGS+=" voidbr-vinstall"
 	ADDITIONAL_PKGS+=" voidbr-grub-theme"
 	ADDITIONAL_PKGS+=" void-install"
@@ -282,6 +282,7 @@ sh_choose_packages_xfce() {
 
 	AEXTRA_PKGS+=" voidbr-xfwm-axiom-theme"
 	ACONFIG_PKGS+=(voidbr-xfce-config)
+	ACONFIG_PKGS+=(voidbr-xfce-theme-dracula)
 
 }
 
