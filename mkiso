@@ -944,7 +944,7 @@ generate_iso_image() {
 			-output "$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
 	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	hsize=$(du -sh "$OUTPUT_FILE" | awk '{print $1}')
-	info_msg "${green}Iso file created $(readlink -f "$OUTPUT_FILE") ($hsize) successfully.${reset}"
+	info_msg "Iso file created: ${green}$(readlink -f "$OUTPUT_FILE") ($hsize) successfully.${reset}"
 }
 
 usage() {
@@ -1183,6 +1183,9 @@ sh_configure_rootfs() {
 	: ${OUTPUT_FILE="voidbr-live-$name-${BASE_ARCH}-$(uname -r)-$(sh_diahora).iso"}
 	mkdir -p "$ROOTFS" "$VOIDHOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR"
 
+  # Validação de espaço em disco inserida antes do resumo e do início das instalações
+	verificar_espaco_livre
+
 	sh_print_resume
 
 }
@@ -1314,6 +1317,14 @@ sh_make_iso() {
 sh_remove_etc_xbps_00_repository_main_conf() {
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
 	rm -f $conf
+}
+
+verificar_espaco_livre() {
+	# Garante que há pelo menos 15GB livres no diretório de compilação
+	local espaco_livre=$(df -m "$ROOTDIR" | awk 'NR==2 {print $4}')
+	if [ "$espaco_livre" -lt 15360 ]; then
+		die "Espaço insuficiente em $ROOTDIR. São necessários pelo menos 15GB livres."
+	fi
 }
 
 automatic=false
