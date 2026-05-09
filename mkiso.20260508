@@ -162,7 +162,7 @@ sh_choose_packages_common_X() {
 		COMMON_PKGS+=" gdm" #seg 04 mai 2026 11:12:38 -04
 	else
 		COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings arc-theme papirus-icon-theme dejavu-fonts-ttf"
-		AEXTRA_COMMON_PKGS+=" voidbr-lightdm-themes"
+	  AEXTRA_COMMON_PKGS+=" voidbr-lightdm-themes"
 	fi
 	COMMON_PKGS+=" sddm"
 	COMMON_PKGS+=" libavif libheif gdk-pixbuf libheif-pixbuf-loader"
@@ -756,32 +756,13 @@ EOF
 generate_initramfs() {
 	local _args
 
-	# Garantia de segurança: verifica se KERNELVERSION está definida e se o diretório de módulos existe no ROOTFS
-	if [ -z "$KERNELVERSION" ] || [ ! -d "$ROOTFS/lib/modules/$KERNELVERSION" ]; then
-		# Tenta autodetectar a versão real instalada no chroot para não quebrar o script
-		local detected_kver=$(ls "$ROOTFS/lib/modules" | head -n1)
-		if [ -n "$detected_kver" ]; then
-			KERNELVERSION="$detected_kver"
-		else
-			die "Erro: Kernel não foi encontrado instalado em $ROOTFS/lib/modules!"
-		fi
-	fi
-
 	print_step "Gerando imagem initramfs ($INITRAMFS_COMPRESSION): ${yellow}$BOOT_DIR/initrd"
 	{
 		copy_dracut_files "$ROOTFS"
 		copy_autoinstaller_files "$ROOTFS"
-
-		# Executa o dracut preservando o ambiente necessário para evitar o erro de 'dwarning: command not found'
-		chroot "$ROOTFS" /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" --add-drivers "ahci" --force-add "vmklive autoinstaller" --omit systemd "/boot/initrd" $KERNELVERSION
+		chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" --add-drivers "ahci" --force-add "vmklive autoinstaller" --omit systemd "/boot/initrd" $KERNELVERSION
 		result="${PIPESTATUS[0]}"
 		[ $result -ne 0 ] && die "Failed to generate the initramfs"
-
-		# Verifica se o arquivo de initrd foi realmente gerado antes de tentar mover ou copiar
-		if [ ! -f "$ROOTFS/boot/initrd" ]; then
-			die "Erro crítico: O arquivo $ROOTFS/boot/initrd não foi gerado pelo dracut!"
-		fi
-
 		mv "$ROOTFS"/boot/initrd "$BOOT_DIR"
 		cp "$ROOTFS"/boot/vmlinuz-$KERNELVERSION "$BOOT_DIR"/vmlinuz
 		cp -Rpva "$ROOTFS"/boot/grub/themes "$BOOT_DIR/grub/"
