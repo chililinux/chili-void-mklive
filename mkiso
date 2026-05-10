@@ -363,7 +363,7 @@ sh_checkDependencies() {
 		if [[ "$distro" = @(void|void-live|voidlinux) ]]; then
 			echo
 			if readconf "${yellow}${cmsg_InstCommand} '${cyan}${missing[*]}${reset}' ?"; then
-				if xbps-install -Sy "${missing[@]}"; then
+				if xbps-install -Sy "${missing[@]}" -R $XBPS_REPOSITORY; then
 					errorFound=false
 					sh_checkDependencies
 				else
@@ -527,7 +527,7 @@ install_prereqs() {
 	#	result="${PIPESTATUS[0]}"
 	#	[ $result -ne 0 ] && die "Failed to install required software, exiting..."
 
-	cmd_logger "Instalando software para gerar a imagem de disco..." '
+	cmd_logger "Instalando software para gerar a imagem de disco..." "
         LC_ALL=C \
         XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" \
         --rootdir "$VOIDHOSTDIR" ${XBPS_REPOSITORY} \
@@ -535,7 +535,7 @@ install_prereqs() {
         --yes $REQUIRED_PKGS \
         --update \
         --sync
-    '
+    "
 }
 
 cmd_install() {
@@ -1065,10 +1065,12 @@ sh_print_resume() {
 }
 
 cmd_logger() {
+  local cmd="$*"
 	local msg="$1"
 	local check_error="$3"
 
 	print_step "$msg"
+  #! $quiet msg_tab "${cyan}[⚙   ] [running] : ${reset} $cmd"
 	{
 		eval "$2"
 		#   } 2>&1 | tee -i -a "$BOOTLOG" >$([[ "$QUIET" == false ]] && echo /dev/stdout || echo "$LOGGER")
@@ -1232,12 +1234,12 @@ sh_configure_linux() {
 
 sh_install_rootfs() {
 	replicate
-	cmd_logger "Sincronizando dados do repositório XBPS..." '
+	cmd_logger "Sincronizando dados do repositório XBPS..." "
 		copy_void_keys "$ROOTFS"
 		copy_void_keys "$VOIDHOSTDIR"
-		LC_ALL=C XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -Sy -r "$ROOTFS" ${XBPS_REPOSITORY}
-		LC_ALL=C XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -Sy -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY}
-    '
+		LC_ALL=C XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -Sy -r "$ROOTFS" -R ${XBPS_REPOSITORY}
+		LC_ALL=C XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -Sy -r "$VOIDHOSTDIR" -R ${XBPS_REPOSITORY}
+    "
 	sh_configure_linux
 
 	#	: ${OUTPUT_FILE="voidbr-live-$name-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}

@@ -61,6 +61,42 @@ die() {
 	exit 1
 }
 
+# Retorno: 0 = online, 1 = offline
+# Retorno:
+#   0 = online/existe
+#   1 = offline/inexistente
+test_repo_online() {
+  [ $# -eq 1 ] || return 1
+
+  local repo="$1"
+  local url="${repo%/}/x86_64-repodata"
+  local ret=1
+
+  msg "Testando $url\n"
+
+  case "$repo" in
+    http://*|https://*)
+      timeout 20 curl \
+        --fail \
+        --silent \
+        --show-error \
+        --location \
+        --output /dev/null \
+        "$url"
+      ret=$?
+      ;;
+
+    *)
+      [ -e "$url" ]
+      ret=$?
+      ;;
+  esac
+
+  printf 'RET=%s URL=%s\n' "$ret" "$url" >&2
+  return "$ret"
+}
+export -f test_repo_online
+
 run_cmd() {
 	local cmd="$*"
 
@@ -77,7 +113,7 @@ run_cmd() {
 	# erro real
 	if ((rc != 0)); then
 		log_warn_tab "Falha ao executar: $cmd"
-		return $rc
+.		return $rc
 	fi
 
 	return 0
@@ -457,16 +493,19 @@ replicate() {
 }
 
 select_mirrors_dialog() {
-	local cfastly='https://repo-fastly.voidlinux.org'
-	local cgithub='/github/ChiliOS/RepoChililinux/void'
+	local cgithub='/github/RepoVoidLinux/void'
 	local cvc='/vg/void-mirror'
+	local cfastly='https://repo-fastly.voidlinux.org'
+#	local cvoidbr='https://void.voidbr.org/voidlinux'
+	local cvoidbr='https://void.voidbr.org/'
 	local cvoidlinux='https://void.voidlinux.com.br/voidlinux'
-	local cvoidbr='https://void.voidbr.org/voidlinux'
-	local chome='https://home.chililinux.com/voidlinux'
-	local tmpfile
+	local cchili='https://void.chililinux.com/voidlinux'
+
+	local repo
+	declare -a repos=()
 
 	if ! $automatic; then
-		tmpfile=$(
+		repo=$(
 			dialog \
 				--stdout \
 				--clear \
@@ -476,9 +515,9 @@ select_mirrors_dialog() {
 				00 00 00 \
 				$cgithub "Mirror Brasil VoidLinux" on \
 				$cvc "Mirror Brasil VoidLinux" on \
-				$cvoidlinux "Mirror Brasil VoidLinux" on \
 				$cvoidbr "Mirror Brasil VoidBR" off \
-				$chome "Mirror Brasil VoidLinux" off \
+				$cvoidlinux "Mirror Brasil VoidLinux" off \
+				$cchili "Mirror Brasil ChiliLinux" off \
 				$cfastly "Mirror Oficial Fastly" on
 		)
 
@@ -487,33 +526,47 @@ select_mirrors_dialog() {
 			echo "Cancelado."
 			return 1
 		fi
+		repos+=("$repo")
 	else
-        tmpfile="$cfastly $cvoidbr $cgithub $cvc $cvoidlinux"
+		repos+=("$cfastly")
+		repos+=("$cvoidbr")
+		repos+=("$cchili")
+		repos+=("$cvoidlinux")
+		repos+=("$cgithub")
+		repos+=("$cvc")
 	fi
 
 	AREPOSITORY=()
-	for mirror in $tmpfile; do
+	for mirror in "${repos[@]}"; do
+    if ! test_repo_online "$mirror/current"; then
+      continue
+    fi
 		case $mirror in
-		$cgithub) AREPOSITORY+=("repository=$mirror/current") ;;
+		$cgithub)
+		    AREPOSITORY+=("repository=$mirror/current")
+		  ;;
 		$cvc)
-			AREPOSITORY+=("repository=$mirror/voidlinux/current")
-			AREPOSITORY+=("repository=$mirror/extra")
-			AREPOSITORY+=("repository=$mirror/voidlinux/current/nonfree")
-			AREPOSITORY+=("repository=$mirror/voidlinux/current/multilib")
-			AREPOSITORY+=("repository=$mirror/voidlinux/current/multilib/nonfree")
+ 			AREPOSITORY+=("repository=$mirror/voidlinux/current")
+  		AREPOSITORY+=("repository=$mirror/extra")
+  		AREPOSITORY+=("repository=$mirror/voidlinux/current/nonfree")
+  		AREPOSITORY+=("repository=$mirror/voidlinux/current/multilib")
+  		AREPOSITORY+=("repository=$mirror/voidlinux/current/multilib/nonfree")
 			;;
-		$cvoidlinux | $cvoidbr | $chome)
-			AREPOSITORY+=("repository=$mirror/current")
-			AREPOSITORY+=("repository=$mirror/extra")
-			AREPOSITORY+=("repository=$mirror/current/nonfree")
-			AREPOSITORY+=("repository=$mirror/current/multilib")
-			AREPOSITORY+=("repository=$mirror/current/multilib/nonfree")
+		 $cchili)
+  		AREPOSITORY+=("repository=$mirror/extra")
+			;;
+		$cvoidbr | $cvoidlinux | $cchili)
+ 			AREPOSITORY+=("repository=$mirror/current")
+  		AREPOSITORY+=("repository=$mirror/extra")
+  		AREPOSITORY+=("repository=$mirror/current/nonfree")
+  		AREPOSITORY+=("repository=$mirror/current/multilib")
+  		AREPOSITORY+=("repository=$mirror/current/multilib/nonfree")
 			;;
 		*)
-			AREPOSITORY+=("repository=$mirror/current")
-			AREPOSITORY+=("repository=$mirror/current/nonfree")
-			AREPOSITORY+=("repository=$mirror/current/multilib")
-			AREPOSITORY+=("repository=$mirror/current/multilib/nonfree")
+ 			AREPOSITORY+=("repository=$mirror/current")
+ 			AREPOSITORY+=("repository=$mirror/current/nonfree")
+ 			AREPOSITORY+=("repository=$mirror/current/multilib")
+ 			AREPOSITORY+=("repository=$mirror/current/multilib/nonfree")
 			;;
 		esac
 	done
@@ -524,9 +577,9 @@ select_mirrors_dialog() {
 			tr '\n' ' '
 	)"
 
-	#	echo "${AREPOSITORY[@]}"
-	#	echo
-	#	echo "${XBPS_REPOSITORY[@]}"
+	#echo "${AREPOSITORY[@]}"
+	#echo
+	#echo "${XBPS_REPOSITORY[@]}"
 
 }
 
