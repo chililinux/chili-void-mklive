@@ -6,7 +6,7 @@
 # mkiso
 # Created: 2023/09/18 - 09:05
 # Altered: 2024/12/17 - 12:43
-# Updated: sáb 25 abr 2026 18:59:09 -04
+# Updated: dom 10 mai 2026 10:49:55 -04
 #
 # Copyright (c) 2009-2015 Juan Romero Pardines.
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.04.25-20260425'
+readonly _VERSION_='0.05.10-20260510'
 readonly distro=$(uname -n)
 readonly DEPENDENCIES=(rsync sed grep cat umount losetup tput chroot mkfs.vfat tee)
 
@@ -983,16 +983,16 @@ ${bold}OPTIONS${rst}
   -Q                 ${yellow}Quiet mode${rst}
 
 ${bold}Desktop presets:${rst}
-  -W  ${green}AWESOME${rst}
-  -N  ${green}CINNAMON${rst}
-  -E  ${green}ENLIGHTENMENT${rst}
-  -F  ${green}FLUXBOX${rst}
-  -G  ${green}GNOME${rst}
-  -P  ${green}KDE PLASMA${rst}
-  -X  ${green}XFCE (base)${rst}
-  -Y  ${green}XFCE${rst}
-  -M  ${green}MATE${rst}
-  -A  ${green}ALL X${rst}
+  -W|awesome        ${green}AWESOME${rst}
+  -N|cinnamon       ${green}CINNAMON${rst}
+  -E|enlightenment  ${green}ENLIGHTENMENT${rst}
+  -F|fluxbox        ${green}FLUXBOX${rst}
+  -G|gnome          ${green}GNOME${rst}
+  -P|plasma|kde     ${green}KDE PLASMA${rst}
+  -X|xfce-base      ${green}XFCE (base)${rst}
+  -Y|xfce           ${green}XFCE${rst}
+  -M|mate           ${green}MATE${rst}
+  -A|fullx          ${green}ALL X${rst}
 
   -h                 Show this help and exit
   -V                 Show version and exit
@@ -1051,7 +1051,12 @@ sh_config_distroname() {
 
 sh_print_resume() {
 	replicate
-	print_step "Building ISO    => ${yellow}${title}${reset}"
+	for mirror in "${public_repos[@]}"; do
+	print_step "Repository ${cyan}#$((++count))${rst}    => ${yellow}${mirror}${reset}"
+	done
+	replicate
+	print_step "Building ISO     => ${yellow}${title}${reset}"
+	print_step "Versao app       => ${yellow}${APP} v${_VERSION_}${reset}"
 	print_step "Profile         => ${yellow}${name}${reset}"
 	print_step "ROOTDIR         => ${yellow}${ROOTDIR}${reset}"
 	print_step "ROOTFS          => ${yellow}${ROOTFS}${reset}"
@@ -1124,6 +1129,7 @@ sh_configure_packages() {
 
 sh_configure_rootfs() {
 	# Configure dracut to use overlayfs for the writable overlay.
+	print_step "Configurando rootfs"
 	BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "
 	ARCH=$(xbps-uhelper arch)
 
@@ -1168,7 +1174,7 @@ sh_configure_rootfs() {
 	GRUB_DIR="$BOOT_DIR/grub"
 	ISOLINUX_CFG="$ISOLINUX_DIR/isolinux.cfg"
 
-	sh_create_etc_xbps_d_conf_00_repository_main_conf
+	sh_create_etc_xbps_d_conf_00_repository_main_conf "$ROOTFS/etc/xbps.d/00-repository-main.conf"
 
 	[ "${#INCLUDE_DIRS[@]}" -gt 0 ] && STEP_COUNT=$((STEP_COUNT + 1))
 	[ -n "${IGNORE_PKGS}" ] && STEP_COUNT=$((STEP_COUNT + 1))
@@ -1312,14 +1318,17 @@ sh_make_iso() {
 	generate_grub_efi_boot
 	cleanup_rootfs
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
-	sh_remove_etc_xbps_00_repository_main_conf
+	sh_remove_etc_xbps_00_repository_main_conf "$conf"
 	generate_squashfs
 	#	generate_iso_image
 }
 
 sh_remove_etc_xbps_00_repository_main_conf() {
-	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
-	rm -f $conf
+	local conf="$1"
+	print_step "Removendo $conf"
+	cmd_logger "Removendo $conf" '
+   	rm -f -- "$conf" >/dev/null 2>&1
+ 	'
 }
 
 verificar_espaco_livre() {
@@ -1345,7 +1354,7 @@ set -- "${new_args[@]}"
 
 for arg in "$@"; do
 	case "$arg" in
-	-h | --help)
+	-H | -h | --help)
 		usage
 		exit 0
 		;;
@@ -1396,15 +1405,15 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFfAGPmM" opt; do
 		MAKE_X=true
 		MAKE_MATE=true
 		;;
-	w | W)
+	w | W )
 		MAKE_X=true
 		MAKE_AWESOME=true
 		;;
-	e | E)
+	e | E )
 		MAKE_X=true
 		MAKE_ENLIGHTENMENT=true
 		;;
-	f | F)
+	f | F )
 		MAKE_X=true
 		MAKE_FLUXBOX=true
 		;;
@@ -1437,6 +1446,60 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFfAGPmM" opt; do
 	esac
 done
 shift $((OPTIND - 1))
+
+for arg in "$@"; do
+  case "${arg,,}" in
+    fluxbox)
+      MAKE_X=true
+      MAKE_FLUXBOX=true
+      ;;
+
+    xfce)
+      MAKE_X=true
+      MAKE_XFCE=true
+      ;;
+
+    xfce-base)
+      MAKE_X=true
+      MAKE_XFCE_BASE=true
+      ;;
+
+    plasma|kde)
+      MAKE_X=true
+      MAKE_PLASMA=true
+      ;;
+
+    gnome)
+      MAKE_X=true
+      MAKE_GNOME=true
+      ;;
+
+    mate)
+      MAKE_X=true
+      MAKE_MATE=true
+      ;;
+
+    cinnamon)
+      MAKE_X=true
+      MAKE_CINNAMON=true
+      ;;
+
+    awesome)
+      MAKE_X=true
+      MAKE_AWESOME=true
+      ;;
+
+    enlightenment)
+      MAKE_X=true
+      MAKE_ENLIGHTENMENT=true
+      ;;
+
+    fullx)
+      MAKE_X=true
+      MAKE_FULL_X=true
+      ;;
+  esac
+done
 
 # Check for root permissions.
 if [ "$(id -u)" -ne 0 ]; then
