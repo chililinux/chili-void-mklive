@@ -111,6 +111,7 @@ sh_choose_packages_base() {
 	ADDITIONAL_PKGS+=" umc"
 	ADDITIONAL_PKGS+=" fzf"
 	ADDITIONAL_PKGS+=" exa"
+	ADDITIONAL_PKGS+=" ntfs-3g"
 
 	ACONFIG_PKGS+=(voidbr-base-config)
 	ACONFIG_PKGS+=(voidbr-plymouth-theme)
@@ -127,10 +128,9 @@ sh_choose_packages_base() {
 	#	ADDITIONAL_PKGS+=" xtools"
 	#	ADDITIONAL_PKGS+=" grub-btrfs-runit"
 	#	ADDITIONAL_PKGS+=" cifs-utils"
-	#	ADDITIONAL_PKGS+=" ntfs-3g"
 	#	ADDITIONAL_PKGS+=" porg"
-	#   ADDITIONAL_PKGS+=" wifi-firmware"
-	#   ADDITIONAL_PKGS+=" rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
+	# ADDITIONAL_PKGS+=" wifi-firmware"
+	# ADDITIONAL_PKGS+=" rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
 	#	ADDITIONAL_PKGS+=" pacman fakeroot bsdtar"
 }
 
