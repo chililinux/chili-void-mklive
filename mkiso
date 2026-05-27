@@ -73,6 +73,7 @@ declare -g MAKE_PLASMA=false
 declare -g MAKE_GNOME=false
 declare -g MAKE_CINNAMON=false
 declare -g MAKE_MATE=false
+declare -g MAKE_ONLY_XORG=false
 declare -g MAKE_FULL_X=false
 declare -g LBIND=false
 declare -g QUIET=false
@@ -134,9 +135,21 @@ sh_choose_packages_base() {
 	#	ADDITIONAL_PKGS+=" pacman fakeroot bsdtar"
 }
 
-sh_choose_packages_common_X() {
-	print_step "Selecionando pacotes X Common"
+sh_choose_packages_common_X_base() {
+	print_step "Selecionando pacotes X Common Base"
 	COMMON_PKGS="xorg xorg-apps xorg-fonts xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs"
+	COMMON_PKGS+=" xfce4-terminal"
+	COMMON_PKGS+=" libavif libheif gdk-pixbuf libheif-pixbuf-loader"
+	COMMON_PKGS+=" xorg-server-xwayland" #seg 04 mai 2026 11:12:38 -04
+	AEXTRA_COMMON_PKGS+=" voidbr-wallpapers"
+	AEXTRA_COMMON_PKGS+=" voidbr-tokyo-theme"
+	AEXTRA_COMMON_PKGS+=" voidbr-professional-theme"
+	AEXTRA_COMMON_PKGS+=" voidbr-beauty-icons"
+	AEXTRA_COMMON_PKGS+=" voidbr-xfce-theme-dracula"
+}
+
+sh_choose_packages_common_X_advanced() {
+	print_step "Selecionando pacotes X Common Advanced"
 	COMMON_PKGS+=" cool-retro-term"
 	COMMON_PKGS+=" firefox firefox-i18n-pt-BR"
 	COMMON_PKGS+=" noto-fonts-emoji"
@@ -149,7 +162,6 @@ sh_choose_packages_common_X() {
 	COMMON_PKGS+=" adwaita-icon-theme"
 	COMMON_PKGS+=" adwaita-plus"
 	COMMON_PKGS+=" network-manager-applet"
-	COMMON_PKGS+=" xfce4-terminal"
 	COMMON_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
 	COMMON_PKGS+=" xfce4-pulseaudio-plugin"
 	COMMON_PKGS+=" gparted"
@@ -165,16 +177,6 @@ sh_choose_packages_common_X() {
 		AEXTRA_COMMON_PKGS+=" voidbr-lightdm-themes"
 	fi
 	COMMON_PKGS+=" sddm"
-	COMMON_PKGS+=" libavif libheif gdk-pixbuf libheif-pixbuf-loader"
-	COMMON_PKGS+=" xorg-server-xwayland" #seg 04 mai 2026 11:12:38 -04
-
-	AEXTRA_COMMON_PKGS+=" voidbr-wallpapers"
-	AEXTRA_COMMON_PKGS+=" voidbr-tokyo-theme"
-	AEXTRA_COMMON_PKGS+=" voidbr-professional-theme"
-	AEXTRA_COMMON_PKGS+=" voidbr-beauty-icons"
-	AEXTRA_COMMON_PKGS+=" sddm voidbr-sddm-themes"
-	AEXTRA_COMMON_PKGS+=" voidbr-sddm-themes"
-	AEXTRA_COMMON_PKGS+=" voidbr-xfce-theme-dracula"
 
 	#	COMMON_PKGS+=" brave-bin"
 	#   COMMON_PKGS+=" fonts-roboto-ttf"
@@ -630,6 +632,23 @@ install_skel_root() {
     '
 }
 
+sh_configure_void_install_desktop() {
+  cmd_logger "Configurando /usr/share/xsessions/void-install.desktop" '
+    mkdir -p "$ROOTFS/usr/share/xsessions"
+
+    cat > "$ROOTFS/usr/share/xsessions/void-install.desktop" << "EOF"
+[Desktop Entry]
+Name=VoidBR Install
+Comment=Executa o instalador VoidBR Linux
+Exec=xfce4-terminal --fullscreen --hide-menubar --hide-toolbar --disable-server -- sudo void-install
+Type=Application
+DesktopNames=VoidInstall
+EOF
+
+    chmod 644 "$ROOTFS/usr/share/xsessions/void-install.desktop"
+  '
+}
+
 sh_reconfigure_pass1() {
 	cmd_logger "Reconfigurando o ambiente - pass 1" '
 		xbps-reconfigure -r "$ROOTFS" -f base-files >/dev/null 2>&1
@@ -1042,6 +1061,10 @@ sh_config_distroname() {
 		title='VoidBR Linux Live Mate'
 		VOL_ID='VOIDBR_LIVE_MATE'
 		name='mate'
+	elif $MAKE_ONLY_XORG; then
+		title='VoidBR Linux Live Xorg'
+		VOL_ID='VOIDBR_LIVE_XORG'
+		name='xorg'
 	else
 		title='VoidBR Linux Live Base'
 		VOL_ID='VOIDBR_LIVE_BASE'
@@ -1092,7 +1115,10 @@ sh_configure_packages() {
 	#	sh_config_distroname
 	sh_choose_packages_base
 	if $MAKE_X; then
-		sh_choose_packages_common_X
+		sh_choose_packages_common_X_base
+    if ! $MAKE_ONLY_XORG; then
+  		sh_choose_packages_common_X_advanced
+	  fi
 		if $MAKE_FULL_X; then
 			STEP_COUNT=72
 			sh_choose_packages_xfce_base
@@ -1263,6 +1289,7 @@ sh_install_rootfs() {
 	print_step "Instalando pacotes void em $ROOTFS..."
 	install_packages
 	install_skel_root
+  sh_configure_void_install_desktop
 	sh_reconfigure_pass2
 	finish_clean
 }
@@ -1449,6 +1476,10 @@ shift $((OPTIND - 1))
 
 for arg in "$@"; do
   case "${arg,,}" in
+    xorg)
+      MAKE_X=true
+      MAKE_ONLY_XORG=true
+      ;;
     fluxbox)
       MAKE_X=true
       MAKE_FLUXBOX=true
