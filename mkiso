@@ -99,7 +99,8 @@ sh_choose_packages_base() {
 	ADDITIONAL_PKGS+=" voidbr-utils"
 	ADDITIONAL_PKGS+=" chili-utils"
 	ADDITIONAL_PKGS+=" grc ncurses dialog gettext curl wget git pv nano parted e2fsprogs bc"
-	ADDITIONAL_PKGS+=" xz zstd pigz cryptsetup lvm2 wireless_tools wpa_supplicant socklog-void chrony"
+	ADDITIONAL_PKGS+=" lvm2 xfsprogs jfsutils gptfdisk btrfs-progs f2fs-tools nilfs-utils"
+	ADDITIONAL_PKGS+=" xz zstd pigz cryptsetup wireless_tools wpa_supplicant socklog-void chrony"
 	ADDITIONAL_PKGS+=" openssh"
 	ADDITIONAL_PKGS+=" dhcpcd"
 	ADDITIONAL_PKGS+=" NetworkManager"
@@ -170,6 +171,7 @@ sh_choose_packages_common_X_advanced() {
 	COMMON_PKGS+=" 7zip p7zip file-roller"
 	COMMON_PKGS+=" avahi avahi-discover"
 	COMMON_PKGS+=" gvfs gvfs-smb gvfs-cdda inetutils iputils"
+
 	if $MAKE_GNOME; then
 		COMMON_PKGS+=" gdm" #seg 04 mai 2026 11:12:38 -04
 	else
@@ -205,9 +207,9 @@ sh_choose_packages_common_X_advanced() {
 	#	COMMON_PKGS+=" nitrogen"
 	#	COMMON_PKGS+=" mate-notification-daemon"
 	#	COMMON_PKGS+=" lxdm lxdm-theme-vdojo"
-	#   COMMON_PKGS+=" lxappearance lxinput lxrandr lxtask"
-	#   COMMON_PKGS+=" slim"
-	#   COMMON_PKGS+=" lightdm"
+	# COMMON_PKGS+=" lxappearance lxinput lxrandr lxtask"
+	# COMMON_PKGS+=" slim"
+	# COMMON_PKGS+=" lightdm"
 	#	COMMON_PKGS+=" xarchiver zip unzip bzip2"
 	#	COMMON_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
 	#	COMMON_PKGS+=" irqbalance"
@@ -1067,9 +1069,9 @@ sh_config_distroname() {
 		VOL_ID='VOIDBR_LIVE_MATE'
 		name='mate'
 	elif $MAKE_ONLY_XORG; then
-		title='VoidBR Linux Live Xorg'
-		VOL_ID='VOIDBR_LIVE_XORG'
-		name='xorg'
+		title='VoidBR Linux Live Install'
+		VOL_ID='VOIDBR_LIVE_INSTALL'
+		name='install'
 	else
 		title='VoidBR Linux Live Base'
 		VOL_ID='VOIDBR_LIVE_BASE'
@@ -1481,7 +1483,7 @@ shift $((OPTIND - 1))
 
 for arg in "$@"; do
   case "${arg,,}" in
-    xorg)
+    xorg|install)
       MAKE_X=true
       MAKE_ONLY_XORG=true
       ;;
