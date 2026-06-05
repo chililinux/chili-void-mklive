@@ -147,6 +147,16 @@ sh_choose_packages_common_X_base() {
 	AEXTRA_COMMON_PKGS+=" voidbr-professional-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-beauty-icons"
 	AEXTRA_COMMON_PKGS+=" voidbr-xfce-theme-dracula"
+	AEXTRA_COMMON_PKGS+=" voidbr-webapps"
+
+	if $MAKE_GNOME; then
+		COMMON_PKGS+=" gdm" #seg 04 mai 2026 11:12:38 -04
+	else
+		COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings arc-theme papirus-icon-theme dejavu-fonts-ttf"
+		AEXTRA_COMMON_PKGS+=" voidbr-lightdm-themes"
+	fi
+  COMMON_PKGS+=" sddm"
+
 }
 
 sh_choose_packages_common_X_advanced() {
@@ -172,23 +182,15 @@ sh_choose_packages_common_X_advanced() {
 	COMMON_PKGS+=" avahi avahi-discover"
 	COMMON_PKGS+=" gvfs gvfs-smb gvfs-cdda inetutils iputils"
 
-	if $MAKE_GNOME; then
-		COMMON_PKGS+=" gdm" #seg 04 mai 2026 11:12:38 -04
-	else
-		COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings arc-theme papirus-icon-theme dejavu-fonts-ttf"
-		AEXTRA_COMMON_PKGS+=" voidbr-lightdm-themes"
-	fi
-	COMMON_PKGS+=" sddm"
-
 	#	COMMON_PKGS+=" brave-bin"
-	#   COMMON_PKGS+=" fonts-roboto-ttf"
-	#   COMMON_PKGS+=" liberation-fonts-ttf"
-	#   COMMON_PKGS+=" dejavu-fonts-ttf"
-	#   COMMON_PKGS+=" fonts-droid-ttf"
-	#   COMMON_PKGS+=" fonts-croscore-ttf"
-	#   COMMON_PKGS+=" terminus-font"
-	#   COMMON_PKGS+=" font-emoji-one-color"
-	#   COMMON_PKGS+=" google-fonts-ttf"
+	# COMMON_PKGS+=" fonts-roboto-ttf"
+	# COMMON_PKGS+=" liberation-fonts-ttf"
+	# COMMON_PKGS+=" dejavu-fonts-ttf"
+	# COMMON_PKGS+=" fonts-droid-ttf"
+	# COMMON_PKGS+=" fonts-croscore-ttf"
+	# COMMON_PKGS+=" terminus-font"
+	# COMMON_PKGS+=" font-emoji-one-color"
+	# COMMON_PKGS+=" google-fonts-ttf"
 	#	COMMON_PKGS+=" cool-retro-term"
 	#	COMMON_PKGS+=" rxvt-unicode"
 	#	COMMON_PKGS+=" blueberry"
