@@ -98,6 +98,7 @@ sh_choose_packages_base() {
 	ADDITIONAL_PKGS+=" void-install"
 	ADDITIONAL_PKGS+=" voidbr-utils"
 	ADDITIONAL_PKGS+=" chili-utils"
+	ADDITIONAL_PKGS+=" chili-clonedisk"
 	ADDITIONAL_PKGS+=" grc ncurses dialog gettext curl wget git pv nano parted e2fsprogs bc"
 	ADDITIONAL_PKGS+=" lvm2 xfsprogs jfsutils gptfdisk btrfs-progs f2fs-tools nilfs-utils"
 	ADDITIONAL_PKGS+=" xz zstd pigz cryptsetup wireless_tools wpa_supplicant socklog-void chrony"
