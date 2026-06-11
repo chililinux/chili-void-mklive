@@ -147,8 +147,9 @@ sh_choose_packages_common_X_base() {
 	AEXTRA_COMMON_PKGS+=" voidbr-tokyo-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-professional-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-beauty-icons"
-	AEXTRA_COMMON_PKGS+=" voidbr-xfce-theme-dracula"
+	AEXTRA_COMMON_PKGS+=" voidbr-theme-dracula"
 	AEXTRA_COMMON_PKGS+=" voidbr-webapps"
+	AEXTRA_COMMON_PKGS+=" chili-iso2usb"
 
 	if $MAKE_GNOME; then
 		COMMON_PKGS+=" gdm" #seg 04 mai 2026 11:12:38 -04
@@ -291,7 +292,7 @@ sh_choose_packages_xfce() {
 
 	AEXTRA_PKGS+=" voidbr-xfwm-axiom-theme"
 	ACONFIG_PKGS+=(voidbr-xfce-config)
-	ACONFIG_PKGS+=(voidbr-xfce-theme-dracula)
+	ACONFIG_PKGS+=(voidbr-theme-dracula)
 
 }
 
