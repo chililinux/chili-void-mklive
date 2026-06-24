@@ -1,0 +1,8 @@
+sudo bash mkiso --automatic -v linux7.0
+sudo bash mkiso --automatic -v linux7.0 install
+sudo bash mkiso --automatic -v linux7.0 xfce
+sudo bash mkiso --automatic -v linux7.0 gnome
+sudo bash mkiso --automatic -v linux7.0 plasma
+sudo bash mkiso --automatic -v linux7.0 cinnamon
+sudo bash mkiso --automatic -v linux7.0 mate
+sudo bash mkiso --automatic -v linux7.0 fullx

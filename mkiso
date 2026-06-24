@@ -710,7 +710,7 @@ configure_plymouth() {
 file=/var/log/boot.log
 # Exibe uma mensagem inicial usando o Plymouth
 plymouth display-message --text="Booting Void Linux"
-desg -f daemon,user,auth | while read -r line; do
+dmesg -f daemon,user,auth | while read -r line; do
   # Exibe as últimas 50 caracteres da linha usando o Plymouth
   plymouth display-message --text="${line:0:50}"
   echo "${line:0:50}"

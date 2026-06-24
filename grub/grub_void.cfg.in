@@ -58,7 +58,7 @@ if [ cpuid -l ]; then
     menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@)" --class void --class gnu-linux --class gnu --class os  {
         set gfxpayload="keep"
         linux (${voidlive})/boot/vmlinuz \
-		root=live:CDLABEL=VOIDBR_LIVE_CINNAMON ro init=/sbin/init \
+		root=live:CDLABEL=VOIDBR_LIVE_FULLX ro init=/sbin/init \
 		splash rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
 		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
 		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
@@ -67,7 +67,7 @@ if [ cpuid -l ]; then
     menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) (RAM)" --class void --class gnu-linux --class gnu --class os {
         set gfxpayload="keep"
         linux (${voidlive})/boot/vmlinuz \
-		root=live:CDLABEL=VOIDBR_LIVE_CINNAMON ro init=/sbin/init \
+		root=live:CDLABEL=VOIDBR_LIVE_FULLX ro init=/sbin/init \
 		splash rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
 		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
 		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
