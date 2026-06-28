@@ -694,6 +694,20 @@ cmd_install() {
 		--yes $PKGS
 }
 
+cmd_install_force() {
+	local PKGS="$*"
+	LC_ALL=C \
+		XBPS_ARCH=$BASE_ARCH \
+		$XBPS_INSTALL_CMD \
+		--unpack-only \
+		--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
+		--cachedir "$XBPS_CACHEDIR" \
+		--update \
+		--force --force \
+		--ignore-file-conflicts \
+		--yes $PKGS
+}
+
 install_packages() {
 	cmd_logger "Instalando xbps pkg" '
         cmd_install -yu xbps
@@ -756,7 +770,7 @@ install_packages() {
 
 	if [[ -n $ASKEL_PKGS ]]; then
     cmd_logger "Instalando void meta pkgs : ${ASKEL_PKGS[*]}" '
-      cmd_install ${ASKEL_PKGS[*]}
+      cmd_install_force ${ASKEL_PKGS[*]}
     '
 	fi
 
