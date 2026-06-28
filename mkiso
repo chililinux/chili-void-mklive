@@ -461,7 +461,8 @@ sh_choose_packages_sway() {
     acpi
     acpid
 	)
-	AEXTRA_PKGS+=" voidbr-sway-config"
+
+  ASKEL_PKGS+=(voidbr-sway-config)
 }
 
 sh_setEnvironment() {
@@ -748,8 +749,14 @@ install_packages() {
 #	fi
 
 	if [[ -n $ACONFIG_PKGS ]]; then
-    cmd_logger "Instalando void meta pkgs : $pkg" '
+    cmd_logger "Instalando void meta pkgs : ${ACONFIG_PKGS[*]}" '
       cmd_install ${ACONFIG_PKGS[*]}
+    '
+	fi
+
+	if [[ -n $ASKEL_PKGS ]]; then
+    cmd_logger "Instalando void meta pkgs : ${ASKEL_PKGS[*]}" '
+      cmd_install ${ASKEL_PKGS[*]}
     '
 	fi
 
