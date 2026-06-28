@@ -73,10 +73,10 @@ declare -g MAKE_PLASMA=false
 declare -g MAKE_GNOME=false
 declare -g MAKE_CINNAMON=false
 declare -g MAKE_MATE=false
+declare -g MAKE_SWAY=false
 declare -g MAKE_ONLY_XORG=false
 declare -g MAKE_FULL_X=false
 declare -g LBIND=false
-declare -g QUIET=false
 declare -gi STEP_COUNT=59
 declare -gi njobs=59
 declare -g VOL_ID='VOIDBR_LIVE'
@@ -86,26 +86,74 @@ declare -g SQUASHFS_COMPRESSION=xz
 declare -g SQUASHFS_COMPRESSION=zstd
 #declare -g KEEP_BUILDDIR=true
 declare -g name='base'
+declare -g QUIET=false
+declare -a INCLUDE_DIRS=()
+declare -g REQUIRED_PKGS=
+declare -g INITRAMFS_PKGS=
+declare -g COMMON_PKGS=
 
 sh_choose_packages_base() {
+	sh_choose_required_packages
+	sh_choose_additional_packages
+	sh_choose_voidbr_packages
+}
+
+sh_choose_required_packages() {
 	print_step "Selecionando pacotes essenciais"
-	declare -a INCLUDE_DIRS=()
-	declare -g PROGNAME=$(basename "$0")
-	declare -g REQUIRED_PKGS="base-files dash bash bash-completion coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
-	declare -g INITRAMFS_PKGS="binutils device-mapper dhclient dracut dracut-network"
-	ADDITIONAL_PKGS+=" voidbr-vinstall"
-	ADDITIONAL_PKGS+=" voidbr-grub-theme"
-	ADDITIONAL_PKGS+=" void-install"
-	ADDITIONAL_PKGS+=" voidbr-utils"
-	ADDITIONAL_PKGS+=" chili-utils"
-	ADDITIONAL_PKGS+=" chili-clonedisk"
-	ADDITIONAL_PKGS+=" grc ncurses dialog gettext curl wget git pv nano parted e2fsprogs bc"
-	ADDITIONAL_PKGS+=" lvm2 xfsprogs jfsutils gptfdisk btrfs-progs f2fs-tools nilfs-utils"
-	ADDITIONAL_PKGS+=" xz zstd pigz cryptsetup wireless_tools wpa_supplicant socklog-void chrony"
-	ADDITIONAL_PKGS+=" openssh"
-	ADDITIONAL_PKGS+=" dhcpcd"
+	REQUIRED_PKGS+=" base-files"
+	#	REQUIRED_PKGS+=" dash"
+	REQUIRED_PKGS+=" bash"
+	REQUIRED_PKGS+=" bash-completion"
+	REQUIRED_PKGS+=" coreutils"
+	REQUIRED_PKGS+=" sed"
+	REQUIRED_PKGS+=" tar"
+	REQUIRED_PKGS+=" gawk"
+	REQUIRED_PKGS+=" syslinux"
+	REQUIRED_PKGS+=" grub-i386-efi"
+	REQUIRED_PKGS+=" grub-x86_64-efi"
+	REQUIRED_PKGS+=" memtest86+"
+	REQUIRED_PKGS+=" squashfs-tools"
+	REQUIRED_PKGS+=" xorriso"
+	#
+	INITRAMFS_PKGS+=" binutils"
+	INITRAMFS_PKGS+=" device-mapper"
+	INITRAMFS_PKGS+=" dhclient"
+	INITRAMFS_PKGS+=" dracut"
+	INITRAMFS_PKGS+=" dracut-network"
+	#
 	ADDITIONAL_PKGS+=" NetworkManager"
 	ADDITIONAL_PKGS+=" plymouth"
+}
+
+sh_choose_additional_packages() {
+	ADDITIONAL_PKGS+=" grc"
+	ADDITIONAL_PKGS+=" ncurses"
+	ADDITIONAL_PKGS+=" dialog"
+	ADDITIONAL_PKGS+=" gettext"
+	ADDITIONAL_PKGS+=" curl"
+	ADDITIONAL_PKGS+=" wget"
+	ADDITIONAL_PKGS+=" git"
+	ADDITIONAL_PKGS+=" pv"
+	ADDITIONAL_PKGS+=" nano"
+	ADDITIONAL_PKGS+=" parted"
+	ADDITIONAL_PKGS+=" e2fsprogs"
+	ADDITIONAL_PKGS+=" bc"
+	ADDITIONAL_PKGS+=" lvm2"
+	ADDITIONAL_PKGS+=" xfsprogs"
+	ADDITIONAL_PKGS+=" jfsutils"
+	ADDITIONAL_PKGS+=" gptfdisk"
+	ADDITIONAL_PKGS+=" btrfs-progs"
+	ADDITIONAL_PKGS+=" f2fs-tools"
+	ADDITIONAL_PKGS+=" nilfs-utils"
+	ADDITIONAL_PKGS+=" xz"
+	ADDITIONAL_PKGS+=" zstd"
+	ADDITIONAL_PKGS+=" pigz"
+	ADDITIONAL_PKGS+=" cryptsetup"
+	ADDITIONAL_PKGS+=" wireless_tools"
+	ADDITIONAL_PKGS+=" wpa_supplicant"
+	ADDITIONAL_PKGS+=" socklog-void chrony"
+	ADDITIONAL_PKGS+=" openssh"
+	ADDITIONAL_PKGS+=" dhcpcd"
 	ADDITIONAL_PKGS+=" htop"
 	ADDITIONAL_PKGS+=" tree"
 	ADDITIONAL_PKGS+=" rsync"
@@ -118,31 +166,18 @@ sh_choose_packages_base() {
 
 	ACONFIG_PKGS+=(voidbr-base-config)
 	ACONFIG_PKGS+=(voidbr-plymouth-theme)
-	AEXTRA_PKGS+=" vim "
+	#	AEXTRA_PKGS+=" vim "
 	AEXTRA_PKGS+=" fastfetch"
-
-	#	ADDITIONAL_PKGS+=" openresolv" ADDITIONAL_PKGS+=" github-cli"
-	#	ADDITIONAL_PKGS+=" libgcc"
-	#	ADDITIONAL_PKGS+=" github-cli"
-	#	ADDITIONAL_PKGS+=" iputils"
-	#	ADDITIONAL_PKGS+=" net-tools"
-	#	ADDITIONAL_PKGS+=" plymouth-data"
-	#	ADDITIONAL_PKGS+=" acpi acpid"
-	#	ADDITIONAL_PKGS+=" xtools"
-	#	ADDITIONAL_PKGS+=" grub-btrfs-runit"
-	#	ADDITIONAL_PKGS+=" cifs-utils"
-	#	ADDITIONAL_PKGS+=" porg"
-	# ADDITIONAL_PKGS+=" wifi-firmware"
-	# ADDITIONAL_PKGS+=" rtl8812au-dkms rtl8821cu-dkms rtl8822bu-dkms"
-	#	ADDITIONAL_PKGS+=" pacman fakeroot bsdtar"
 }
 
-sh_choose_packages_common_X_base() {
-	print_step "Selecionando pacotes X Common Base"
-	COMMON_PKGS="xorg xorg-apps xorg-fonts xterm dbus dbus-x11 elogind dbus-elogind polkit-elogind xdg-user-dirs"
-	COMMON_PKGS+=" xfce4-terminal"
-	COMMON_PKGS+=" libavif libheif gdk-pixbuf libheif-pixbuf-loader"
-	COMMON_PKGS+=" xorg-server-xwayland" #seg 04 mai 2026 11:12:38 -04
+sh_choose_voidbr_packages() {
+	ADDITIONAL_PKGS+=" voidbr-vinstall"
+	ADDITIONAL_PKGS+=" voidbr-grub-theme"
+	ADDITIONAL_PKGS+=" void-install"
+	ADDITIONAL_PKGS+=" voidbr-utils"
+	ADDITIONAL_PKGS+=" chili-utils"
+	ADDITIONAL_PKGS+=" chili-clonedisk"
+	#
 	AEXTRA_COMMON_PKGS+=" voidbr-wallpapers"
 	AEXTRA_COMMON_PKGS+=" voidbr-tokyo-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-professional-theme"
@@ -150,15 +185,43 @@ sh_choose_packages_common_X_base() {
 	AEXTRA_COMMON_PKGS+=" voidbr-theme-dracula"
 	AEXTRA_COMMON_PKGS+=" voidbr-webapps"
 	AEXTRA_COMMON_PKGS+=" chili-iso2usb"
+	#
+	ACONFIG_PKGS+=(voidbr-plymouth-theme)
+}
+
+sh_choose_packages_common_X_base() {
+	print_step "Selecionando pacotes X Common Base"
+	COMMON_PKGS+=" xorg"
+	COMMON_PKGS+=" xorg-apps"
+	COMMON_PKGS+=" xorg-fonts"
+	COMMON_PKGS+=" xterm"
+	COMMON_PKGS+=" xauth"
+	COMMON_PKGS+=" dbus"
+	COMMON_PKGS+=" dbus-x11"
+	COMMON_PKGS+=" elogind"
+	COMMON_PKGS+=" dbus-elogind"
+	COMMON_PKGS+=" polkit-elogind"
+	COMMON_PKGS+=" xdg-user-dirs"
+	COMMON_PKGS+=" xfce4-terminal"
+	COMMON_PKGS+=" libavif"
+	COMMON_PKGS+=" libheif"
+	COMMON_PKGS+=" gdk-pixbuf"
+	COMMON_PKGS+=" libheif-pixbuf-loader"
+	COMMON_PKGS+=" xorg-server-xwayland"
+	#
 
 	if $MAKE_GNOME; then
-		COMMON_PKGS+=" gdm" #seg 04 mai 2026 11:12:38 -04
+		COMMON_PKGS+=" gdm"
 	else
-		COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings arc-theme papirus-icon-theme dejavu-fonts-ttf"
+		COMMON_PKGS+=" lightdm"
+		COMMON_PKGS+=" lightdm-gtk-greeter"
+		COMMON_PKGS+=" lightdm-gtk-greeter-settings"
+		COMMON_PKGS+=" arc-theme"
+		COMMON_PKGS+=" papirus-icon-theme"
+		COMMON_PKGS+=" dejavu-fonts-ttf"
 		AEXTRA_COMMON_PKGS+=" voidbr-lightdm-themes"
 	fi
-  COMMON_PKGS+=" sddm"
-
+	#  COMMON_PKGS+=" sddm"
 }
 
 sh_choose_packages_common_X_advanced() {
@@ -243,7 +306,6 @@ sh_choose_packages_plasma() {
 
 sh_choose_packages_gnome() {
 	print_step "Selecionando pacotes GNOME"
-	#gnome
 	ADISTRO_PKGS+=" gnome"
 	ADISTRO_PKGS+=" gnome-keyring"
 	ADISTRO_PKGS+=" accountsservice"
@@ -324,6 +386,81 @@ sh_choose_packages_mate() {
 
 	ACONFIG_PKGS+=(voidbr-mate-config)
 
+}
+
+sh_choose_packages_sway() {
+	print_step "Selecionando pacotes SWAY"
+	ADISTRO_PKGS+=" sway"
+  #
+	ACONFIG_PKGS+=(
+		dbus                    # Message bus system
+		elogind                 # Gerenciador de login e sessões (seat management)
+		foot                    # Terminal leve e otimizado para Wayland
+		wofi                    # Lançador de aplicativos e menu de busca
+		grim                    # Utilitário para captura de tela (screenshot)
+		slurp                   # Seleção de área para captura de tela
+		brightnessctl           # Controle de brilho via linha de comando
+		eom                     # Visualizador de imagens (Eye of MATE)
+		fuse-exfat              # Suporte para montagem de sistemas exFAT
+		ffmpeg                  # Ferramentas para manipulação de áudio e vídeo
+		mesa-dri                # Drivers gráficos (Direct Rendering Infrastructure)
+		mesa-vaapi              # Aceleração de vídeo via hardware (VA-API)
+		mesa-demos              # Coleção de ferramentas de teste para o Mesa
+		psmisc                  # Utilitários de processo (killall, fuser, pstree)
+		cpupower                # Ferramenta de gerenciamento de frequência da CPU
+		noto-fonts-ttf          # Fontes Noto da Google
+		font-awesome            # Fontes de ícones para barras e interfaces
+		optipng                 # Otimizador de compressão para arquivos PNG
+		sassc                   # Compilador CSS (SASS)
+		jq                      # Processador de arquivos JSON via CLI
+		swaylock                # Bloqueador de tela para Wayland
+		swayidle                # Gerenciador de inatividade (idle) e bloqueio
+		wl-clipboard            # Ferramentas de clipboard (wl-copy/wl-paste)
+		sway-audio-idle-inhibit # Inibe o bloqueio/hibernação durante reprodução de áudio
+		Waybar                  # Barra de status customizável para Wayland
+		wmenu                   # Menu de seleção estilo dmenu/wofi para Wayland
+		xdg-utils               # Ferramentas de integração com a área de trabalho
+		xdg-desktop-portal      # Camada de comunicação entre apps e o desktop
+		xdg-desktop-portal-gtk  # Implementação GTK do portal XDG
+		xdg-desktop-portal-wlr  # Implementação WLR (Sway) do portal XDG
+		rtkit                   # Gerenciamento de prioridade de tempo real
+		mate-polkit             # Agente de autenticação para permissões root
+		kanshi                  # Gerenciador dinâmico de monitores
+		Thunar                  # Gerenciador de arquivos (XFCE)
+		thunar-archive-plugin   # Integração de compactação no Thunar
+		engrampa                # Gerenciador de arquivos compactados
+		cliphist                # Histórico da área de transferência
+		mate-calc               # Calculadora do ambiente MATE
+		pluma                   # Editor de texto leve (MATE)
+		nwg-look                # Configurador de temas GTK para Wayland
+		atril                   # Visualizador de documentos (PDFs)
+		mako                    # Servidor de notificações Wayland
+		pipewire                # Servidor de áudio moderno
+		wireplumber             # Gerenciador de sessão para PipeWire
+		pavucontrol             # Volume control applet for Pipewire
+		xfce4-terminal          # Modern terminal emulator primarly for the Xfce desktop environment
+		alsa-pipewire
+		pulseaudio-utils
+		libspa-bluetooth
+		libjack-pipewire
+		alsa-plugins-pulseaudio
+		alsa-utils
+		NetworkManager            # Gerenciador de rede (daemon)
+		network-manager-applet    # Ícone de bandeja para controlar conexões
+		firefox                   # Mozilla Firefox web browser
+		firefox-i18n-pt-BR        # Firefox Portuguese (Brazilian) language pack
+#		nerd-fonts                # Iconic font aggregator collection
+		ttf-jetbrains-mono-nerd   # Patched font JetBrains Mono from nerd fonts library
+		lm_sensors                # Utilities to read temperature/voltage/fan sensors
+		xdg-user-dirs-gtk         # GTK+ tool to help manage user directories
+		xdg-user-dirs             # Tool to help manage user directories
+		voidbr-base-config        # Configuração base personalizada
+		voidbr-sway-config        # Configuração específica do Sway
+		voidbr-theme-dracula      # Tema visual Dracula aplicado
+		voidbr-tokyo-theme        # TokyoNight-Dark theme with icons, cursors, and wallpaper
+    acpi
+    acpid
+	)
 }
 
 sh_setEnvironment() {
@@ -529,13 +666,6 @@ copy_autoinstaller_files() {
 }
 
 install_prereqs() {
-	#	print_step "Instalando software para gerar a imagem de disco..."
-	#	{
-	#		LC_ALL=C XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -c "$XBPS_HOST_CACHEDIR" -y $REQUIRED_PKGS -S
-	#	} 2>&1 | tee -i -a "$BOOTLOG" >$([[ "$QUIET" == false ]] && echo /dev/stdout || echo "$LOGGER")
-	#	result="${PIPESTATUS[0]}"
-	#	[ $result -ne 0 ] && die "Failed to install required software, exiting..."
-
 	cmd_logger "Instalando software para gerar a imagem de disco..." "
         LC_ALL=C \
         XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" \
@@ -543,6 +673,8 @@ install_prereqs() {
         --cachedir "$XBPS_HOST_CACHEDIR" \
         --yes $REQUIRED_PKGS \
         --update \
+        --unpack-only \
+        --ignore-file-conflicts \
         --sync
     "
 }
@@ -556,7 +688,7 @@ cmd_install() {
 		--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
 		--cachedir "$XBPS_CACHEDIR" \
 		--update \
-		--force --force \
+		--ignore-file-conflicts \
 		--yes $PKGS
 }
 
@@ -602,21 +734,27 @@ install_packages() {
 
 	if [[ -n $AEXTRA_COMMON_PKGS ]]; then
 		cmd_logger "Instalando void meta pkgs : AEXTRA_COMMON_PKGS" '
-            cmd_install $AEXTRA_COMMON_PKGS
+      cmd_install $AEXTRA_COMMON_PKGS
 		'
 	fi
 
+#	if [[ -n $ACONFIG_PKGS ]]; then
+#		for pkg in "${ACONFIG_PKGS[@]}"; do
+#			cmd_logger "Instalando void meta pkgs : $pkg" '
+#        cmd_install "$pkg"
+#    		'
+#		done
+#	fi
+
 	if [[ -n $ACONFIG_PKGS ]]; then
-		for pkg in "${ACONFIG_PKGS[@]}"; do
-			cmd_logger "Instalando void meta pkgs : $pkg" '
-                cmd_install "$pkg"
-    		'
-		done
+    cmd_logger "Instalando void meta pkgs : $pkg" '
+      cmd_install ${ACONFIG_PKGS[*]}
+    '
 	fi
 
 	if [[ -n $AEXTRA_PKGS ]]; then
 		cmd_logger "Instalando void meta pkgs : AEXTRA" '
-            cmd_install $AEXTRA_PKGS
+      cmd_install $AEXTRA_PKGS
 		'
 	fi
 	#    sh_reconfigure_pass1
@@ -640,7 +778,7 @@ install_skel_root() {
 }
 
 sh_configure_void_install_desktop() {
-  cmd_logger "Configurando /usr/share/xsessions/void-install.desktop" '
+	cmd_logger "Configurando /usr/share/xsessions/void-install.desktop" '
     mkdir -p "$ROOTFS/usr/share/xsessions"
 
     cat > "$ROOTFS/usr/share/xsessions/void-install.desktop" << "EOF"
@@ -674,7 +812,7 @@ sh_reconfigure_pass1() {
 
 sh_reconfigure_pass2() {
 	cmd_logger "Reconfigurando o ambiente - pass 2" '
-        chroot "$ROOTFS" env -i xbps-reconfigure -a
+    chroot "$ROOTFS" env -i xbps-reconfigure -a
 	'
 }
 
@@ -1022,6 +1160,7 @@ ${bold}Desktop presets:${rst}
   -X|xfce-base      ${green}XFCE (base)${rst}
   -Y|xfce           ${green}XFCE${rst}
   -M|mate           ${green}MATE${rst}
+  -S|sway           ${green}SWAY${rst}
   -A|fullx          ${green}ALL X${rst}
 
   -h                 Show this help and exit
@@ -1072,6 +1211,10 @@ sh_config_distroname() {
 		title='VoidBR Linux Live Mate'
 		VOL_ID='VOIDBR_LIVE_MATE'
 		name='mate'
+	elif $MAKE_SWAY; then
+		title='VoidBR Linux Live Sway'
+		VOL_ID='VOIDBR_LIVE_SWAY'
+		name='sway'
 	elif $MAKE_ONLY_XORG; then
 		title='VoidBR Linux Live Install'
 		VOL_ID='VOIDBR_LIVE_INSTALL'
@@ -1086,7 +1229,7 @@ sh_config_distroname() {
 sh_print_resume() {
 	replicate
 	for mirror in "${public_repos[@]}"; do
-	print_step "Repository ${cyan}#$((++count))${rst}    => ${yellow}${mirror}${reset}"
+		print_step "Repository ${cyan}#$((++count))${rst}    => ${yellow}${mirror}${reset}"
 	done
 	replicate
 	print_step "Building ISO     => ${yellow}${title}${reset}"
@@ -1104,12 +1247,12 @@ sh_print_resume() {
 }
 
 cmd_logger() {
-  local cmd="$*"
+	local cmd="$*"
 	local msg="$1"
 	local check_error="$3"
 
 	print_step "$msg"
-  #! $quiet msg_tab "${cyan}[⚙   ] [running] : ${reset} $cmd"
+	#! $quiet msg_tab "${cyan}[⚙   ] [running] : ${reset} $cmd"
 	{
 		eval "$2"
 		#   } 2>&1 | tee -i -a "$BOOTLOG" >$([[ "$QUIET" == false ]] && echo /dev/stdout || echo "$LOGGER")
@@ -1124,12 +1267,14 @@ cmd_logger() {
 
 sh_configure_packages() {
 	#	sh_config_distroname
+
 	sh_choose_packages_base
+
 	if $MAKE_X; then
 		sh_choose_packages_common_X_base
-    if ! $MAKE_ONLY_XORG; then
-  		sh_choose_packages_common_X_advanced
-	  fi
+		if ! $MAKE_ONLY_XORG; then
+			sh_choose_packages_common_X_advanced
+		fi
 		if $MAKE_FULL_X; then
 			STEP_COUNT=72
 			sh_choose_packages_xfce_base
@@ -1141,6 +1286,7 @@ sh_configure_packages() {
 			sh_choose_packages_awesome
 			sh_choose_packages_enlightenment
 			sh_choose_packages_fluxbox
+			sh_choose_packages_sway
 		elif $MAKE_ENLIGHTENMENT; then
 			sh_choose_packages_enlightenment
 		elif $MAKE_AWESOME; then
@@ -1160,6 +1306,8 @@ sh_configure_packages() {
 			sh_choose_packages_cinnamon
 		elif $MAKE_MATE; then
 			sh_choose_packages_mate
+		elif $MAKE_SWAY; then
+			sh_choose_packages_sway
 		fi
 	fi
 }
@@ -1229,7 +1377,7 @@ sh_configure_rootfs() {
 	: ${OUTPUT_FILE="voidbr-live-$name-${BASE_ARCH}-$(uname -r)-$(sh_diahora).iso"}
 	mkdir -p "$ROOTFS" "$VOIDHOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR"
 
-  # Validação de espaço em disco inserida antes do resumo e do início das instalações
+	# Validação de espaço em disco inserida antes do resumo e do início das instalações
 	verificar_espaco_livre
 
 	sh_print_resume
@@ -1300,7 +1448,7 @@ sh_install_rootfs() {
 	print_step "Instalando pacotes void em $ROOTFS..."
 	install_packages
 	install_skel_root
-  sh_configure_void_install_desktop
+	sh_configure_void_install_desktop
 	sh_reconfigure_pass2
 	finish_clean
 }
@@ -1443,15 +1591,19 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFfAGPmM" opt; do
 		MAKE_X=true
 		MAKE_MATE=true
 		;;
-	w | W )
+	S)
+		MAKE_X=true
+		MAKE_SWAY=true
+		;;
+	w | W)
 		MAKE_X=true
 		MAKE_AWESOME=true
 		;;
-	e | E )
+	e | E)
 		MAKE_X=true
 		MAKE_ENLIGHTENMENT=true
 		;;
-	f | F )
+	f | F)
 		MAKE_X=true
 		MAKE_FLUXBOX=true
 		;;
@@ -1486,61 +1638,66 @@ done
 shift $((OPTIND - 1))
 
 for arg in "$@"; do
-  case "${arg,,}" in
-    xorg|install)
-      MAKE_X=true
-      MAKE_ONLY_XORG=true
-      ;;
-    fluxbox)
-      MAKE_X=true
-      MAKE_FLUXBOX=true
-      ;;
+	case "${arg,,}" in
+	xorg | install)
+		MAKE_X=true
+		MAKE_ONLY_XORG=true
+		;;
+	fluxbox)
+		MAKE_X=true
+		MAKE_FLUXBOX=true
+		;;
 
-    xfce)
-      MAKE_X=true
-      MAKE_XFCE=true
-      ;;
+	xfce)
+		MAKE_X=true
+		MAKE_XFCE=true
+		;;
 
-    xfce-base)
-      MAKE_X=true
-      MAKE_XFCE_BASE=true
-      ;;
+	xfce-base)
+		MAKE_X=true
+		MAKE_XFCE_BASE=true
+		;;
 
-    plasma|kde)
-      MAKE_X=true
-      MAKE_PLASMA=true
-      ;;
+	plasma | kde)
+		MAKE_X=true
+		MAKE_PLASMA=true
+		;;
 
-    gnome)
-      MAKE_X=true
-      MAKE_GNOME=true
-      ;;
+	gnome)
+		MAKE_X=true
+		MAKE_GNOME=true
+		;;
 
-    mate)
-      MAKE_X=true
-      MAKE_MATE=true
-      ;;
+	mate)
+		MAKE_X=true
+		MAKE_MATE=true
+		;;
 
-    cinnamon)
-      MAKE_X=true
-      MAKE_CINNAMON=true
-      ;;
+	sway)
+		MAKE_X=true
+		MAKE_SWAY=true
+		;;
 
-    awesome)
-      MAKE_X=true
-      MAKE_AWESOME=true
-      ;;
+	cinnamon)
+		MAKE_X=true
+		MAKE_CINNAMON=true
+		;;
 
-    enlightenment)
-      MAKE_X=true
-      MAKE_ENLIGHTENMENT=true
-      ;;
+	awesome)
+		MAKE_X=true
+		MAKE_AWESOME=true
+		;;
 
-    fullx)
-      MAKE_X=true
-      MAKE_FULL_X=true
-      ;;
-  esac
+	enlightenment)
+		MAKE_X=true
+		MAKE_ENLIGHTENMENT=true
+		;;
+
+	fullx)
+		MAKE_X=true
+		MAKE_FULL_X=true
+		;;
+	esac
 done
 
 # Check for root permissions.
