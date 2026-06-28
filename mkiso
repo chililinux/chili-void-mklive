@@ -455,12 +455,12 @@ sh_choose_packages_sway() {
 		xdg-user-dirs-gtk         # GTK+ tool to help manage user directories
 		xdg-user-dirs             # Tool to help manage user directories
 		voidbr-base-config        # Configuração base personalizada
-		voidbr-sway-config        # Configuração específica do Sway
 		voidbr-theme-dracula      # Tema visual Dracula aplicado
 		voidbr-tokyo-theme        # TokyoNight-Dark theme with icons, cursors, and wallpaper
     acpi
     acpid
 	)
+	AEXTRA_PKGS+=" voidbr-sway-config"
 }
 
 sh_setEnvironment() {
