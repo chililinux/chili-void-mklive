@@ -6,7 +6,7 @@
 # mkiso
 # Created: 2023/09/18 - 09:05
 # Altered: 2024/12/17 - 12:43
-# Updated: dom 10 mai 2026 10:49:55 -04
+# Updated: dom 28 jun 2026 01:49:10 -04
 #
 # Copyright (c) 2009-2015 Juan Romero Pardines.
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.05.10-20260510'
+readonly _VERSION_='0.06.28-20260628'
 readonly distro=$(uname -n)
 readonly DEPENDENCIES=(rsync sed grep cat umount losetup tput chroot mkfs.vfat tee)
 
@@ -91,6 +91,7 @@ declare -a INCLUDE_DIRS=()
 declare -g REQUIRED_PKGS=
 declare -g INITRAMFS_PKGS=
 declare -g COMMON_PKGS=
+declare -g AEXTRA_PKGS=
 
 sh_choose_packages_base() {
 	sh_choose_required_packages
