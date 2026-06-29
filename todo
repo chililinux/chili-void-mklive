@@ -1,6 +1,0 @@
- ✗  não encontrei o comando 'mkfs.ntfs'
- ✗  não encontrei o comando 'mkfs.jfs'
- ✗  não encontrei o comando 'mkfs.nilfs2'
- ✗  não encontrei o comando 'gdisk'
-Distro detectada: voidbr
-Erro: Nenhuma configuração de pacotes encontrada para a distro: 'voidbr'
