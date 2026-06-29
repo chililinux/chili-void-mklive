@@ -6,7 +6,7 @@
 # mkiso
 # Created: 2023/09/18 - 09:05
 # Altered: 2024/12/17 - 12:43
-# Updated: dom 28 jun 2026 13:34:50 -04
+# Updated: dom 28 jun 2026 01:49:10 -04
 #
 # Copyright (c) 2009-2015 Juan Romero Pardines.
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
@@ -57,14 +57,10 @@ readonly _VERSION_='0.06.28-20260628'
 readonly distro=$(uname -n)
 readonly DEPENDENCIES=(rsync sed grep cat umount losetup tput chroot mkfs.vfat tee)
 
-cleanup() {
-	umount_pseudofs
-	# Restaurar os aliases quando o script terminar
-	eval "$OLD_ALIASES"
-}
-trap 'cleanup' EXIT
-trap 'cleanup; exit 130' INT
-trap 'cleanup; exit 143' TERM HUP
+# Restaurar os aliases quando o script terminar
+trap "eval \"$OLD_ALIASES\"" EXIT
+#trap 'error_out $? $LINENO' INT TERM 0
+trap 'umount_pseudofs' EXIT INT TERM HUP
 
 umask 022
 declare -g MAKE_X=false
@@ -106,59 +102,79 @@ sh_choose_packages_base() {
 sh_choose_required_packages() {
 	print_step "Selecionando pacotes essenciais"
 	REQUIRED_PKGS+=" base-files"
-	REQUIRED_PKGS+=" dbus"
-	REQUIRED_PKGS+=" bash bash-completion"
-	REQUIRED_PKGS+=" binutils coreutils"
-	REQUIRED_PKGS+=" grep sed tar gawk"
-	REQUIRED_PKGS+=" grub-i386-efi  grub-x86_64-efi"
+	#	REQUIRED_PKGS+=" dash"
+	REQUIRED_PKGS+=" bash"
+	REQUIRED_PKGS+=" bash-completion"
+	REQUIRED_PKGS+=" coreutils"
+	REQUIRED_PKGS+=" sed"
+	REQUIRED_PKGS+=" tar"
+	REQUIRED_PKGS+=" gawk"
+	REQUIRED_PKGS+=" syslinux"
+	REQUIRED_PKGS+=" grub-i386-efi"
+	REQUIRED_PKGS+=" grub-x86_64-efi"
 	REQUIRED_PKGS+=" memtest86+"
-	REQUIRED_PKGS+=" plymouth"
-	REQUIRED_PKGS+=" dialog pv gettext ncurses"
-	REQUIRED_PKGS+=" curl"
-	REQUIRED_PKGS+=" parted gptfdisk"
-	REQUIRED_PKGS+=" e2fsprogs xfsprogs jfsutils btrfs-progs f2fs-tools"
-	REQUIRED_PKGS+=" ntfs-3g nilfs-utils lvm2 cryptsetup"
-	REQUIRED_PKGS+=" rsync"
-	REQUIRED_PKGS+=" xz zstd pigz"
-	REQUIRED_PKGS+=" bc"
-	REQUIRED_PKGS+=" fastfetch"
 	REQUIRED_PKGS+=" squashfs-tools"
 	REQUIRED_PKGS+=" xorriso"
-	REQUIRED_PKGS+=" syslinux"
 	#
 	INITRAMFS_PKGS+=" binutils"
 	INITRAMFS_PKGS+=" device-mapper"
+	INITRAMFS_PKGS+=" dhclient"
 	INITRAMFS_PKGS+=" dracut"
 	INITRAMFS_PKGS+=" dracut-network"
 	#
-	ADDITIONAL_PKGS+=" NetworkManager dhcpcd dhclient iw"
+	ADDITIONAL_PKGS+=" NetworkManager"
+	ADDITIONAL_PKGS+=" plymouth"
 }
 
 sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" grc"
-	ADDITIONAL_PKGS+=" fzf"
+	ADDITIONAL_PKGS+=" ncurses"
+	ADDITIONAL_PKGS+=" dialog"
+	ADDITIONAL_PKGS+=" gettext"
+	ADDITIONAL_PKGS+=" curl"
 	ADDITIONAL_PKGS+=" wget"
-	ADDITIONAL_PKGS+=" nano"
 	ADDITIONAL_PKGS+=" git"
-	ADDITIONAL_PKGS+=" wpa_supplicant"
+	ADDITIONAL_PKGS+=" pv"
+	ADDITIONAL_PKGS+=" nano"
+	ADDITIONAL_PKGS+=" parted"
+	ADDITIONAL_PKGS+=" e2fsprogs"
+	ADDITIONAL_PKGS+=" bc"
+	ADDITIONAL_PKGS+=" lvm2"
+	ADDITIONAL_PKGS+=" xfsprogs"
+	ADDITIONAL_PKGS+=" jfsutils"
+	ADDITIONAL_PKGS+=" gptfdisk"
+	ADDITIONAL_PKGS+=" btrfs-progs"
+	ADDITIONAL_PKGS+=" f2fs-tools"
+	ADDITIONAL_PKGS+=" nilfs-utils"
+	ADDITIONAL_PKGS+=" xz"
+	ADDITIONAL_PKGS+=" zstd"
+	ADDITIONAL_PKGS+=" pigz"
+	ADDITIONAL_PKGS+=" cryptsetup"
 	ADDITIONAL_PKGS+=" wireless_tools"
+	ADDITIONAL_PKGS+=" wpa_supplicant"
 	ADDITIONAL_PKGS+=" socklog-void chrony"
 	ADDITIONAL_PKGS+=" openssh"
+	ADDITIONAL_PKGS+=" dhcpcd"
 	ADDITIONAL_PKGS+=" htop"
 	ADDITIONAL_PKGS+=" tree"
+	ADDITIONAL_PKGS+=" rsync"
 	ADDITIONAL_PKGS+=" tmate"
 	ADDITIONAL_PKGS+=" duf"
 	ADDITIONAL_PKGS+=" umc"
+	ADDITIONAL_PKGS+=" fzf"
 	ADDITIONAL_PKGS+=" exa"
-	ADDITIONAL_PKGS+=" vim "
-	#
-	ASKEL_PKGS+=(voidbr-base-config)
+	ADDITIONAL_PKGS+=" ntfs-3g"
+
+	ACONFIG_PKGS+=(voidbr-base-config)
+	ACONFIG_PKGS+=(voidbr-plymouth-theme)
+	#	AEXTRA_PKGS+=" vim "
+	AEXTRA_PKGS+=" fastfetch"
 }
 
 sh_choose_voidbr_packages() {
-	ADDITIONAL_PKGS+=" void-install"
 	ADDITIONAL_PKGS+=" voidbr-vinstall"
 	ADDITIONAL_PKGS+=" voidbr-grub-theme"
+	ADDITIONAL_PKGS+=" void-install"
 	ADDITIONAL_PKGS+=" voidbr-utils"
 	ADDITIONAL_PKGS+=" chili-utils"
 	ADDITIONAL_PKGS+=" chili-clonedisk"
@@ -179,14 +195,14 @@ sh_choose_packages_common_X_base() {
 	COMMON_PKGS+=" xorg"
 	COMMON_PKGS+=" xorg-apps"
 	COMMON_PKGS+=" xorg-fonts"
-	COMMON_PKGS+=" xauth"
 	COMMON_PKGS+=" xterm"
+	COMMON_PKGS+=" xauth"
+	COMMON_PKGS+=" dbus"
 	COMMON_PKGS+=" dbus-x11"
-	COMMON_PKGS+=" dbus-elogind"
 	COMMON_PKGS+=" elogind"
+	COMMON_PKGS+=" dbus-elogind"
 	COMMON_PKGS+=" polkit-elogind"
 	COMMON_PKGS+=" xdg-user-dirs"
-	COMMON_PKGS+=" xdg-user-dirs-gtk"
 	COMMON_PKGS+=" xfce4-terminal"
 	COMMON_PKGS+=" libavif"
 	COMMON_PKGS+=" libheif"
@@ -198,7 +214,9 @@ sh_choose_packages_common_X_base() {
 	if $MAKE_GNOME; then
 		COMMON_PKGS+=" gdm"
 	else
-		COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings"
+		COMMON_PKGS+=" lightdm"
+		COMMON_PKGS+=" lightdm-gtk-greeter"
+		COMMON_PKGS+=" lightdm-gtk-greeter-settings"
 		COMMON_PKGS+=" arc-theme"
 		COMMON_PKGS+=" papirus-icon-theme"
 		COMMON_PKGS+=" dejavu-fonts-ttf"
@@ -210,13 +228,12 @@ sh_choose_packages_common_X_base() {
 sh_choose_packages_common_X_advanced() {
 	print_step "Selecionando pacotes X Common Advanced"
 	COMMON_PKGS+=" cool-retro-term"
-	COMMON_PKGS+=" terminus-font"
 	COMMON_PKGS+=" firefox firefox-i18n-pt-BR"
 	COMMON_PKGS+=" noto-fonts-emoji"
 	COMMON_PKGS+=" ttf-ubuntu-font-family"
 	COMMON_PKGS+=" font-iosevka"
 	COMMON_PKGS+=" nerd-fonts-symbols-ttf"
-	COMMON_PKGS+=" ttf-jetbrains-mono-nerd"
+	COMMON_PKGS+=" nerd-fonts-symbols-ttf"
 	COMMON_PKGS+=" font-awesome"
 	COMMON_PKGS+=" Adapta"
 	COMMON_PKGS+=" adwaita-icon-theme"
@@ -237,6 +254,7 @@ sh_choose_packages_common_X_advanced() {
 	# COMMON_PKGS+=" dejavu-fonts-ttf"
 	# COMMON_PKGS+=" fonts-droid-ttf"
 	# COMMON_PKGS+=" fonts-croscore-ttf"
+	# COMMON_PKGS+=" terminus-font"
 	# COMMON_PKGS+=" font-emoji-one-color"
 	# COMMON_PKGS+=" google-fonts-ttf"
 	#	COMMON_PKGS+=" cool-retro-term"
@@ -259,19 +277,13 @@ sh_choose_packages_common_X_advanced() {
 	#	COMMON_PKGS+=" lxdm lxdm-theme-vdojo"
 	# COMMON_PKGS+=" lxappearance lxinput lxrandr lxtask"
 	# COMMON_PKGS+=" slim"
-	# COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings"
+	# COMMON_PKGS+=" lightdm"
 	#	COMMON_PKGS+=" xarchiver zip unzip bzip2"
 	#	COMMON_PKGS+=" libreoffice libreoffice-i18n-pt-BR"
 	#	COMMON_PKGS+=" irqbalance"
 	#	COMMON_PKGS+=" cups system-config-printer system-config-printer-udev splix"
-	#	COMMON_PKGS+=" vlc"
-	# COMMON_PKGS+=" celluloid"
-	#	COMMON_PKGS+=" bat"
-	# COMMON_PKGS+=" cmatrix"
-	# COMMON_PKGS+=" xkill"
-	# COMMON_PKGS+=" menulibre""
-	# COMMON_PKGS+=" mugshot"
-	# COMMON_PKGS+=" ocs-url"
+	#	COMMON_PKGS+=" vlc celluloid"
+	#	COMMON_PKGS+=" bat cmatrix xkill menulibre mugshot ocs-url"
 	#	COMMON_PKGS+=" nvme-cli"
 	#	COMMON_PKGS+=" remmina remmina-kwallet"
 }
@@ -289,8 +301,8 @@ sh_choose_packages_plasma() {
 	ADDITIONAL_PKGS+=" konsole"
 	ADDITIONAL_PKGS+=" kate"
 	ADDITIONAL_PKGS+=" dolphin"
-	#
-	ASKEL_PKGS+=(voidbr-plasma-config)
+
+	ACONFIG_PKGS+=(voidbr-plasma-config)
 }
 
 sh_choose_packages_gnome() {
@@ -299,8 +311,7 @@ sh_choose_packages_gnome() {
 	ADISTRO_PKGS+=" gnome-keyring"
 	ADISTRO_PKGS+=" accountsservice"
 	ADISTRO_PKGS+=" voidbr-change-gnome-wallpaper"
-	#
-	ASKEL_PKGS+=(voidbr-gnome-config)
+	ACONFIG_PKGS+=(voidbr-gnome-config)
 }
 
 sh_choose_packages_fluxbox() {
@@ -319,8 +330,9 @@ sh_choose_packages_enlightenment() {
 	ADISTRO_PKGS+=" terminology"
 	ADISTRO_PKGS+=" exquisite"
 	ADISTRO_PKGS+=" connman"
-	#
-	ASKEL_PKGS+=(voidbr-enlightenment-config)
+
+	ACONFIG_PKGS+=(voidbr-enlightenment-config)
+
 }
 
 sh_choose_packages_xfce_base() {
@@ -342,8 +354,8 @@ sh_choose_packages_xfce() {
 	#	ADISTRO_PKGS+=" cups-pdf"
 
 	AEXTRA_PKGS+=" voidbr-xfwm-axiom-theme"
+	ACONFIG_PKGS+=(voidbr-xfce-config)
 	ACONFIG_PKGS+=(voidbr-theme-dracula)
-	ASKEL_PKGS+=(voidbr-xfce-config)
 
 }
 
@@ -353,7 +365,8 @@ sh_choose_packages_cinnamon() {
 	ADISTRO_PKGS+=" plank"
 	ADISTRO_PKGS+=" playerctl"
 
-	ASKEL_PKGS+=(voidbr-cinnamon-config)
+	ACONFIG_PKGS+=(voidbr-cinnamon-config)
+
 }
 
 sh_choose_packages_mate() {
@@ -372,13 +385,14 @@ sh_choose_packages_mate() {
 	AEXTRA_PKGS+=" mate-utils caja-image-converter caja-open-terminal caja-sendto caja-share caja-wallpaper caja-xattr-tags"
 	AEXTRA_PKGS+=" engrampa eom mozo pluma plank brisk-menu"
 
-	ASKEL_PKGS+=(voidbr-mate-config)
+	ACONFIG_PKGS+=(voidbr-mate-config)
+
 }
 
 sh_choose_packages_sway() {
 	print_step "Selecionando pacotes SWAY"
 	ADISTRO_PKGS+=" sway"
-
+  #
 	ACONFIG_PKGS+=(
 		dbus                    # Message bus system
 		elogind                 # Gerenciador de login e sessões (seat management)
@@ -432,41 +446,27 @@ sh_choose_packages_sway() {
 		libjack-pipewire
 		alsa-plugins-pulseaudio
 		alsa-utils
-		NetworkManager         # Gerenciador de rede (daemon)
-		network-manager-applet # Ícone de bandeja para controlar conexões
-		firefox                # Mozilla Firefox web browser
-		firefox-i18n-pt-BR     # Firefox Portuguese (Brazilian) language pack
-		#		nerd-fonts                # Iconic font aggregator collection
-		ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
-		lm_sensors              # Utilities to read temperature/voltage/fan sensors
-		xdg-user-dirs-gtk       # GTK+ tool to help manage user directories
-		xdg-user-dirs           # Tool to help manage user directories
-		voidbr-base-config      # Configuração base personalizada
-		voidbr-theme-dracula    # Tema visual Dracula aplicado
-		voidbr-tokyo-theme      # TokyoNight-Dark theme with icons, cursors, and wallpaper
-		acpi
-		acpid
+		NetworkManager            # Gerenciador de rede (daemon)
+		network-manager-applet    # Ícone de bandeja para controlar conexões
+		firefox                   # Mozilla Firefox web browser
+		firefox-i18n-pt-BR        # Firefox Portuguese (Brazilian) language pack
+#		nerd-fonts                # Iconic font aggregator collection
+		ttf-jetbrains-mono-nerd   # Patched font JetBrains Mono from nerd fonts library
+		lm_sensors                # Utilities to read temperature/voltage/fan sensors
+		xdg-user-dirs-gtk         # GTK+ tool to help manage user directories
+		xdg-user-dirs             # Tool to help manage user directories
+		voidbr-base-config        # Configuração base personalizada
+		voidbr-theme-dracula      # Tema visual Dracula aplicado
+		voidbr-tokyo-theme        # TokyoNight-Dark theme with icons, cursors, and wallpaper
+    acpi
+    acpid
 	)
-
-	ASKEL_PKGS+=(voidbr-sway-config)
+	AEXTRA_PKGS+=" voidbr-sway-config"
 }
 
 sh_setEnvironment() {
 	declare -g BOOTLOG="/tmp/void-mklive-$(sh_diahora).log"
 	declare -g LOGGER='/dev/tty8'
-	: "${COL_NC='\e[0m'}" # No Color
-	: "${COL_LIGHT_GREEN='\e[1;32m'}"
-	: "${COL_LIGHT_RED='\e[1;31m'}"
-	: "${DONE="${COL_LIGHT_GREEN} done!${COL_NC}"}"
-	: "${OVER="\\r\\033[K"}"
-	: "${DOTPREFIX="  ${black}::${reset} "}"
-	: "${clrkey=${light_white}}"
-	: "${TICK="${clrkey}[${green}✓✓✓${clrkey}]${rst}"}"
-	: "${CROSS="${clrkey}[${red}✗✗✗${clrkey}]${rst}"}"
-	: "${MID="${clrkey}[${red}✗✗${green}✓${clrkey}]${rst}"}"
-	: "${WARN="${clrkey}[${yellow}⚠  ${clrkey}]${yellow}"}"
-	: "${INFO="${clrkey}[${yellow}➡  ${clrkey}]${rst}"}"
-
 }
 
 sh_setLanguage() {
@@ -562,59 +562,27 @@ die() {
 	error_out 1 $LINENO
 }
 
-run_cmdOLD() {
-	# print_step "running: $*" "${black}"
-	if $VERBOSE; then
-		"$@" 2>&1 | tee -a "$localdir/build.log"
-	else
-		#   "$@" &>>build.log 2>&1
-		#   "$@" >> build.log
-		#   "$@" >> build.log 2>&1
-		# stdout vai pro log, stderr vai pro terminal e pro log
-		"$@" 1>>"$localdir/build.log" 2> >(tee -a "$localdir/build.log" >&2)
-	fi
-}
-
-run_cmd_new() {
-	local cmd="$*"
-
-	if [[ $DRYRUN -eq 1 ]]; then
-		msg "${cyan}[DRY-RUN]${rst} ${cmd}"
-	else
-		! $QUIET echo -e "  [⚙  ] ${cyan}${cmd}${rst}"
-		# Executa o comando, falha se houver erro
-		# Redireciona stderr para /dev/null apenas para mkdir -p e ummount -R
-		if [[ "$cmd" =~ ^mkdir\ -p ]] || [[ "$cmd" =~ ^umount\ -R ]]; then
-			#     eval "$cmd" &>/dev/null || true
-			"$@" &>/dev/null || true
-		else
-			#     eval "$cmd" || log_warn_tab "Falha ao executar: $cmd"
-			if $QUIET; then
-				"$@" &>/dev/null || log_warn_tab "Falha ao executar: $cmd"
-			else
-				"$@" || log_warn_tab "Falha ao executar: $cmd"
-			fi
-		fi
-	fi
-}
-
-msg() { echo -e "${INFO} ${*}${reset}"; }
-log_ok() { echo -e "${TICK} ${*}${reset}"; }
-log_err() { echo -e "${CROSS} ${*}${reset}"; }
-log_mid() { echo -e "${MID} ${*}${reset}"; }
-log_warn() { echo -e "${WARN} ${*}${reset}"; }
-msg_tab() { echo -e "  ${INFO} ${*}${reset}"; }
-log_ok_tab() { echo -e "  ${TICK} ${*}${reset}"; }
-log_err_tab() { echo -e "  ${CROSS} ${*}${reset}"; }
-log_mid_tab() { echo -e "  ${MID} ${*}${reset}"; }
-log_warn_tab() { echo -e "  ${WARN} ${*}${reset}"; }
-die() {
-	echo -e "${CROSS} ${red}${*}${reset}"
-	exit 1
-}
-
 info_msg() {
 	printf "${yellow}$@${reset}\n"
+}
+
+msgDot() {
+	local s="$*"
+	MSG_PAD=50 # largura antes do :
+
+	if [[ "$s" == *:* ]]; then
+		local left="${s%%:*}"
+		local right="${s#*:}"
+
+		printf "=>%s[%s/%s]%s %-*s : %s%s%s\n" \
+			"$cyan" "$CURRENT_STEP" "$STEP_COUNT" "$reset" \
+			"$MSG_PAD" "$left" \
+			"$yellow" "$right" "$reset"
+	else
+		printf "=>%s[%s/%s]%s %s\n" \
+			"$cyan" "$CURRENT_STEP" "$STEP_COUNT" "$reset" \
+			"$s"
+	fi
 }
 
 print_step() {
@@ -628,27 +596,8 @@ print_step() {
 	msgDot "$*"
 }
 
-msgDot() {
-	local s="$*"
-	local MSG_PAD="${2:-40}" # largura antes do :
-
-	if [[ "$s" == *:* ]]; then
-		local left="${s%%:*}"
-		local right="${s#*:}"
-
-		printf "=>%s[%s/%s]%s %-*s :%s%s%s\n" \
-			"$cyan" "$CURRENT_STEP" "$STEP_COUNT" "$reset" \
-			"$MSG_PAD" "$left" \
-			"$yellow" "$right" "$reset"
-	else
-		printf "=>%s[%s/%s]%s %s\n" \
-			"$cyan" "$CURRENT_STEP" "$STEP_COUNT" "$reset" \
-			"$s"
-	fi
-}
-
 mount_pseudofs() {
-	! $LBIND || return 0
+	[[ $LBIND -eq 0 ]] || return 0
 	for f in proc sys dev; do
 		local target="$ROOTFS/$f"
 		print_step "Montando pseudo FS: $target"
@@ -657,18 +606,38 @@ mount_pseudofs() {
 		# ESSENCIAL: evita propagação de desmontagem para o host
 		mount --make-rslave "$target"
 	done
-	LBIND=true
+	LBIND=1
 }
 
 umount_pseudofs() {
-	$LBIND || return 0
+	[[ $LBIND -eq 1 ]] || return 0
 	for f in dev proc sys; do
 		local target="$ROOTFS/$f"
 		mountpoint -q "$target" || continue
 		print_step "Desmontando pseudo FS: $target"
 		umount -R "$target" 2>/dev/null || umount -l "$target"
 	done
-	LBIND=false
+	LBIND=0
+}
+
+mount_pseudofsOLD() {
+	[[ $LBIND -eq 0 ]] || return 0
+	for f in sys dev proc; do
+		print_step "Montando pseudo FS : $ROOTFS/$f"
+		mkdir -p "$ROOTFS/$f"
+		mount --rbind "/$f" "$ROOTFS/$f"
+	done
+	LBIND=1
+}
+
+umount_pseudofsOLD() {
+	[[ $LBIND -eq 1 ]] || return 0
+	for f in proc dev sys; do
+		print_step "Desmontando pseudo FS: ${ROOTFS}/$f"
+		mount --make-rslave "$ROOTFS/$f" 2>/dev/null
+		umount "$ROOTFS/$f" 2>/dev/null || umount -l "$ROOTFS/$f" 2>/dev/null
+	done
+	LBIND=0
 }
 
 error_out() {
@@ -698,18 +667,17 @@ copy_autoinstaller_files() {
 }
 
 install_prereqs() {
-	cmd_logger "Instalando required software para gerar a imagem de disco..." "
-    LC_ALL=C \
-      XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" \
+	cmd_logger "Instalando software para gerar a imagem de disco..." "
+        LC_ALL=C \
+        XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" \
         --rootdir "$VOIDHOSTDIR" ${XBPS_REPOSITORY} \
         --cachedir "$XBPS_HOST_CACHEDIR" \
+        --yes $REQUIRED_PKGS \
         --update \
         --unpack-only \
         --ignore-file-conflicts \
-        --sync \
-        --yes \
-        $REQUIRED_PKGS
-  "
+        --sync
+    "
 }
 
 cmd_install() {
@@ -725,83 +693,68 @@ cmd_install() {
 		--yes $PKGS
 }
 
-cmd_install_force() {
-	local PKGS="$*"
-	LC_ALL=C \
-		XBPS_ARCH=$BASE_ARCH \
-		$XBPS_INSTALL_CMD \
-		--unpack-only \
-		--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
-		--cachedir "$XBPS_CACHEDIR" \
-		--update \
-		--force --force \
-		--ignore-file-conflicts \
-		--yes $PKGS
-}
-
 install_packages() {
 	cmd_logger "Instalando xbps pkg" '
-    cmd_install -yu xbps
-  '
-
+        cmd_install -yu xbps
+    '
 	cmd_logger "Running dry-run for packages list selected..." '
 		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" \
 			--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
 			--cachedir "$XBPS_CACHEDIR" \
 			--unpack-only \
-      --update \
+            --update \
 			--yes \
 			--dry-run $PACKAGE_LIST $INITRAMFS_PKGS
     '
 
 	mount_pseudofs
 
-	cmd_logger "Instalando grupo de pacotes : PACKAGE_LIST" '
-    cmd_install $PACKAGE_LIST
-  '
+	cmd_logger "Instalando void meta pkgs : $PACKAGE_LIST" '
+        cmd_install $PACKAGE_LIST
+    '
 
-	cmd_logger "Instalando grupo de pacotes : INITRAMFS_PKGS" '
-    cmd_install $INITRAMFS_PKGS
-  '
+	cmd_logger "Instalando void meta pkgs : $INITRAMFS_PKGS" '
+        cmd_install $INITRAMFS_PKGS
+    '
 
-	cmd_logger "Instalando grupo de pacotes : ADDITIONAL_PKG" '
-    cmd_install $ADDITIONAL_PKGS
-  '
+	cmd_logger "Instalando void meta pkgs : ADDITIONAL" '
+        cmd_install $ADDITIONAL_PKGS
+	'
 
 	if [[ -n $COMMON_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : COMMON_PKGS" '
-      cmd_install $COMMON_PKGS
-    '
+		cmd_logger "Instalando void meta pkgs : COMMON" '
+            cmd_install $COMMON_PKGS
+		'
 	fi
 
 	if [[ -n $ADISTRO_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : ADISTRO_PKGS" '
-      cmd_install $ADISTRO_PKGS
-    '
+		cmd_logger "Instalando void meta pkgs : ADISTRO" '
+		    cmd_install $ADISTRO_PKGS
+		'
 	fi
 
 	if [[ -n $AEXTRA_COMMON_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : AEXTRA_COMMON_PKGS" '
+		cmd_logger "Instalando void meta pkgs : AEXTRA_COMMON_PKGS" '
       cmd_install $AEXTRA_COMMON_PKGS
 		'
 	fi
 
+#	if [[ -n $ACONFIG_PKGS ]]; then
+#		for pkg in "${ACONFIG_PKGS[@]}"; do
+#			cmd_logger "Instalando void meta pkgs : $pkg" '
+#        cmd_install "$pkg"
+#    		'
+#		done
+#	fi
+
 	if [[ -n $ACONFIG_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : ACONFIG_PKGS" '
+    cmd_logger "Instalando void meta pkgs : $pkg" '
       cmd_install ${ACONFIG_PKGS[*]}
     '
 	fi
 
-	if [[ -n $ASKEL_PKGS ]]; then
-		for pkg in "${ASKEL_PKGS[@]}"; do
-			cmd_logger "Instalando pacote : $pkg" '
-        cmd_install_force "$pkg"
-      '
-		done
-	fi
-
 	if [[ -n $AEXTRA_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : AEXTRA_PKGS" '
+		cmd_logger "Instalando void meta pkgs : AEXTRA" '
       cmd_install $AEXTRA_PKGS
 		'
 	fi
@@ -818,11 +771,11 @@ ignore_packages() {
 
 install_skel_root() {
 	cmd_logger "Copiando skel para usuario root" '
-	  cp -Rpva $ROOTFS/etc/skel/.bash* $ROOTFS/root/
+		cp -Rpva $ROOTFS/etc/skel/.bash* $ROOTFS/root/
 		cp -Rpva $ROOTFS/etc/skel/.git-prompt.sh $ROOTFS/root/
 		cp -Rpva $ROOTFS/etc/skel/.dircolors $ROOTFS/root/
-    #rsync -a $ROOTFS/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/
-  '
+        #rsync -a $ROOTFS/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/
+    '
 }
 
 sh_configure_void_install_desktop() {
@@ -833,7 +786,7 @@ sh_configure_void_install_desktop() {
 [Desktop Entry]
 Name=VoidBR Install
 Comment=Executa o instalador VoidBR Linux
-#Exec=xfce4-terminal --maximize --hide-menubar --hide-toolbar --disable-server -x sudo void-install
+Exec=xfce4-terminal --maximize --hide-menubar --hide-toolbar --disable-server -x sudo void-install
 #Exec=xfce4-terminal --fullscreen --hide-menubar --hide-toolbar --disable-server --font="Monospace 14" -e "sudo void-install"
 #Exec=xfce4-terminal --fullscreen --hide-menubar --hide-toolbar --disable-server --zoom=3 -e "sudo void-install"
 #Exec=xfce4-terminal --maximize --hide-menubar --hide-toolbar --disable-server --zoom=3 -x sudo void-install
@@ -888,7 +841,7 @@ configure_plymouth() {
 	result="${PIPESTATUS[0]}"
 	[ $result -ne 0 ] && die "Falha ao configurar tema"
 
-	print_step "Criando wrapper plymouth : $ROOTFS/usr/bin/plymouth-show-log-voidlinux.sh"
+	print_step "Criando wrapper plymouth $ROOTFS/usr/bin/plymouth-show-log-voidlinux.sh"
 	mkdir -p "$ROOTFS/usr/bin"
 	cat <<'EOF' >"$ROOTFS/usr/bin/plymouth-show-log-voidlinux.sh"
 #!/usr/bin/env bash
@@ -1006,7 +959,7 @@ generate_initramfs() {
 }
 
 cleanup_rootfs() {
-	print_step "Limpando rootfs... : $ROOTFS"
+	print_step "Limpando rootfs..."
 	for f in ${INITRAMFS_PKGS}; do
 		revdeps=$(xbps-query -r "$ROOTFS" -X $f)
 		if [ -n "$revdeps" ]; then
@@ -1021,18 +974,18 @@ cleanup_rootfs() {
 
 generate_isolinux_boot() {
 	print_step "Gerando suporte isolinux para systema : PC-BIOS"
-	run_cmd_new cp -f "$SYSLINUX_DATADIR"/isolinux.bin "$ISOLINUX_DIR"
-	run_cmd_new cp -f "$SYSLINUX_DATADIR"/ldlinux.c32 "$ISOLINUX_DIR"
-	run_cmd_new cp -f "$SYSLINUX_DATADIR"/libcom32.c32 "$ISOLINUX_DIR"
-	run_cmd_new cp -f "$SYSLINUX_DATADIR"/vesamenu.c32 "$ISOLINUX_DIR"
-	run_cmd_new cp -f "$SYSLINUX_DATADIR"/libutil.c32 "$ISOLINUX_DIR"
-	run_cmd_new cp -f "$SYSLINUX_DATADIR"/chain.c32 "$ISOLINUX_DIR"
-	run_cmd_new cp -f "$SYSLINUX_DATADIR"/reboot.c32 "$ISOLINUX_DIR"
-	run_cmd_new cp -f "$SYSLINUX_DATADIR"/poweroff.c32 "$ISOLINUX_DIR"
-	run_cmd_new cp -f isolinux/isolinux.cfg.in "$ISOLINUX_DIR"/isolinux.cfg
-	run_cmd_new cp -f ${SPLASH_IMAGE} "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/isolinux.bin "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/ldlinux.c32 "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/libcom32.c32 "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/vesamenu.c32 "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/libutil.c32 "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/chain.c32 "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/reboot.c32 "$ISOLINUX_DIR"
+	cp -f "$SYSLINUX_DATADIR"/poweroff.c32 "$ISOLINUX_DIR"
+	cp -f isolinux/isolinux.cfg.in "$ISOLINUX_DIR"/isolinux.cfg
+	cp -f ${SPLASH_IMAGE} "$ISOLINUX_DIR"
 
-	run_cmd_new sed -i -e "s|@@SPLASHIMAGE@@|$(basename "${SPLASH_IMAGE}")|" \
+	sed -i -e "s|@@SPLASHIMAGE@@|$(basename "${SPLASH_IMAGE}")|" \
 		-e "s|@@KERNVER@@|${KERNELVERSION}|" \
 		-e "s|@@KEYMAP@@|${KEYMAP}|" \
 		-e "s|@@ARCH@@|$BASE_ARCH|" \
@@ -1042,67 +995,67 @@ generate_isolinux_boot() {
 		"$ISOLINUX_DIR"/isolinux.cfg
 
 	# include memtest86+
-	#run_cmd_new cp -f "$VOIDHOSTDIR"/boot/memtest.bin "$BOOT_DIR"
-	run_cmd_new cp -f "$VOIDHOSTDIR"/boot/memtest86+/memtest.bin "$BOOT_DIR"
+	#cp -f "$VOIDHOSTDIR"/boot/memtest.bin "$BOOT_DIR"
+	cp -f "$VOIDHOSTDIR"/boot/memtest86+/memtest.bin "$BOOT_DIR"
 }
 
 generate_grub_efi_boot() {
 	print_step "Gerando suporte GRUB para sistema : EFI"
 	{
-		run_cmd_new cp -f grub/grub.cfg "$GRUB_DIR"
-		run_cmd_new cp -f grub/grub_void.cfg.in "$GRUB_DIR"/grub_void.cfg
-		run_cmd_new sed -i -e "s|@@SPLASHIMAGE@@|$(basename "${SPLASH_IMAGE}")|" \
+		cp -f grub/grub.cfg "$GRUB_DIR"
+		cp -f grub/grub_void.cfg.in "$GRUB_DIR"/grub_void.cfg
+		sed -i -e "s|@@SPLASHIMAGE@@|$(basename "${SPLASH_IMAGE}")|" \
 			-e "s|@@KERNVER@@|${KERNELVERSION}|" \
 			-e "s|@@KEYMAP@@|${KEYMAP}|" \
 			-e "s|@@ARCH@@|$BASE_ARCH|" \
 			-e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
 			-e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
 			-e "s|@@LOCALE@@|${LOCALE}|" "$GRUB_DIR"/grub_void.cfg
-		run_cmd_new mkdir -p "$GRUB_DIR"/fonts
-		run_cmd_new cp -f "$GRUB_DATADIR"/unicode.pf2 "$GRUB_DIR"/fonts
+		mkdir -p "$GRUB_DIR"/fonts
+		cp -f "$GRUB_DATADIR"/unicode.pf2 "$GRUB_DIR"/fonts
+		cp -fr "VOIDHOSTDIR"/unicode.pf2 "$GRUB_DIR"/fonts
 
-		run_cmd_new modprobe -q loop || :
+		modprobe -q loop || :
 
 		# Create EFI vfat image.
-		run_cmd_new truncate -s 32M "$GRUB_DIR"/efiboot.img
-		run_cmd_new mkfs.vfat -F12 -S 512 -n "GRUB_UEFI" "$GRUB_DIR/efiboot.img"
+		truncate -s 32M "$GRUB_DIR"/efiboot.img
+		mkfs.vfat -F12 -S 512 -n "grub_uefi" "$GRUB_DIR/efiboot.img"
 
 		GRUB_EFI_TMPDIR="$(mktemp --tmpdir="$HOME" -d)"
 		LOOP_DEVICE="$(losetup --show --find "${GRUB_DIR}"/efiboot.img)"
-		run_cmd_new mount -o rw,flush -t vfat "${LOOP_DEVICE}" "${GRUB_EFI_TMPDIR}"
+		mount -o rw,flush -t vfat "${LOOP_DEVICE}" "${GRUB_EFI_TMPDIR}"
 
-		run_cmd_new cp -a "$IMAGEDIR"/boot "$VOIDHOSTDIR"
-		run_cmd_new xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
+		cp -a "$IMAGEDIR"/boot "$VOIDHOSTDIR"
+		xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
 			--directory="/usr/lib/grub/i386-efi" \
 			--format="i386-efi" \
 			--output="/tmp/bootia32.efi" \
 			"boot/grub/grub.cfg"
 		if [ $? -ne 0 ]; then
-			run_cmd_new umount "$GRUB_EFI_TMPDIR"
-			run_cmd_new losetup --detach "${LOOP_DEVICE}"
+			umount "$GRUB_EFI_TMPDIR"
+			losetup --detach "${LOOP_DEVICE}"
 			die "Failed to generate EFI loader"
 		fi
-		run_cmd_new mkdir -p "${GRUB_EFI_TMPDIR}"/EFI/BOOT
-		run_cmd_new cp -f "$VOIDHOSTDIR"/tmp/bootia32.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTIA32.EFI
-		run_cmd_new xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
+		mkdir -p "${GRUB_EFI_TMPDIR}"/EFI/BOOT
+		cp -f "$VOIDHOSTDIR"/tmp/bootia32.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTIA32.EFI
+		xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
 			--directory="/usr/lib/grub/x86_64-efi" \
 			--format="x86_64-efi" \
 			--output="/tmp/bootx64.efi" \
 			"boot/grub/grub.cfg"
 		if [ $? -ne 0 ]; then
-			run_cmd_new umount "$GRUB_EFI_TMPDIR"
-			run_cmd_new losetup --detach "${LOOP_DEVICE}"
+			umount "$GRUB_EFI_TMPDIR"
+			losetup --detach "${LOOP_DEVICE}"
 			die "Failed to generate EFI loader"
 		fi
-		run_cmd_new cp -f "$VOIDHOSTDIR"/tmp/bootx64.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTX64.EFI
-		run_cmd_new umount "$GRUB_EFI_TMPDIR"
-		run_cmd_new losetup --detach "${LOOP_DEVICE}"
-		run_cmd_new rm -rf "$GRUB_EFI_TMPDIR"
+		cp -f "$VOIDHOSTDIR"/tmp/bootx64.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTX64.EFI
+		umount "$GRUB_EFI_TMPDIR"
+		losetup --detach "${LOOP_DEVICE}"
+		rm -rf "$GRUB_EFI_TMPDIR"
 
 		# include memtest86+
-		run_cmd_new cp -f "$VOIDHOSTDIR"/boot/memtest86+/memtest.efi "$BOOT_DIR"
-	}
-	#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		cp -f "$VOIDHOSTDIR"/boot/memtest.efi "$BOOT_DIR"
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 get_compression_options() {
@@ -1124,52 +1077,42 @@ generate_squashfs() {
 	print_step "Gerando image squashfs ($SQUASHFS_COMPRESSION) de rootfs: ${yellow}$IMAGEDIR/LiveOS/squashfs.img"
 	{
 		ROOTFS_SIZE=$(du --apparent-size -sm "$ROOTFS" | awk '{print $1}')
-		run_cmd_new mkdir -p "$BUILDDIR/tmp/LiveOS"
-		run_cmd_new truncate -s "$((ROOTFS_SIZE + ROOTFS_SIZE))M" "$BUILDDIR"/tmp/LiveOS/ext3fs.img
-		run_cmd_new mkdir -p "$BUILDDIR/tmp-rootfs"
-		run_cmd_new mkfs.ext3 -F -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-		run_cmd_new mount -o loop "$BUILDDIR/tmp/LiveOS/ext3fs.img" "$BUILDDIR/tmp-rootfs"
-		run_cmd_new cp -a "$ROOTFS"/* "$BUILDDIR"/tmp-rootfs/
-		run_cmd_new umount -f "$BUILDDIR/tmp-rootfs"
-		run_cmd_new mkdir -p "$IMAGEDIR/LiveOS"
+		mkdir -p "$BUILDDIR/tmp/LiveOS"
+		truncate -s "$((ROOTFS_SIZE + ROOTFS_SIZE))M" "$BUILDDIR"/tmp/LiveOS/ext3fs.img
+		mkdir -p "$BUILDDIR/tmp-rootfs"
+		mkfs.ext3 -F -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		mount -o loop "$BUILDDIR/tmp/LiveOS/ext3fs.img" "$BUILDDIR/tmp-rootfs"
+		cp -a "$ROOTFS"/* "$BUILDDIR"/tmp-rootfs/
+		umount -f "$BUILDDIR/tmp-rootfs"
+		mkdir -p "$IMAGEDIR/LiveOS"
 
-		#run_cmd_new "$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
-		#run_cmd_new "$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img "$options" || die "Failed to generate squashfs image"
-		run_cmd_new "$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 3 || die "Failed to generate squashfs image"
+		#       "$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
+		#       "$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img "$options" || die "Failed to generate squashfs image"
+		"$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 3 || die "Failed to generate squashfs image"
 
-		run_cmd_new chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
-		#[ -z "$KEEP_BUILDDIR" ] && rm -rf "$ROOTFS"
-		run_cmd_new rm -rf "$BUILDDIR/tmp-rootfs"
-		run_cmd_new rm -rf "$BUILDDIR/tmp"
-	}
-	#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
+		#       [ -z "$KEEP_BUILDDIR" ] && rm -rf "$ROOTFS"
+		rm -rf "$BUILDDIR/tmp-rootfs"
+		rm -rf "$BUILDDIR/tmp"
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
 
 generate_iso_image() {
 	print_step "Gerando imagem ISO: ${yellow}$OUTPUT_FILE"
 	{
-		run_cmd_new "$VOIDHOSTDIR"/usr/bin/xorriso \
+		"$VOIDHOSTDIR"/usr/bin/xorriso \
 			-as mkisofs \
-			-iso-level 3 \
-			-rock \
-			-joliet \
-			-max-iso9660-filenames \
-			-omit-period \
-			-omit-version-number \
-			-relaxed-filenames \
-			-allow-lowercase \
+			-iso-level 3 -rock -joliet \
+			-max-iso9660-filenames -omit-period \
+			-omit-version-number -relaxed-filenames -allow-lowercase \
 			-volid "$VOL_ID" \
 			-eltorito-boot boot/isolinux/isolinux.bin \
 			-eltorito-catalog boot/isolinux/boot.cat \
-			-no-emul-boot \
-			-boot-load-size 4 -boot-info-table \
-			-eltorito-alt-boot -e boot/grub/efiboot.img \
-			-isohybrid-gpt-basdat \
-			-no-emul-boot \
+			-no-emul-boot -boot-load-size 4 -boot-info-table \
+			-eltorito-alt-boot -e boot/grub/efiboot.img -isohybrid-gpt-basdat -no-emul-boot \
 			-isohybrid-mbr "$SYSLINUX_DATADIR"/isohdpfx.bin \
 			-output "$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
-  }
-#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	hsize=$(du -sh "$OUTPUT_FILE" | awk '{print $1}')
 	info_msg "Iso file created: ${green}$(readlink -f "$OUTPUT_FILE") ($hsize) successfully.${reset}"
 }
@@ -1228,7 +1171,7 @@ EOF
 
 sh_config_distroname() {
 	declare -ga name
-	print_step "Configurando distroname"
+	print_step "Configurando distro name"
 	if $MAKE_FULL_X; then
 		title='VoidBR Linux Live Full X'
 		VOL_ID='VOIDBR_LIVE_FULLX'
@@ -1512,35 +1455,19 @@ sh_install_rootfs() {
 }
 
 enable_services() {
-	local SERVICE_LIST="$*"
-	local service link
-
+	SERVICE_LIST="$*"
 	for service in $SERVICE_LIST; do
-		link="$ROOTFS/etc/runit/runsvdir/default/$service"
-		print_step "Ativando serviço: $service"
-
-#		if [[ -L "$link" ]] &&
-#			[[ "$(readlink "$link")" == "/etc/sv/$service" ]]; then
-#			info_msg "service $service já está habilitado"
-#			continue
-#		fi
-
-		if [[ ! -d "$ROOTFS/etc/sv/$service" ]]; then
-			info_msg "service $service not found in $ROOTFS/etc/sv"
+		print_step "Ativando serviço : $service"
+		if ! [ -e $ROOTFS/etc/sv/$service ]; then
+			info_msg "service $service not in $ROOTFS/etc/sv"
 			continue
 		fi
-
-    run_cmd_new ln -snf "/etc/sv/$service" "$link"
-    if [[ ! -L "$link" && ! -e "$link" ]] &&
-       [[! "$(readlink "$link")" == "/etc/sv/$service" ]]; then
-      info_msg "failed to enable service $service (broken symlink)"
-    fi
+		ln -sf /etc/sv/$service $ROOTFS/etc/runit/runsvdir/default/
 	done
 }
 
 sh_make_iso() {
 	mount_pseudofs
-
 	#dica: No Void, com dbus ativo, o elogind e o polkitd sobem automaticamente.
 	#      Você não precisa ativar os serviços deles no runit.
 	: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 dbus socklog-unix nanoklogd udevd sshd NetworkManager dhcpcd chronyd}
@@ -1556,17 +1483,15 @@ sh_make_iso() {
 		: ${EXTRA_SERVICE_LIST:=acpid connmand}
 	fi
 
-	replicate '-'
 	enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST} ${ADDITIONAL_SERVICE_LIST} ${EXTRA_SERVICE_LIST}
-	replicate '-'
 
 	if [ "${#INCLUDE_DIRS[@]}" -gt 0 ]; then
 		print_step "Copying directory structures into the rootfs ..."
 		copy_include_directories
 	fi
 
+	print_step "Substituir 'CDLABEL=VOID_LIVE' por 'CDLABEL=$VOL_ID' em ./grub/grub_void.cfg.in e ./isolinux/isolinux.cfg.in"
 	for file in ./grub/grub_void.cfg.in ./isolinux/isolinux.cfg.in; do
-		print_step "Ajustando CDLABEL=$VOL_ID : ${file}"
 		sudo sed -i "s/CDLABEL=[^ ]*/CDLABEL=${VOL_ID}/g" "$file"
 	done
 
@@ -1581,13 +1506,14 @@ sh_make_iso() {
 	cleanup_rootfs
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
 	sh_remove_etc_xbps_00_repository_main_conf "$conf"
-	# generate_squashfs
+	generate_squashfs
 	#	generate_iso_image
 }
 
 sh_remove_etc_xbps_00_repository_main_conf() {
 	local conf="$1"
-	cmd_logger "Removendo arquivo: $conf" '
+	print_step "Removendo $conf"
+	cmd_logger "Removendo $conf" '
    	rm -f -- "$conf" >/dev/null 2>&1
  	'
 }
@@ -1786,7 +1712,4 @@ umount_pseudofs
 sh_configure_packages
 sh_install_rootfs
 sh_make_iso
-generate_squashfs
 generate_iso_image
-umount_pseudofs
-exit 0
