@@ -35,13 +35,13 @@ ${yellow}Examples:${reset}
 ${yellow}Available flavors:${reset}
     ${green}all${reset}        Build all images
     ${green}base${reset}       Build Base ISO
-    ${green}install${reset}    Build Installer ISO
-    ${green}xfce${reset}       Build XFCE ISO
-    ${green}gnome${reset}      Build GNOME ISO
-    ${green}plasma${reset}     Build KDE Plasma ISO
     ${green}cinnamon${reset}   Build Cinnamon ISO
+    ${green}gnome${reset}      Build GNOME ISO
+    ${green}install${reset}    Build Installer ISO
     ${green}mate${reset}       Build MATE ISO
+    ${green}plasma${reset}     Build KDE Plasma ISO
     ${green}sway${reset}       Build SWAY ISO
+    ${green}xfce${reset}       Build XFCE ISO
 EOF
 	exit 1
 }
