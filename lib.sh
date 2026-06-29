@@ -499,7 +499,7 @@ replicate() {
 }
 
 select_mirrors_dialog() {
-	local cgithub='/github/RepoVoidLinux/void'
+	local cgithub='/vg/void-mirror/extra'
 	local cvc='/vg/void-mirror'
 	local cfastly='https://repo-fastly.voidlinux.org'
 	local cvoidbr='https://void.voidbr.org/voidlinux'
