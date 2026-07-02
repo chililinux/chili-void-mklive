@@ -96,100 +96,94 @@ declare -g REQUIRED_PKGS=
 declare -g INITRAMFS_PKGS=
 declare -g COMMON_PKGS=
 declare -g AEXTRA_PKGS=
-declare -g BASE_PKGS=
 
 sh_choose_packages_base() {
 	sh_choose_required_packages
 	sh_choose_additional_packages
-	sh_choose_voidbr_base_packages
+	sh_choose_voidbr_packages
 }
 
 sh_choose_required_packages() {
-	print_step "Selecionando pacotes essenciais"
-	REQUIRED_PKGS+=" base-files"
-	REQUIRED_PKGS+=" coreutils"
-	REQUIRED_PKGS+=" binutils"
-	# REQUIRED_PKGS+=" dash"
-	REQUIRED_PKGS+=" bash"
-	REQUIRED_PKGS+=" syslinux"
-	REQUIRED_PKGS+=" grub-i386-efi"
-	REQUIRED_PKGS+=" grub-x86_64-efi"
-	REQUIRED_PKGS+=" memtest86+"
-	REQUIRED_PKGS+=" squashfs-tools"
-	REQUIRED_PKGS+=" xorriso"
-	REQUIRED_PKGS+=" plymouth"
+  print_step "Selecionando pacotes essenciais"
+  REQUIRED_PKGS+=" base-files"
+  # REQUIRED_PKGS+=" dash"
+  REQUIRED_PKGS+=" bash"
+  REQUIRED_PKGS+=" bash-completion"
+  REQUIRED_PKGS+=" coreutils"
+  REQUIRED_PKGS+=" sed"
+  REQUIRED_PKGS+=" tar"
+  REQUIRED_PKGS+=" gawk"
+  REQUIRED_PKGS+=" syslinux"
+  REQUIRED_PKGS+=" grub-i386-efi"
+  REQUIRED_PKGS+=" grub-x86_64-efi"
+  REQUIRED_PKGS+=" memtest86+"
+  REQUIRED_PKGS+=" squashfs-tools"
+  REQUIRED_PKGS+=" xorriso"
   #
-	INITRAMFS_PKGS+=" device-mapper"
-	INITRAMFS_PKGS+=" dhclient"
-	INITRAMFS_PKGS+=" dracut"
-	INITRAMFS_PKGS+=" dracut-network"
-	#
-	#BASE_PKGS+=" voidbr-utils"
-	#BASE_PKGS+=" voidbr-base-config"
-	#
+  INITRAMFS_PKGS+=" binutils"
+  INITRAMFS_PKGS+=" device-mapper"
+  INITRAMFS_PKGS+=" dhclient"
+  INITRAMFS_PKGS+=" dracut"
+  INITRAMFS_PKGS+=" dracut-network"
+  #
+  ADDITIONAL_PKGS+=" NetworkManager iw"
+  ADDITIONAL_PKGS+=" plymouth"
 }
 
 sh_choose_additional_packages() {
-	ADDITIONAL_PKGS+=" bash-completion"
-	ADDITIONAL_PKGS+=" coreutils"
-	ADDITIONAL_PKGS+=" sed"
-	ADDITIONAL_PKGS+=" tar"
-	ADDITIONAL_PKGS+=" gawk"
-	ADDITIONAL_PKGS+=" NetworkManager iw"
-	ADDITIONAL_PKGS+=" grc"
-	ADDITIONAL_PKGS+=" ncurses"
-	ADDITIONAL_PKGS+=" dialog"
-	ADDITIONAL_PKGS+=" gettext"
-	ADDITIONAL_PKGS+=" pv"
-	ADDITIONAL_PKGS+=" curl"
-	ADDITIONAL_PKGS+=" wget"
-	ADDITIONAL_PKGS+=" git"
-	ADDITIONAL_PKGS+=" nano"
-	ADDITIONAL_PKGS+=" bc"
-	ADDITIONAL_PKGS+=" parted"
-	ADDITIONAL_PKGS+=" e2fsprogs"
-	ADDITIONAL_PKGS+=" lvm2"
-	ADDITIONAL_PKGS+=" xfsprogs"
-	ADDITIONAL_PKGS+=" jfsutils"
-	ADDITIONAL_PKGS+=" gptfdisk"
-	ADDITIONAL_PKGS+=" btrfs-progs"
-	ADDITIONAL_PKGS+=" f2fs-tools"
-	ADDITIONAL_PKGS+=" nilfs-utils"
-	ADDITIONAL_PKGS+=" ntfs-3g"
-	ADDITIONAL_PKGS+=" xz"
-	ADDITIONAL_PKGS+=" zstd"
-	ADDITIONAL_PKGS+=" pigz"
-	ADDITIONAL_PKGS+=" cryptsetup"
-	ADDITIONAL_PKGS+=" wireless_tools"
-	ADDITIONAL_PKGS+=" wpa_supplicant"
-	ADDITIONAL_PKGS+=" socklog-void chrony"
-	ADDITIONAL_PKGS+=" openssh"
-	ADDITIONAL_PKGS+=" dhcpcd"
-	ADDITIONAL_PKGS+=" htop"
-	ADDITIONAL_PKGS+=" tree"
-	ADDITIONAL_PKGS+=" rsync"
-	ADDITIONAL_PKGS+=" tmate"
-	ADDITIONAL_PKGS+=" duf"
-	ADDITIONAL_PKGS+=" umc"
-	ADDITIONAL_PKGS+=" fzf"
-	ADDITIONAL_PKGS+=" exa"
-	ADDITIONAL_PKGS+=" fastfetch"
+  ADDITIONAL_PKGS+=" grc"
+  ADDITIONAL_PKGS+=" ncurses"
+  ADDITIONAL_PKGS+=" dialog"
+  ADDITIONAL_PKGS+=" gettext"
+  ADDITIONAL_PKGS+=" curl"
+  ADDITIONAL_PKGS+=" wget"
+  ADDITIONAL_PKGS+=" git"
+  ADDITIONAL_PKGS+=" pv"
+  ADDITIONAL_PKGS+=" nano"
+  ADDITIONAL_PKGS+=" bc"
+  ADDITIONAL_PKGS+=" parted"
+  ADDITIONAL_PKGS+=" e2fsprogs"
+  ADDITIONAL_PKGS+=" lvm2"
+  ADDITIONAL_PKGS+=" xfsprogs"
+  ADDITIONAL_PKGS+=" jfsutils"
+  ADDITIONAL_PKGS+=" gptfdisk"
+  ADDITIONAL_PKGS+=" btrfs-progs"
+  ADDITIONAL_PKGS+=" f2fs-tools"
+  ADDITIONAL_PKGS+=" nilfs-utils"
+  ADDITIONAL_PKGS+=" ntfs-3g"
+  ADDITIONAL_PKGS+=" xz"
+  ADDITIONAL_PKGS+=" zstd"
+  ADDITIONAL_PKGS+=" pigz"
+  ADDITIONAL_PKGS+=" cryptsetup"
+  ADDITIONAL_PKGS+=" wireless_tools"
+  ADDITIONAL_PKGS+=" wpa_supplicant"
+  ADDITIONAL_PKGS+=" socklog-void chrony"
+  ADDITIONAL_PKGS+=" openssh"
+  ADDITIONAL_PKGS+=" dhcpcd"
+  ADDITIONAL_PKGS+=" htop"
+  ADDITIONAL_PKGS+=" tree"
+  ADDITIONAL_PKGS+=" rsync"
+  ADDITIONAL_PKGS+=" tmate"
+  ADDITIONAL_PKGS+=" duf"
+  ADDITIONAL_PKGS+=" umc"
+  ADDITIONAL_PKGS+=" fzf"
+  ADDITIONAL_PKGS+=" exa"
+
+  ACONFIG_PKGS+=(voidbr-plymouth-theme)
+  # AEXTRA_PKGS+=" vim "
+  AEXTRA_PKGS+=" fastfetch"
 	#
 	ASKEL_PKGS+=(voidbr-base-config)
 }
 
-sh_choose_voidbr_base_packages() {
+sh_choose_voidbr_packages() {
 	ADDITIONAL_PKGS+=" void-install"
 	ADDITIONAL_PKGS+=" voidbr-vinstall"
 	ADDITIONAL_PKGS+=" voidbr-grub-theme"
 	ADDITIONAL_PKGS+=" voidbr-utils"
 	ADDITIONAL_PKGS+=" chili-utils"
 	ADDITIONAL_PKGS+=" chili-clonedisk"
-  #
-  ACONFIG_PKGS+=(voidbr-plymouth-theme)
-}
-
-sh_choose_voidbr_X_packages() {
+	#
 	AEXTRA_COMMON_PKGS+=" voidbr-wallpapers"
 	AEXTRA_COMMON_PKGS+=" voidbr-tokyo-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-professional-theme"
@@ -197,6 +191,8 @@ sh_choose_voidbr_X_packages() {
 	AEXTRA_COMMON_PKGS+=" voidbr-theme-dracula"
 	AEXTRA_COMMON_PKGS+=" voidbr-webapps"
 	AEXTRA_COMMON_PKGS+=" chili-iso2usb"
+	#
+	ACONFIG_PKGS+=(voidbr-plymouth-theme)
 }
 
 sh_choose_packages_common_X_base() {
@@ -579,6 +575,27 @@ sh_setVarColors() {
 	bright_white=$(tput setaf 15)
 }
 
+die() {
+	local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
+	local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
+	local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
+	info_msg "ERROR: ${script_name0} $@"
+	error_out 1 $LINENO
+}
+
+run_cmdOLD() {
+	# print_step "running: $*" "${black}"
+	if $VERBOSE; then
+		"$@" 2>&1 | tee -a "$localdir/build.log"
+	else
+		#   "$@" &>>build.log 2>&1
+		#   "$@" >> build.log
+		#   "$@" >> build.log 2>&1
+		# stdout vai pro log, stderr vai pro terminal e pro log
+		"$@" 1>>"$localdir/build.log" 2> >(tee -a "$localdir/build.log" >&2)
+	fi
+}
+
 run_cmd_new() {
 	local cmd="$*"
 
@@ -612,6 +629,10 @@ log_ok_tab() { echo -e "  ${TICK} ${*}${reset}"; }
 log_err_tab() { echo -e "  ${CROSS} ${*}${reset}"; }
 log_mid_tab() { echo -e "  ${MID} ${*}${reset}"; }
 log_warn_tab() { echo -e "  ${WARN} ${*}${reset}"; }
+die() {
+	echo -e "${CROSS} ${red}${*}${reset}"
+	exit 1
+}
 
 info_msg() {
 	printf "${yellow}$@${reset}\n"
@@ -697,6 +718,21 @@ copy_autoinstaller_files() {
 	cp dracut/autoinstaller/* "$1"/usr/lib/dracut/modules.d/01autoinstaller/
 }
 
+install_prereqs() {
+	cmd_logger "Instalando required software para gerar a imagem de disco..." "
+    LC_ALL=C \
+      XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" \
+        --rootdir "$VOIDHOSTDIR" ${XBPS_REPOSITORY} \
+        --cachedir "$XBPS_HOST_CACHEDIR" \
+        --update \
+        --unpack-only \
+        --ignore-file-conflicts \
+        --sync \
+        --yes \
+        $REQUIRED_PKGS
+  "
+}
+
 cmd_install() {
 	local PKGS="$*"
 	LC_ALL=C \
@@ -729,76 +765,67 @@ install_packages() {
     cmd_install -yu xbps
   '
 
-	#	cmd_logger "Running dry-run for packages list selected..." '
-	#		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" \
-	#			--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
-	#			--cachedir "$XBPS_CACHEDIR" \
-	#			--unpack-only \
-	#      --update \
-	#			--yes \
-	#			--dry-run $PACKAGE_LIST $INITRAMFS_PKGS
-	#    '
+	cmd_logger "Running dry-run for packages list selected..." '
+		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" \
+			--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
+			--cachedir "$XBPS_CACHEDIR" \
+			--unpack-only \
+      --update \
+			--yes \
+			--dry-run $PACKAGE_LIST $INITRAMFS_PKGS
+    '
 
 	mount_pseudofs
 
-	cmd_logger "Instalando grupo de pacotes : PACKAGE_LIST -> $ROOTFS" '
+	cmd_logger "Instalando grupo de pacotes : PACKAGE_LIST" '
     cmd_install $PACKAGE_LIST
   '
-  replicate '-'
 
-	cmd_logger "Instalando grupo de pacotes : INITRAMFS_PKGS -> $ROOTFS" '
+	cmd_logger "Instalando grupo de pacotes : INITRAMFS_PKGS" '
     cmd_install $INITRAMFS_PKGS
   '
-  replicate '-'
 
-	cmd_logger "Instalando grupo de pacotes : ADDITIONAL_PKG -> $ROOTFS" '
+	cmd_logger "Instalando grupo de pacotes : ADDITIONAL_PKG" '
     cmd_install $ADDITIONAL_PKGS
   '
-  replicate '-'
 
 	if [[ -n $COMMON_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : COMMON_PKGS  -> $ROOTFS" '
+		cmd_logger "Instalando grupo de pacotes : COMMON_PKGS" '
       cmd_install $COMMON_PKGS
     '
-    replicate '-'
 	fi
 
 	if [[ -n $ADISTRO_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : ADISTRO_PKGS -> $ROOTFS" '
+		cmd_logger "Instalando grupo de pacotes : ADISTRO_PKGS" '
       cmd_install $ADISTRO_PKGS
     '
-    replicate '-'
 	fi
 
 	if [[ -n $AEXTRA_COMMON_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : AEXTRA_COMMON_PKGS -> $ROOTFS" '
+		cmd_logger "Instalando grupo de pacotes : AEXTRA_COMMON_PKGS" '
       cmd_install $AEXTRA_COMMON_PKGS
 		'
-    replicate '-'
 	fi
 
 	if [[ -n $ACONFIG_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : ACONFIG_PKGS -> $ROOTFS" '
+		cmd_logger "Instalando grupo de pacotes : ACONFIG_PKGS" '
       cmd_install ${ACONFIG_PKGS[*]}
     '
-    replicate '-'
 	fi
 
 	if [[ -n $ASKEL_PKGS ]]; then
 		for pkg in "${ASKEL_PKGS[@]}"; do
-			cmd_logger "Instalando pacote : $pkg -> $ROOTFS" '
+			cmd_logger "Instalando pacote : $pkg" '
         cmd_install_force "$pkg"
       '
 		done
-    replicate '-'
 	fi
 
 	if [[ -n $AEXTRA_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : AEXTRA_PKGS -> $ROOTFS" '
+		cmd_logger "Instalando grupo de pacotes : AEXTRA_PKGS" '
       cmd_install $AEXTRA_PKGS
 		'
-	  replicate '-'
-  fi
+	fi
 	#    sh_reconfigure_pass1
 
 }
@@ -872,7 +899,7 @@ copy_include_directories() {
 }
 
 configure_plymouth() {
-	print_step "Configurando plymouth : $ROOTFS/etc/dracut.conf.d/plymouth.conf"
+	print_step "Configurando plymouth em: $ROOTFS/etc/dracut.conf.d/plymouth.conf"
 	mkdir -p "$ROOTFS/etc/dracut.conf.d"
 	echo 'add_dracutmodules+=" plymouth "' >"$ROOTFS/etc/dracut.conf.d/plymouth.conf"
 	print_step "Configurando tema plymouth : voidbr"
@@ -914,7 +941,7 @@ EOF
 }
 
 configure_service_boot_logger() {
-	print_step "Configurando serviço boot-logger : $ROOTFS/etc/sv/"
+	print_step "Configurando serviço boot-logger em: $ROOTFS/etc/sv/"
 	mkdir -p "$ROOTFS/etc/sv/boot-logger"
 	tee "$ROOTFS/etc/sv/boot-logger/run" >/dev/null <<'EOF'
 #!/bin/sh
@@ -930,7 +957,7 @@ EOF
 }
 
 configure_service_plymouth_log() {
-	print_step "Configurando serviço plymouth-log : $ROOTFS/etc/sv/"
+	print_step "Configurando serviço plymouth-log em: $ROOTFS/etc/sv/"
 	mkdir -p "$ROOTFS/etc/sv/plymouth-log"
 	tee "$ROOTFS/etc/sv/plymouth-log/run" >/dev/null <<EOF
 #!/bin/sh
@@ -942,7 +969,7 @@ EOF
 }
 
 configure_service_plymouth_stop() {
-	print_step "Configurando serviço plymouth-stop : $ROOTFS/etc/sv"
+	print_step "Configurando serviço plymouth-stop em: $ROOTFS/etc/sv"
 	mkdir -p "$ROOTFS/etc/sv/plymouth-stop"
 	tee "$ROOTFS/etc/sv/plymouth-stop/run" >/dev/null <<EOF
 #!/bin/sh
@@ -954,7 +981,7 @@ EOF
 }
 
 configure_etc_runit_core_services_quit_plymouth() {
-	print_step "Configurando script plymouth-stop : $ROOTFS/etc/runit/core-services/"
+	print_step "Configurando script plymouth-stop em: $ROOTFS/etc/runit/core-services/"
 	tee "$ROOTFS/etc/runit/core-services/99-voidbr-plymouth-quit.sh" >/dev/null <<EOF
 #!/bin/sh
 if command -v plymouth >/dev/null; then
@@ -978,20 +1005,20 @@ generate_initramfs() {
 		fi
 	fi
 
-	print_step "Gerando imagem initramfs ($INITRAMFS_COMPRESSION) : ${yellow}$BOOT_DIR/initrd"
+	print_step "Gerando imagem initramfs ($INITRAMFS_COMPRESSION): ${yellow}$BOOT_DIR/initrd"
 	{
 		copy_dracut_files "$ROOTFS"
 		copy_autoinstaller_files "$ROOTFS"
 
 		# Executa o dracut preservando o ambiente necessário para evitar o erro de 'dwarning: command not found'
 		chroot "$ROOTFS" env PYTHONWARNINGS="ignore::SyntaxWarning" \
-			/usr/bin/dracut \
-			-N \
-			--"${INITRAMFS_COMPRESSION}" \
-			--add-drivers "ahci" \
-			--force-add "vmklive autoinstaller" \
-			--omit systemd "/boot/initrd" \
-			$KERNELVERSION
+		  /usr/bin/dracut \
+		  -N \
+		  --"${INITRAMFS_COMPRESSION}" \
+		  --add-drivers "ahci" \
+		  --force-add "vmklive autoinstaller" \
+		  --omit systemd "/boot/initrd" \
+		  $KERNELVERSION
 
 		result="${PIPESTATUS[0]}"
 		[ $result -ne 0 ] && die "Failed to generate the initramfs"
@@ -1008,7 +1035,7 @@ generate_initramfs() {
 }
 
 cleanup_rootfs() {
-	print_step "Limpando rootfs : $ROOTFS"
+	print_step "Limpando rootfs... : $ROOTFS"
 	for f in ${INITRAMFS_PKGS}; do
 		revdeps=$(xbps-query -r "$ROOTFS" -X $f)
 		if [ -n "$revdeps" ]; then
@@ -1022,7 +1049,7 @@ cleanup_rootfs() {
 }
 
 generate_isolinux_boot() {
-	print_step "Gerando suporte isolinux para sistema : PC-BIOS"
+	print_step "Gerando suporte isolinux para systema : PC-BIOS"
 	run_cmd_new cp -f "$SYSLINUX_DATADIR"/isolinux.bin "$ISOLINUX_DIR"
 	run_cmd_new cp -f "$SYSLINUX_DATADIR"/ldlinux.c32 "$ISOLINUX_DIR"
 	run_cmd_new cp -f "$SYSLINUX_DATADIR"/libcom32.c32 "$ISOLINUX_DIR"
@@ -1044,8 +1071,8 @@ generate_isolinux_boot() {
 		"$ISOLINUX_DIR"/isolinux.cfg
 
 	# include memtest86+
-	#run_cmd_new cp -f "$HOSTDIR"/boot/memtest.bin "$BOOT_DIR"
-	run_cmd_new cp -f "$HOSTDIR"/boot/memtest86+/memtest.bin "$BOOT_DIR"
+	#run_cmd_new cp -f "$VOIDHOSTDIR"/boot/memtest.bin "$BOOT_DIR"
+	run_cmd_new cp -f "$VOIDHOSTDIR"/boot/memtest86+/memtest.bin "$BOOT_DIR"
 }
 
 generate_grub_efi_boot() {
@@ -1073,8 +1100,8 @@ generate_grub_efi_boot() {
 		LOOP_DEVICE="$(losetup --show --find "${GRUB_DIR}"/efiboot.img)"
 		run_cmd_new mount -o rw,flush -t vfat "${LOOP_DEVICE}" "${GRUB_EFI_TMPDIR}"
 
-		run_cmd_new cp -a "$IMAGEDIR"/boot "$HOSTDIR"
-		run_cmd_new xbps-uchroot "$HOSTDIR" grub-mkstandalone -- \
+		run_cmd_new cp -a "$IMAGEDIR"/boot "$VOIDHOSTDIR"
+		run_cmd_new xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
 			--directory="/usr/lib/grub/i386-efi" \
 			--format="i386-efi" \
 			--output="/tmp/bootia32.efi" \
@@ -1085,8 +1112,8 @@ generate_grub_efi_boot() {
 			die "Failed to generate EFI loader"
 		fi
 		run_cmd_new mkdir -p "${GRUB_EFI_TMPDIR}"/EFI/BOOT
-		run_cmd_new cp -f "$HOSTDIR"/tmp/bootia32.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTIA32.EFI
-		run_cmd_new xbps-uchroot "$HOSTDIR" grub-mkstandalone -- \
+		run_cmd_new cp -f "$VOIDHOSTDIR"/tmp/bootia32.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTIA32.EFI
+		run_cmd_new xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
 			--directory="/usr/lib/grub/x86_64-efi" \
 			--format="x86_64-efi" \
 			--output="/tmp/bootx64.efi" \
@@ -1096,13 +1123,13 @@ generate_grub_efi_boot() {
 			run_cmd_new losetup --detach "${LOOP_DEVICE}"
 			die "Failed to generate EFI loader"
 		fi
-		run_cmd_new cp -f "$HOSTDIR"/tmp/bootx64.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTX64.EFI
+		run_cmd_new cp -f "$VOIDHOSTDIR"/tmp/bootx64.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTX64.EFI
 		run_cmd_new umount "$GRUB_EFI_TMPDIR"
 		run_cmd_new losetup --detach "${LOOP_DEVICE}"
 		run_cmd_new rm -rf "$GRUB_EFI_TMPDIR"
 
 		# include memtest86+
-		run_cmd_new cp -f "$HOSTDIR"/boot/memtest86+/memtest.efi "$BOOT_DIR"
+		run_cmd_new cp -f "$VOIDHOSTDIR"/boot/memtest86+/memtest.efi "$BOOT_DIR"
 	}
 	#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 }
@@ -1135,9 +1162,9 @@ generate_squashfs() {
 		run_cmd_new umount -f "$BUILDDIR/tmp-rootfs"
 		run_cmd_new mkdir -p "$IMAGEDIR/LiveOS"
 
-		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
-		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img "$options" || die "Failed to generate squashfs image"
-		run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 3 || die "Failed to generate squashfs image"
+		#run_cmd_new "$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
+		#run_cmd_new "$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img "$options" || die "Failed to generate squashfs image"
+		run_cmd_new "$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 3 || die "Failed to generate squashfs image"
 
 		run_cmd_new chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
 		#[ -z "$KEEP_BUILDDIR" ] && rm -rf "$ROOTFS"
@@ -1148,9 +1175,9 @@ generate_squashfs() {
 }
 
 generate_iso_image() {
-	print_step "Gerando imagem ISO : ${yellow}$OUTPUT_FILE"
+	print_step "Gerando imagem ISO: ${yellow}$OUTPUT_FILE"
 	{
-		run_cmd_new "$HOSTDIR"/usr/bin/xorriso \
+		run_cmd_new "$VOIDHOSTDIR"/usr/bin/xorriso \
 			-as mkisofs \
 			-iso-level 3 \
 			-rock \
@@ -1170,8 +1197,8 @@ generate_iso_image() {
 			-no-emul-boot \
 			-isohybrid-mbr "$SYSLINUX_DATADIR"/isohdpfx.bin \
 			-output "$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
-	}
-	#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+  }
+#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	hsize=$(du -sh "$OUTPUT_FILE" | awk '{print $1}')
 	info_msg "Iso file created: ${green}$(readlink -f "$OUTPUT_FILE") ($hsize) successfully.${reset}"
 }
@@ -1230,6 +1257,7 @@ EOF
 
 sh_config_distroname() {
 	declare -ga name
+	print_step "Configurando distroname"
 	if $MAKE_FULL_X; then
 		title='VoidBR Linux Live Full X'
 		VOL_ID='VOIDBR_LIVE_FULLX'
@@ -1283,7 +1311,6 @@ sh_config_distroname() {
 		VOL_ID='VOIDBR_LIVE_BASE'
 		name='base'
 	fi
-	print_step "Configurando distroname : $name"
 }
 
 sh_print_resume() {
@@ -1297,7 +1324,7 @@ sh_print_resume() {
 	print_step "Profile         => ${yellow}${name}${reset}"
 	print_step "ROOTDIR         => ${yellow}${ROOTDIR}${reset}"
 	print_step "ROOTFS          => ${yellow}${ROOTFS}${reset}"
-	print_step "HOSTDIR         => ${yellow}${HOSTDIR}${reset}"
+	print_step "VOIDHOSTDIR     => ${yellow}${VOIDHOSTDIR}${reset}"
 	print_step "ARCH            => ${yellow}${ARCH}${reset}"
 	print_step "Output file ISO => ${yellow}${OUTPUT_FILE}${reset}"
 	print_step "Compression SFS => ${yellow}${SQUASHFS_COMPRESSION}${reset}"
@@ -1332,7 +1359,6 @@ sh_configure_packages() {
 
 	if $MAKE_X; then
 		sh_choose_packages_common_X_base
-		sh_choose_voidbr_X_packages
 		if ! $MAKE_ONLY_XORG; then
 			sh_choose_packages_common_X_advanced
 		fi
@@ -1375,7 +1401,7 @@ sh_configure_packages() {
 
 sh_configure_rootfs() {
 	# Configure dracut to use overlayfs for the writable overlay.
-	print_step "Configurando rootfs : $ROOTFS"
+	print_step "Configurando rootfs"
 	BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "
 	ARCH=$(xbps-uhelper arch)
 
@@ -1411,8 +1437,10 @@ sh_configure_rootfs() {
 
 	BUILDDIR=$(readlink -f "$BUILDDIR")
 	IMAGEDIR="$BUILDDIR/image"
+	#	ROOTFS="$IMAGEDIR/rootfs"
 	ROOTFS="$BUILDDIR/rootfs"
-	HOSTDIR="$ROOTDIR/hostdir"
+	#	VOIDHOSTDIR="$BUILDDIR/void-host"
+	VOIDHOSTDIR="$ROOTDIR/void-host"
 	BOOT_DIR="$IMAGEDIR/boot"
 	ISOLINUX_DIR="$BOOT_DIR/isolinux"
 	GRUB_DIR="$BOOT_DIR/grub"
@@ -1423,8 +1451,8 @@ sh_configure_rootfs() {
 	[ "${#INCLUDE_DIRS[@]}" -gt 0 ] && STEP_COUNT=$((STEP_COUNT + 1))
 	[ -n "${IGNORE_PKGS}" ] && STEP_COUNT=$((STEP_COUNT + 1))
 
-	: ${SYSLINUX_DATADIR:="$HOSTDIR"/usr/lib/syslinux}
-	: ${GRUB_DATADIR:="$HOSTDIR"/usr/share/grub}
+	: ${SYSLINUX_DATADIR:="$VOIDHOSTDIR"/usr/lib/syslinux}
+	: ${GRUB_DATADIR:="$VOIDHOSTDIR"/usr/share/grub}
 	: ${SPLASH_IMAGE:=data/splash.png}
 	: ${XBPS_INSTALL_UNPACK_ONLY:=xbps-install --unpack-only --yes --ignore-file-conflicts}
 	: ${XBPS_INSTALL_CMD:=xbps-install}
@@ -1434,7 +1462,7 @@ sh_configure_rootfs() {
 	: ${XBPS_UHELPER_CMD:=xbps-uhelper}
 	: ${XBPS_RECONFIGURE_CMD:=xbps-reconfigure}
 	: ${OUTPUT_FILE="voidbr-live-$name-${BASE_ARCH}-$(uname -r)-$(sh_diahora).iso"}
-	mkdir -p "$ROOTFS" "$HOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR"
+	mkdir -p "$ROOTFS" "$VOIDHOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR"
 
 	# Validação de espaço em disco inserida antes do resumo e do início das instalações
 	verificar_espaco_livre
@@ -1444,7 +1472,7 @@ sh_configure_rootfs() {
 }
 
 sh_configure_linux() {
-#	print_step "Configurando kernel"
+	print_step "Configurando kernel"
 	# Get linux version for ISO - If linux version option specified use
 	if [ -n "$LINUX_VERSION" ]; then
 		if ! echo "$LINUX_VERSION" | grep "linux[0-9._]\+"; then
@@ -1482,61 +1510,27 @@ sh_configure_linux() {
 
 }
 
-install_prereqs() {
-	#        --unpack-only \
-	cmd_logger "Instalando grupo de pacotes : REQUIRED_PKGS -> $HOSTDIR" "
-    LC_ALL=C \
-      XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" \
-        --rootdir "$HOSTDIR" ${XBPS_REPOSITORY} \
-        --cachedir "$XBPS_HOST_CACHEDIR" \
-        --update \
-        --ignore-file-conflicts \
-        --sync \
-        --yes \
-        $REQUIRED_PKGS
-  "
-	replicate '-'
-
-	cmd_logger "Instalando grupo de pacotes : BASE_PKGS -> $HOSTDIR" "
-    LC_ALL=C \
-      XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" \
-        --rootdir "$HOSTDIR" ${XBPS_REPOSITORY} \
-        --cachedir "$XBPS_HOST_CACHEDIR" \
-        --update \
-        --ignore-file-conflicts \
-        --sync \
-        --yes \
-        $BASE_PKGS
-  "
-	replicate '-'
-}
-
 sh_install_rootfs() {
 	replicate
+	cmd_logger "Sincronizando dados do repositório XBPS..." "
+		copy_void_keys "$ROOTFS"
+		copy_void_keys "$VOIDHOSTDIR"
 
-	copy_void_keys "$ROOTFS"
-	copy_void_keys "$HOSTDIR"
-	install_prereqs
-
-	cmd_logger "Sincronizando dados do repositório : $ROOTFS" "
-		LC_ALL=C XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD \
+		LC_ALL=C XBPS_ARCH=$BASE_ARCH \
+		  $XBPS_INSTALL_CMD \
 		  -Syu \
 		  -r "$ROOTFS" \
 		  -R ${XBPS_REPOSITORY}
 
-  "
-	cmd_logger "Sincronizando dados do repositório : $HOSTDIR" "
 		LC_ALL=C XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD \
 		  -Syu \
-		  -r "$HOSTDIR" \
+		  -r "$VOIDHOSTDIR" \
 		  -R ${XBPS_REPOSITORY}
   "
-  replicate '-'
-
 	sh_configure_linux
 
 	#	: ${OUTPUT_FILE="voidbr-live-$name-${BASE_ARCH}-${KERNELVERSION}-$(sh_diahora).iso"}
-	#  install_prereqs
+	install_prereqs
 
 	mkdir -p "$ROOTFS"/etc
 	[ -s data/motd ] && cp data/motd "$ROOTFS"/etc
@@ -1547,7 +1541,7 @@ sh_install_rootfs() {
 		ignore_packages
 	fi
 
-	print_step "Instalando pacotes void em : $ROOTFS"
+	print_step "Instalando pacotes void em $ROOTFS..."
 	install_packages
 	install_skel_root
 	sh_configure_void_install_desktop
@@ -1563,22 +1557,22 @@ enable_services() {
 		link="$ROOTFS/etc/runit/runsvdir/default/$service"
 		print_step "Ativando serviço: $service"
 
-		#		if [[ -L "$link" ]] &&
-		#			[[ "$(readlink "$link")" == "/etc/sv/$service" ]]; then
-		#			info_msg "service $service já está habilitado"
-		#			continue
-		#		fi
+#		if [[ -L "$link" ]] &&
+#			[[ "$(readlink "$link")" == "/etc/sv/$service" ]]; then
+#			info_msg "service $service já está habilitado"
+#			continue
+#		fi
 
 		if [[ ! -d "$ROOTFS/etc/sv/$service" ]]; then
 			info_msg "service $service not found in $ROOTFS/etc/sv"
 			continue
 		fi
 
-		run_cmd_new ln -snf "/etc/sv/$service" "$link"
-		if [[ ! -L "$link" && ! -e "$link" ]] &&
-			[[! "$(readlink "$link")" == "/etc/sv/$service" ]]; then
-			info_msg "failed to enable service $service (broken symlink)"
-		fi
+    run_cmd_new ln -snf "/etc/sv/$service" "$link"
+    if [[ ! -L "$link" && ! -e "$link" ]] &&
+       [[! "$(readlink "$link")" == "/etc/sv/$service" ]]; then
+      info_msg "failed to enable service $service (broken symlink)"
+    fi
 	done
 }
 
@@ -1815,10 +1809,6 @@ for arg in "$@"; do
 	fullx)
 		MAKE_X=true
 		MAKE_FULL_X=true
-		;;
-	*)
-		MAKE_X=false
-		MAKE_FULL_X=false
 		;;
 	esac
 done

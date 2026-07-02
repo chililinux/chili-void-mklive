@@ -217,13 +217,12 @@ info_msg() {
 }
 
 die() {
-	# This function is registered in all the scripts to make sure that
-	# the important mounts get cleaned up and the $ROOTFS location is
-	# removed.
-	printf "FATAL: %s\n" "$@"
-	umount_pseudofs
-	#[ -d "$ROOTFS" ] && rm -rf "$ROOTFS"
-	exit 1
+  local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
+  local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
+  local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
+  echo -e "${CROSS}${red}ERROR: $*"
+  error_out 1 $LINENO
+  exit 1
 }
 
 check_tools() {

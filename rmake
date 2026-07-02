@@ -31,6 +31,7 @@ ${yellow}Examples:${reset}
     $0 cinnamon
     $0 mate
     $0 sway
+    $0 fullx
 
 ${yellow}Available flavors:${reset}
     ${green}all${reset}        Build all images
@@ -42,6 +43,7 @@ ${yellow}Available flavors:${reset}
     ${green}plasma${reset}     Build KDE Plasma ISO
     ${green}sway${reset}       Build SWAY ISO
     ${green}xfce${reset}       Build XFCE ISO
+    ${green}fullx${reset}      Build ALL ISo
 EOF
 	exit 1
 }
@@ -62,9 +64,10 @@ all)
 		cinnamon
 		mate
 		sway
+		fullx
 	)
 	;;
-base | install | xfce | gnome | plasma | cinnamon | mate | sway)
+base | install | xfce | gnome | plasma | cinnamon | mate | sway | fullx)
 	FLAVORS=("$FLAVOR")
 	;;
 *)
