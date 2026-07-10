@@ -78,6 +78,7 @@ declare -g MAKE_GNOME=false
 declare -g MAKE_CINNAMON=false
 declare -g MAKE_MATE=false
 declare -g MAKE_SWAY=false
+declare -g MAKE_HYPRLAND=false
 declare -g MAKE_ONLY_XORG=false
 declare -g MAKE_FULL_X=false
 declare -g LBIND=false
@@ -406,6 +407,98 @@ sh_choose_packages_sway() {
 	ADISTRO_PKGS+=" sway"
 
 	ACONFIG_PKGS+=(
+		dbus                    # Message bus system
+		elogind                 # Gerenciador de login e sessões (seat management)
+		foot                    # Terminal leve e otimizado para Wayland
+		wofi                    # Lançador de aplicativos e menu de busca
+		grim                    # Utilitário para captura de tela (screenshot)
+		slurp                   # Seleção de área para captura de tela
+		brightnessctl           # Controle de brilho via linha de comando
+		eom                     # Visualizador de imagens (Eye of MATE)
+		fuse-exfat              # Suporte para montagem de sistemas exFAT
+		ffmpeg                  # Ferramentas para manipulação de áudio e vídeo
+		mesa-dri                # Drivers gráficos (Direct Rendering Infrastructure)
+		mesa-vaapi              # Aceleração de vídeo via hardware (VA-API)
+		mesa-demos              # Coleção de ferramentas de teste para o Mesa
+		psmisc                  # Utilitários de processo (killall, fuser, pstree)
+		cpupower                # Ferramenta de gerenciamento de frequência da CPU
+		noto-fonts-ttf          # Fontes Noto da Google
+		font-awesome            # Fontes de ícones para barras e interfaces
+		optipng                 # Otimizador de compressão para arquivos PNG
+		sassc                   # Compilador CSS (SASS)
+		jq                      # Processador de arquivos JSON via CLI
+		swaylock                # Bloqueador de tela para Wayland
+		swayidle                # Gerenciador de inatividade (idle) e bloqueio
+		wl-clipboard            # Ferramentas de clipboard (wl-copy/wl-paste)
+		sway-audio-idle-inhibit # Inibe o bloqueio/hibernação durante reprodução de áudio
+		Waybar                  # Barra de status customizável para Wayland
+		wmenu                   # Menu de seleção estilo dmenu/wofi para Wayland
+		xdg-utils               # Ferramentas de integração com a área de trabalho
+		xdg-desktop-portal      # Camada de comunicação entre apps e o desktop
+		xdg-desktop-portal-gtk  # Implementação GTK do portal XDG
+		xdg-desktop-portal-wlr  # Implementação WLR (Sway) do portal XDG
+		rtkit                   # Gerenciamento de prioridade de tempo real
+		mate-polkit             # Agente de autenticação para permissões root
+		kanshi                  # Gerenciador dinâmico de monitores
+		Thunar                  # Gerenciador de arquivos (XFCE)
+		thunar-archive-plugin   # Integração de compactação no Thunar
+		engrampa                # Gerenciador de arquivos compactados
+		cliphist                # Histórico da área de transferência
+		mate-calc               # Calculadora do ambiente MATE
+		pluma                   # Editor de texto leve (MATE)
+		nwg-look                # Configurador de temas GTK para Wayland
+		atril                   # Visualizador de documentos (PDFs)
+		mako                    # Servidor de notificações Wayland
+		pipewire                # Servidor de áudio moderno
+		wireplumber             # Gerenciador de sessão para PipeWire
+		pavucontrol             # Volume control applet for Pipewire
+		xfce4-terminal          # Modern terminal emulator primarly for the Xfce desktop environment
+		alsa-pipewire
+		pulseaudio-utils
+		libspa-bluetooth
+		libjack-pipewire
+		alsa-plugins-pulseaudio
+		alsa-utils
+		NetworkManager         # Gerenciador de rede (daemon)
+		network-manager-applet # Ícone de bandeja para controlar conexões
+		firefox                # Mozilla Firefox web browser
+		firefox-i18n-pt-BR     # Firefox Portuguese (Brazilian) language pack
+		#		nerd-fonts                # Iconic font aggregator collection
+		ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
+		lm_sensors              # Utilities to read temperature/voltage/fan sensors
+		xdg-user-dirs-gtk       # GTK+ tool to help manage user directories
+		xdg-user-dirs           # Tool to help manage user directories
+		voidbr-base-config      # Configuração base personalizada
+		voidbr-theme-dracula    # Tema visual Dracula aplicado
+		voidbr-tokyo-theme      # TokyoNight-Dark theme with icons, cursors, and wallpaper
+		acpi
+		acpid
+	)
+
+	ASKEL_PKGS+=(voidbr-sway-config)
+}
+
+sh_choose_packages_hyprland() {
+	print_step "Selecionando pacotes HYPRLAND"
+	ADISTRO_PKGS+=" hyprland"
+
+	ACONFIG_PKGS+=(
+hyprpaper
+hyprlock
+hypridle
+hyprpicker
+waybar
+wofi
+mako
+grim
+slurp
+swappy
+wl-clipboard
+brightnessctl
+playerctl
+xdg-desktop-portal-hyprland
+xorg-server-xwayland
+
 		dbus                    # Message bus system
 		elogind                 # Gerenciador de login e sessões (seat management)
 		foot                    # Terminal leve e otimizado para Wayland
@@ -1225,6 +1318,7 @@ ${bold}Desktop presets:${rst}
   -Y|xfce           ${green}XFCE${rst}
   -M|mate           ${green}MATE${rst}
   -S|sway           ${green}SWAY${rst}
+  -H|hyprland       ${green}HYPRLAND${rst}
   -A|fullx          ${green}ALL X${rst}
 
   -h                 Show this help and exit
@@ -1278,6 +1372,10 @@ sh_config_distroname() {
 		title='VoidBR Linux Live Sway'
 		VOL_ID='VOIDBR_LIVE_SWAY'
 		name='sway'
+	elif $MAKE_HYPRLAND; then
+		title='VoidBR Linux Live Hyprland'
+		VOL_ID='VOIDBR_LIVE_HYPRLAND'
+		name='hyprland'
 	elif $MAKE_ONLY_XORG; then
 		title='VoidBR Linux Live Install'
 		VOL_ID='VOIDBR_LIVE_INSTALL'
@@ -1352,6 +1450,7 @@ sh_configure_packages() {
 			sh_choose_packages_enlightenment
 			sh_choose_packages_fluxbox
 			sh_choose_packages_sway
+			sh_choose_packages_hyprland
 		elif $MAKE_ENLIGHTENMENT; then
 			sh_choose_packages_enlightenment
 		elif $MAKE_AWESOME; then
@@ -1373,6 +1472,8 @@ sh_configure_packages() {
 			sh_choose_packages_mate
 		elif $MAKE_SWAY; then
 			sh_choose_packages_sway
+		elif $MAKE_HYPRLAND; then
+			sh_choose_packages_hyprland
 		fi
 	fi
 }
@@ -1718,6 +1819,10 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFfAGPmM" opt; do
 		MAKE_X=true
 		MAKE_SWAY=true
 		;;
+	H)
+		MAKE_X=true
+		MAKE_HYPRLAND=true
+		;;
 	w | W)
 		MAKE_X=true
 		MAKE_AWESOME=true
@@ -1799,6 +1904,11 @@ for arg in "$@"; do
 	sway)
 		MAKE_X=true
 		MAKE_SWAY=true
+		;;
+
+	hyprland)
+		MAKE_X=true
+		MAKE_HYPRLAND=true
 		;;
 
 	cinnamon)
