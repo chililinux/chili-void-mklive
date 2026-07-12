@@ -119,7 +119,7 @@ sh_choose_required_packages() {
 	REQUIRED_PKGS+=" squashfs-tools"
 	REQUIRED_PKGS+=" xorriso"
 	REQUIRED_PKGS+=" plymouth"
-  #
+	#
 	INITRAMFS_PKGS+=" device-mapper"
 	INITRAMFS_PKGS+=" dhclient"
 	INITRAMFS_PKGS+=" dracut"
@@ -132,7 +132,7 @@ sh_choose_required_packages() {
 
 sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" bash-completion"
-#	ADDITIONAL_PKGS+=" coreutils"
+	#	ADDITIONAL_PKGS+=" coreutils"
 	ADDITIONAL_PKGS+=" sed"
 	ADDITIONAL_PKGS+=" tar"
 	ADDITIONAL_PKGS+=" gawk"
@@ -146,7 +146,7 @@ sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" pv"
 	ADDITIONAL_PKGS+=" curl"
 	ADDITIONAL_PKGS+=" wget"
-#	ADDITIONAL_PKGS+=" git"
+	#	ADDITIONAL_PKGS+=" git"
 	ADDITIONAL_PKGS+=" nano"
 	ADDITIONAL_PKGS+=" bc"
 	ADDITIONAL_PKGS+=" parted"
@@ -169,7 +169,7 @@ sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" htop"
 	ADDITIONAL_PKGS+=" tree"
 	ADDITIONAL_PKGS+=" rsync"
-#	ADDITIONAL_PKGS+=" tmate"
+	#	ADDITIONAL_PKGS+=" tmate"
 	ADDITIONAL_PKGS+=" duf"
 	ADDITIONAL_PKGS+=" umc"
 	ADDITIONAL_PKGS+=" fzf"
@@ -187,8 +187,8 @@ sh_choose_voidbr_base_packages() {
 	ADDITIONAL_PKGS+=" voidbr-utils"
 	ADDITIONAL_PKGS+=" chili-utils"
 	ADDITIONAL_PKGS+=" chili-clonedisk"
-  #
-  ACONFIG_PKGS+=(voidbr-plymouth-theme)
+	#
+	ACONFIG_PKGS+=(voidbr-plymouth-theme)
 }
 
 sh_choose_voidbr_X_packages() {
@@ -483,79 +483,74 @@ sh_choose_packages_hyprland() {
 	ADISTRO_PKGS+=" hyprland"
 
 	ACONFIG_PKGS+=(
-hyprpaper
-hyprlock
-hypridle
-hyprpicker
-waybar
-wofi
-mako
-grim
-slurp
-swappy
-wl-clipboard
-brightnessctl
-playerctl
-xdg-desktop-portal-hyprland
-xorg-server-xwayland
+		hyprpaper
+		hyprlock
+		hypridle
+		hyprpicker-0.4.7_3
+		Waybar
+		wofi
+		mako
+		grim
+		slurp
+		swappy
+		wl-clipboard
+		brightnessctl
+		playerctl
+		xdg-desktop-portal-hyprland
+		xorg-server-xwayland
+		lua55
 
-		dbus                    # Message bus system
-		elogind                 # Gerenciador de login e sessões (seat management)
-		foot                    # Terminal leve e otimizado para Wayland
-		wofi                    # Lançador de aplicativos e menu de busca
-		grim                    # Utilitário para captura de tela (screenshot)
-		slurp                   # Seleção de área para captura de tela
-		brightnessctl           # Controle de brilho via linha de comando
-		eom                     # Visualizador de imagens (Eye of MATE)
-		fuse-exfat              # Suporte para montagem de sistemas exFAT
-		ffmpeg                  # Ferramentas para manipulação de áudio e vídeo
-		mesa-dri                # Drivers gráficos (Direct Rendering Infrastructure)
-		mesa-vaapi              # Aceleração de vídeo via hardware (VA-API)
-		mesa-demos              # Coleção de ferramentas de teste para o Mesa
-		psmisc                  # Utilitários de processo (killall, fuser, pstree)
-		cpupower                # Ferramenta de gerenciamento de frequência da CPU
-		noto-fonts-ttf          # Fontes Noto da Google
-		font-awesome            # Fontes de ícones para barras e interfaces
-		optipng                 # Otimizador de compressão para arquivos PNG
-		sassc                   # Compilador CSS (SASS)
-		jq                      # Processador de arquivos JSON via CLI
-		swaylock                # Bloqueador de tela para Wayland
-		swayidle                # Gerenciador de inatividade (idle) e bloqueio
-		wl-clipboard            # Ferramentas de clipboard (wl-copy/wl-paste)
+		dbus           # Message bus system
+		elogind        # Gerenciador de login e sessões (seat management)
+		foot           # Terminal leve e otimizado para Wayland
+		eom            # Visualizador de imagens (Eye of MATE)
+		fuse-exfat     # Suporte para montagem de sistemas exFAT
+		ffmpeg         # Ferramentas para manipulação de áudio e vídeo
+		mesa-dri       # Drivers gráficos (Direct Rendering Infrastructure)
+		mesa-vaapi     # Aceleração de vídeo via hardware (VA-API)
+		mesa-demos     # Coleção de ferramentas de teste para o Mesa
+		psmisc         # Utilitários de processo (killall, fuser, pstree)
+		cpupower       # Ferramenta de gerenciamento de frequência da CPU
+		noto-fonts-ttf # Fontes Noto da Google
+		font-awesome   # Fontes de ícones para barras e interfaces
+		optipng        # Otimizador de compressão para arquivos PNG
+		sassc          # Compilador CSS (SASS)
+		jq             # Processador de arquivos JSON via CLI
+		#		swaylock                # Bloqueador de tela para Wayland
+		#		swayidle                # Gerenciador de inatividade (idle) e bloqueio
 		sway-audio-idle-inhibit # Inibe o bloqueio/hibernação durante reprodução de áudio
-		Waybar                  # Barra de status customizável para Wayland
-		wmenu                   # Menu de seleção estilo dmenu/wofi para Wayland
-		xdg-utils               # Ferramentas de integração com a área de trabalho
-		xdg-desktop-portal      # Camada de comunicação entre apps e o desktop
-		xdg-desktop-portal-gtk  # Implementação GTK do portal XDG
-		xdg-desktop-portal-wlr  # Implementação WLR (Sway) do portal XDG
-		rtkit                   # Gerenciamento de prioridade de tempo real
-		mate-polkit             # Agente de autenticação para permissões root
-		kanshi                  # Gerenciador dinâmico de monitores
-		Thunar                  # Gerenciador de arquivos (XFCE)
-		thunar-archive-plugin   # Integração de compactação no Thunar
-		engrampa                # Gerenciador de arquivos compactados
-		cliphist                # Histórico da área de transferência
-		mate-calc               # Calculadora do ambiente MATE
-		pluma                   # Editor de texto leve (MATE)
-		nwg-look                # Configurador de temas GTK para Wayland
-		atril                   # Visualizador de documentos (PDFs)
-		mako                    # Servidor de notificações Wayland
-		pipewire                # Servidor de áudio moderno
-		wireplumber             # Gerenciador de sessão para PipeWire
-		pavucontrol             # Volume control applet for Pipewire
-		xfce4-terminal          # Modern terminal emulator primarly for the Xfce desktop environment
+		#		wmenu                   # Menu de seleção estilo dmenu/wofi para Wayland
+		#		xdg-utils               # Ferramentas de integração com a área de trabalho
+		#		xdg-desktop-portal      # Camada de comunicação entre apps e o desktop
+		xdg-desktop-portal-gtk # Implementação GTK do portal XDG
+		#		xdg-desktop-portal-wlr  # Implementação WLR (Sway) do portal XDG
+		rtkit                 # Gerenciamento de prioridade de tempo real
+		mate-polkit           # Agente de autenticação para permissões root
+		mate-calc             # Calculadora do ambiente MATE
+		kanshi                # Gerenciador dinâmico de monitores
+		Thunar                # Gerenciador de arquivos (XFCE)
+		thunar-archive-plugin # Integração de compactação no Thunar
+		engrampa              # Gerenciador de arquivos compactados
+		cliphist              # Histórico da área de transferência
+		pluma                 # Editor de texto leve (MATE)
+		nwg-look              # Configurador de temas GTK para Wayland
+		atril                 # Visualizador de documentos (PDFs)
+		mako                  # Servidor de notificações Wayland
+		pipewire              # Servidor de áudio moderno
+		wireplumber           # Gerenciador de sessão para PipeWire
+		pavucontrol           # Volume control applet for Pipewire
+		xfce4-terminal        # Modern terminal emulator primarly for the Xfce desktop environment
 		alsa-pipewire
 		pulseaudio-utils
 		libspa-bluetooth
 		libjack-pipewire
 		alsa-plugins-pulseaudio
 		alsa-utils
-		NetworkManager         # Gerenciador de rede (daemon)
-		network-manager-applet # Ícone de bandeja para controlar conexões
-		firefox                # Mozilla Firefox web browser
-		firefox-i18n-pt-BR     # Firefox Portuguese (Brazilian) language pack
-		#		nerd-fonts                # Iconic font aggregator collection
+		NetworkManager          # Gerenciador de rede (daemon)
+		network-manager-applet  # Ícone de bandeja para controlar conexões
+		firefox                 # Mozilla Firefox web browser
+		firefox-i18n-pt-BR      # Firefox Portuguese (Brazilian) language pack
+		#		nerd-fonts          # Iconic font aggregator collection
 		ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
 		lm_sensors              # Utilities to read temperature/voltage/fan sensors
 		xdg-user-dirs-gtk       # GTK+ tool to help manage user directories
@@ -565,9 +560,10 @@ xorg-server-xwayland
 		voidbr-tokyo-theme      # TokyoNight-Dark theme with icons, cursors, and wallpaper
 		acpi
 		acpid
+
 	)
 
-	ASKEL_PKGS+=(voidbr-sway-config)
+	ASKEL_PKGS+=(voidbr-hyprland-config)
 }
 
 sh_setEnvironment() {
@@ -838,44 +834,44 @@ install_packages() {
 	cmd_logger "Instalando grupo de pacotes : PACKAGE_LIST -> $ROOTFS" '
     cmd_install $PACKAGE_LIST
   '
-  replicate '-'
+	replicate '-'
 
 	cmd_logger "Instalando grupo de pacotes : INITRAMFS_PKGS -> $ROOTFS" '
     cmd_install $INITRAMFS_PKGS
   '
-  replicate '-'
+	replicate '-'
 
 	cmd_logger "Instalando grupo de pacotes : ADDITIONAL_PKG -> $ROOTFS" '
     cmd_install $ADDITIONAL_PKGS
   '
-  replicate '-'
+	replicate '-'
 
 	if [[ -n $COMMON_PKGS ]]; then
 		cmd_logger "Instalando grupo de pacotes : COMMON_PKGS  -> $ROOTFS" '
       cmd_install $COMMON_PKGS
     '
-    replicate '-'
+		replicate '-'
 	fi
 
 	if [[ -n $ADISTRO_PKGS ]]; then
 		cmd_logger "Instalando grupo de pacotes : ADISTRO_PKGS -> $ROOTFS" '
       cmd_install $ADISTRO_PKGS
     '
-    replicate '-'
+		replicate '-'
 	fi
 
 	if [[ -n $AEXTRA_COMMON_PKGS ]]; then
 		cmd_logger "Instalando grupo de pacotes : AEXTRA_COMMON_PKGS -> $ROOTFS" '
       cmd_install $AEXTRA_COMMON_PKGS
 		'
-    replicate '-'
+		replicate '-'
 	fi
 
 	if [[ -n $ACONFIG_PKGS ]]; then
 		cmd_logger "Instalando grupo de pacotes : ACONFIG_PKGS -> $ROOTFS" '
       cmd_install ${ACONFIG_PKGS[*]}
     '
-    replicate '-'
+		replicate '-'
 	fi
 
 	if [[ -n $ASKEL_PKGS ]]; then
@@ -884,15 +880,15 @@ install_packages() {
         cmd_install_force "$pkg"
       '
 		done
-    replicate '-'
+		replicate '-'
 	fi
 
 	if [[ -n $AEXTRA_PKGS ]]; then
 		cmd_logger "Instalando grupo de pacotes : AEXTRA_PKGS -> $ROOTFS" '
       cmd_install $AEXTRA_PKGS
 		'
-	  replicate '-'
-  fi
+		replicate '-'
+	fi
 	#    sh_reconfigure_pass1
 
 }
@@ -906,10 +902,12 @@ ignore_packages() {
 
 install_skel_root() {
 	cmd_logger "Copiando skel para usuario root" '
-	  cp -Rpva $ROOTFS/etc/skel/.bash* $ROOTFS/root/
-		cp -Rpva $ROOTFS/etc/skel/.git-prompt.sh $ROOTFS/root/
-		cp -Rpva $ROOTFS/etc/skel/.dircolors $ROOTFS/root/
-    #rsync -a $ROOTFS/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/
+	  cp -Rpva $ROOTFS/etc/skel/.bash* $ROOTFS/root/ || true
+		cp -Rpva $ROOTFS/etc/skel/.git-prompt.sh $ROOTFS/root/ || true
+		cp -Rpva $ROOTFS/etc/skel/.dialogrc $ROOTFS/root/ || true
+		cp -Rpva $ROOTFS/etc/skel/.dircolors $ROOTFS/root/ || true
+		cp -Rpva $ROOTFS/etc/skel/.ps* $ROOTFS/root/ || true
+    #rsync -a $ROOTFS/etc/skel/.config/neofetch/config.conf $ROOTFS/root/.config/neofetch/ || true
   '
 }
 
@@ -977,8 +975,7 @@ configure_plymouth() {
 	[ $result -ne 0 ] && die "Falha ao configurar tema"
 
 	print_step "Criando wrapper plymouth : $ROOTFS/usr/bin/plymouth-show-log-voidlinux.sh"
-	mkdir -p "$ROOTFS/usr/bin"
-	cat <<'EOF' >"$ROOTFS/usr/bin/plymouth-show-log-voidlinux.sh"
+	mkdir -p "$ROOTFS/usr	cat <<'EOF' >"$ROOTFS/usr/bin/plymouth-show-log-voidlinux.sh"
 #!/usr/bin/env bash
 
 file=/var/log/boot.log
@@ -1231,9 +1228,9 @@ generate_squashfs() {
 
 		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
 		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img "$options" || die "Failed to generate squashfs image"
-    #run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp xz -Xbcj x86 -Xdict-size 100% || die "Failed to generate squashfs image"
-    #run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp lz4 || die "Failed to generate squashfs image"
-    #run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 3 || die "Failed to generate squashfs image"
+		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp xz -Xbcj x86 -Xdict-size 100% || die "Failed to generate squashfs image"
+		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp lz4 || die "Failed to generate squashfs image"
+		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 3 || die "Failed to generate squashfs image"
 		run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 1 || die "Failed to generate squashfs image"
 
 		run_cmd_new chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
@@ -1549,7 +1546,7 @@ sh_configure_rootfs() {
 }
 
 sh_configure_linux() {
-#	print_step "Configurando kernel"
+	#	print_step "Configurando kernel"
 	# Get linux version for ISO - If linux version option specified use
 	if [ -n "$LINUX_VERSION" ]; then
 		if ! echo "$LINUX_VERSION" | grep "linux[0-9._]\+"; then
@@ -1636,7 +1633,7 @@ sh_install_rootfs() {
 		  -r "$HOSTDIR" \
 		  -R ${XBPS_REPOSITORY}
   "
-  replicate '-'
+	replicate '-'
 
 	sh_configure_linux
 

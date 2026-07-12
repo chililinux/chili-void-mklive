@@ -10,7 +10,7 @@ rst="$(printf '\033[0m')"
 VERSION="linux7.0"
 
 msg() {
-  echo -e "[rmake]$*"
+	echo -e "[rmake]$*"
 }
 
 usage() {
@@ -31,28 +31,27 @@ ${yellow}Examples:${reset}
     $0 cinnamon
     $0 mate
     $0 sway
-    $0 hyprland
+    $0 hyprland/hypr
     $0 fullx
 
 ${yellow}Available flavors:${reset}
-    ${green}all${reset}        Build all images
-    ${green}base${reset}       Build Base ISO
-    ${green}cinnamon${reset}   Build Cinnamon ISO
-    ${green}gnome${reset}      Build GNOME ISO
-    ${green}install${reset}    Build Installer ISO
-    ${green}mate${reset}       Build MATE ISO
-    ${green}plasma${reset}     Build KDE Plasma ISO
-    ${green}sway${reset}       Build SWAY ISO
-    ${green}hyprland${reset}   Build HYPRLAND ISO
-    ${green}xfce${reset}       Build XFCE ISO
-    ${green}fullx${reset}      Build ALL ISo
+    ${green}all${reset}             Build all images
+    ${green}base${reset}            Build Base ISO
+    ${green}cinnamon${reset}        Build Cinnamon ISO
+    ${green}gnome${reset}           Build GNOME ISO
+    ${green}hyprland/hypr${reset}   Build HYPRLAND ISO
+    ${green}install${reset}         Build Installer ISO
+    ${green}mate${reset}            Build MATE ISO
+    ${green}plasma${reset}          Build KDE Plasma ISO
+    ${green}sway${reset}            Build SWAY ISO
+    ${green}xfce${reset}            Build XFCE ISO
+    ${green}fullx${reset}           Build ALL ISo
 EOF
 	exit 1
 }
 
 # É obrigatório informar um parâmetro
 [[ $# -eq 0 ]] && usage
-
 FLAVOR="${1,,}"
 
 case "$FLAVOR" in
@@ -70,7 +69,8 @@ all)
 		fullx
 	)
 	;;
-base | install | xfce | gnome | plasma | cinnamon | mate | sway | hyprland | fullx)
+base|install|xfce|gnome|plasma|cinnamon|mate|sway|hypr|hyprland|fullx)
+	[ "${FLAVOR}" == 'hypr' ] && FLAVOR=hyprland
 	FLAVORS=("$FLAVOR")
 	;;
 *)
@@ -86,11 +86,11 @@ for flavor in "${FLAVORS[@]}"; do
 	msg "${cyan}Running  :${rst} ${green}sudo bash mkiso --automatic -v ${VERSION} ${flavor}${rst}"
 
 	[ "${flavor}" == 'base' ] && flavor=
-	if sudo bash mkiso --automatic -v "${VERSION}" "${flavor}"; then
-    echo
+	if sudo bash mkiso --automatic -v	"${VERSION}" "${flavor}"; then
+		echo
 		msg "${green}✓ ${flavor} completed.${reset}"
 	else
-  	echo
+		echo
 		msg "${red}✗ Failed to build ${flavor}.${reset}"
 		exit 1
 	fi
