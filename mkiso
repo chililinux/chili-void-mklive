@@ -974,7 +974,8 @@ configure_plymouth() {
 	[ $result -ne 0 ] && die "Falha ao configurar tema"
 
 	print_step "Criando wrapper plymouth : $ROOTFS/usr/bin/plymouth-show-log-voidlinux.sh"
-	mkdir -p "$ROOTFS/usr	cat <<'EOF' >"$ROOTFS/usr/bin/plymouth-show-log-voidlinux.sh"
+  mkdir -p "$ROOTFS/usr/bin"
+  cat <<'EOF' >"$ROOTFS/usr/bin/plymouth-show-log-voidlinux.sh"
 #!/usr/bin/env bash
 
 file=/var/log/boot.log
@@ -1938,13 +1939,13 @@ if [ "$(id -u)" -ne 0 ]; then
 	die "Must be run as root, exiting..."
 fi
 
-#sh_config_distroname
-#sh_configure_rootfs
-#umount_pseudofs
-#sh_configure_packages
-#sh_install_rootfs
-#sh_make_iso
-#generate_squashfs
-#generate_iso_image
-#umount_pseudofs
+sh_config_distroname
+sh_configure_rootfs
+umount_pseudofs
+sh_configure_packages
+sh_install_rootfs
+sh_make_iso
+generate_squashfs
+generate_iso_image
+umount_pseudofs
 exit 0
