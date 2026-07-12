@@ -560,7 +560,6 @@ sh_choose_packages_hyprland() {
 		voidbr-tokyo-theme      # TokyoNight-Dark theme with icons, cursors, and wallpaper
 		acpi
 		acpid
-
 	)
 
 	ASKEL_PKGS+=(voidbr-hyprland-config)
@@ -1069,7 +1068,7 @@ generate_initramfs() {
 		fi
 	fi
 
-	print_step "Gerando imagem initramfs ($INITRAMFS_COMPRESSION) : ${yellow}$BOOT_DIR/initrd"
+	print_step "Gerando imagem initramfs (${INITRAMFS_COMPRESSION}) : ${yellow}${BOOT_DIR}/initrd"
 	{
 		copy_dracut_files "$ROOTFS"
 		copy_autoinstaller_files "$ROOTFS"
@@ -1939,13 +1938,13 @@ if [ "$(id -u)" -ne 0 ]; then
 	die "Must be run as root, exiting..."
 fi
 
-sh_config_distroname
-sh_configure_rootfs
-umount_pseudofs
-sh_configure_packages
-sh_install_rootfs
-sh_make_iso
-generate_squashfs
-generate_iso_image
-umount_pseudofs
+#sh_config_distroname
+#sh_configure_rootfs
+#umount_pseudofs
+#sh_configure_packages
+#sh_install_rootfs
+#sh_make_iso
+#generate_squashfs
+#generate_iso_image
+#umount_pseudofs
 exit 0
