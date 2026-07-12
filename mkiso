@@ -486,6 +486,7 @@ sh_choose_packages_hyprland() {
 		hyprpaper
 		hyprlock
 		hypridle
+		hyprlauncher
 		hyprpicker-0.4.7_3
 		Waybar
 		wofi
@@ -1942,9 +1943,9 @@ fi
 sh_config_distroname
 sh_configure_rootfs
 umount_pseudofs
-#sh_configure_packages
-#sh_install_rootfs
-#sh_make_iso
+sh_configure_packages
+sh_install_rootfs
+sh_make_iso
 generate_squashfs
 generate_iso_image
 umount_pseudofs
