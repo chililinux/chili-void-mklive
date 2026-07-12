@@ -178,6 +178,7 @@ sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" grub"
 	#
 	ASKEL_PKGS+=(voidbr-base-config)
+	ASKEL_PKGS+=(voidbr-nano-config)
 }
 
 sh_choose_voidbr_base_packages() {
@@ -452,25 +453,25 @@ sh_choose_packages_sway() {
 		pipewire                # Servidor de áudio moderno
 		wireplumber             # Gerenciador de sessão para PipeWire
 		pavucontrol             # Volume control applet for Pipewire
-		xfce4-terminal          # Modern terminal emulator primarly for the Xfce desktop environment
 		alsa-pipewire
 		pulseaudio-utils
 		libspa-bluetooth
 		libjack-pipewire
 		alsa-plugins-pulseaudio
 		alsa-utils
-		NetworkManager         # Gerenciador de rede (daemon)
-		network-manager-applet # Ícone de bandeja para controlar conexões
+#		xfce4-terminal          # Modern terminal emulator primarly for the Xfce desktop environment
+#		NetworkManager         # Gerenciador de rede (daemon)
+#		network-manager-applet # Ícone de bandeja para controlar conexões
 		firefox                # Mozilla Firefox web browser
 		firefox-i18n-pt-BR     # Firefox Portuguese (Brazilian) language pack
 		#		nerd-fonts                # Iconic font aggregator collection
-		ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
+#		ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
 		lm_sensors              # Utilities to read temperature/voltage/fan sensors
 		xdg-user-dirs-gtk       # GTK+ tool to help manage user directories
 		xdg-user-dirs           # Tool to help manage user directories
-		voidbr-base-config      # Configuração base personalizada
-		voidbr-theme-dracula    # Tema visual Dracula aplicado
-		voidbr-tokyo-theme      # TokyoNight-Dark theme with icons, cursors, and wallpaper
+#		voidbr-base-config      # Configuração base personalizada
+#		voidbr-theme-dracula    # Tema visual Dracula aplicado
+#		voidbr-tokyo-theme      # TokyoNight-Dark theme with icons, cursors, and wallpaper
 		acpi
 		acpid
 	)
@@ -540,25 +541,25 @@ sh_choose_packages_hyprland() {
 		pipewire              # Servidor de áudio moderno
 		wireplumber           # Gerenciador de sessão para PipeWire
 		pavucontrol           # Volume control applet for Pipewire
-		xfce4-terminal        # Modern terminal emulator primarly for the Xfce desktop environment
 		alsa-pipewire
 		pulseaudio-utils
 		libspa-bluetooth
 		libjack-pipewire
 		alsa-plugins-pulseaudio
 		alsa-utils
-		NetworkManager          # Gerenciador de rede (daemon)
-		network-manager-applet  # Ícone de bandeja para controlar conexões
+#		xfce4-terminal        # Modern terminal emulator primarly for the Xfce desktop environment
+#		NetworkManager          # Gerenciador de rede (daemon)
+#		network-manager-applet  # Ícone de bandeja para controlar conexões
 		firefox                 # Mozilla Firefox web browser
 		firefox-i18n-pt-BR      # Firefox Portuguese (Brazilian) language pack
 		#		nerd-fonts          # Iconic font aggregator collection
-		ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
+#		ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
 		lm_sensors              # Utilities to read temperature/voltage/fan sensors
 		xdg-user-dirs-gtk       # GTK+ tool to help manage user directories
 		xdg-user-dirs           # Tool to help manage user directories
-		voidbr-base-config      # Configuração base personalizada
-		voidbr-theme-dracula    # Tema visual Dracula aplicado
-		voidbr-tokyo-theme      # TokyoNight-Dark theme with icons, cursors, and wallpaper
+#		voidbr-base-config      # Configuração base personalizada
+#		voidbr-theme-dracula    # Tema visual Dracula aplicado
+#		voidbr-tokyo-theme      # TokyoNight-Dark theme with icons, cursors, and wallpaper
 		acpi
 		acpid
 	)
