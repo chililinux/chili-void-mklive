@@ -412,6 +412,7 @@ sh_choose_packages_sway() {
 		elogind                 # Gerenciador de login e sessões (seat management)
 		foot                    # Terminal leve e otimizado para Wayland
 		wofi                    # Lançador de aplicativos e menu de busca
+		rofi
 		grim                    # Utilitário para captura de tela (screenshot)
 		slurp                   # Seleção de área para captura de tela
 		brightnessctl           # Controle de brilho via linha de comando
@@ -490,6 +491,7 @@ sh_choose_packages_hyprland() {
 		hyprlauncher
 		hyprpicker-0.4.7_3
 		Waybar
+		rofi
 		wofi
 		mako
 		grim
