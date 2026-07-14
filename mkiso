@@ -405,8 +405,11 @@ sh_choose_packages_mate() {
 
 sh_choose_packages_sway() {
 	print_step "Selecionando pacotes SWAY"
-	ADISTRO_PKGS+=" sway"
+	ADISTRO_PKGS+=" voidbr-sway"
+	ASKEL_PKGS+=(voidbr-sway-config)
+  return
 
+	ADISTRO_PKGS+=" sway"
 	ACONFIG_PKGS+=(
 		dbus                    # Message bus system
 		elogind                 # Gerenciador de login e sessões (seat management)
