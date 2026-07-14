@@ -482,8 +482,11 @@ sh_choose_packages_sway() {
 
 sh_choose_packages_hyprland() {
 	print_step "Selecionando pacotes HYPRLAND"
-	ADISTRO_PKGS+=" hyprland"
+	ADISTRO_PKGS+=" voidbr-hyprland"
+	ASKEL_PKGS+=(voidbr-hyprland-config)
+  return
 
+	ADISTRO_PKGS+=" hyprland"
 	ACONFIG_PKGS+=(
 		hyprpaper
 		hyprlock
