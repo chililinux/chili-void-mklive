@@ -197,7 +197,7 @@ sh_choose_voidbr_X_packages() {
 	AEXTRA_COMMON_PKGS+=" voidbr-tokyo-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-professional-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-beauty-icons"
-	AEXTRA_COMMON_PKGS+=" voidbr-theme-dracula"
+	AEXTRA_COMMON_PKGS+=" voidbr-dracula-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-webapps"
 	AEXTRA_COMMON_PKGS+=" chili-iso2usb"
 }
@@ -370,7 +370,7 @@ sh_choose_packages_xfce() {
 	#	ADISTRO_PKGS+=" cups-pdf"
 
 	AEXTRA_PKGS+=" voidbr-xfwm-axiom-theme"
-	ACONFIG_PKGS+=(voidbr-theme-dracula)
+	ACONFIG_PKGS+=(voidbr-dracula-theme)
 	ASKEL_PKGS+=(voidbr-xfce-config)
 
 }
@@ -563,7 +563,7 @@ sh_choose_packages_hyprland() {
 		xdg-user-dirs-gtk       # GTK+ tool to help manage user directories
 		xdg-user-dirs           # Tool to help manage user directories
 #		voidbr-base-config      # Configuração base personalizada
-#		voidbr-theme-dracula    # Tema visual Dracula aplicado
+#		voidbr-dracula-theme    # Tema visual Dracula aplicado
 #		voidbr-tokyo-theme      # TokyoNight-Dark theme with icons, cursors, and wallpaper
 		acpi
 		acpid
