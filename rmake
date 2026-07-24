@@ -1,4 +1,38 @@
 #!/usr/bin/env bash
+# -*- coding: utf-8 -*-
+# shellcheck shell=bash disable=SC1091,SC2039,SC2166,SC2034
+#
+#  rmake
+#  Created: 2023/09/18 - 09:05
+#  Updated: sex 24 jul 2026 12:02:29 -04
+#
+#  Copyright (c) 2019-2026, Vilmar Catafesta <vcatafesta@gmail.com>
+#  Copyright (c) 2019-2026, ChiliLinux Development Team <https://chililinux.com> <https://github.com/chililinux>
+#  Assembled By Vilmar Catafesta for the ChiliLinux project.
+#  All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#
+#  THIS SOFTWARE IS PROVIDED BY Vilmar Catafesta ''AS IS'' AND ANY EXPRESS OR
+#  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+#  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+#  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+#  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+#  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+#  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##############################################################################
+
+#!/usr/bin/env bash
 
 red="$(printf '\033[1;31m')"
 green="$(printf '\033[1;32m')"
@@ -19,7 +53,7 @@ usage() {
 ${cyan}VoidBR ISO Builder${reset}
 
 ${yellow}Usage:${reset}
-    $0 ${green}<flavor>${reset}
+    $0 ${green}<flavor> [flavor ...]${reset}
 
 ${yellow}Examples:${reset}
     $0 all
@@ -32,64 +66,73 @@ ${yellow}Examples:${reset}
     $0 mate
     $0 sway
     $0 mango
-    $0 hyprland/hypr
-    $0 fullx
+    $0 hypr
+    $0 hypr plasma
+    $0 sway plasma xfce
 
 ${yellow}Available flavors:${reset}
     ${green}all${reset}             Build all images
     ${green}base${reset}            Build Base ISO
     ${green}cinnamon${reset}        Build Cinnamon ISO
     ${green}gnome${reset}           Build GNOME ISO
-    ${green}hyprland/hypr${reset}   Build HYPRLAND ISO
+    ${green}hyprland/hypr${reset}   Build Hyprland ISO
     ${green}install${reset}         Build Installer ISO
     ${green}mate${reset}            Build MATE ISO
     ${green}plasma${reset}          Build KDE Plasma ISO
-    ${green}sway${reset}            Build SWAY ISO
-    ${green}mango${reset}           Build MANGO ISO
-    ${green}xfce${reset}            Build XFCE ISO
-    ${green}fullx${reset}           Build ALL ISo
+    ${green}sway${reset}           Build Sway ISO
+    ${green}mango${reset}          Build Mango ISO
+    ${green}xfce${reset}           Build XFCE ISO
+    ${green}fullx${reset}          Build FullX ISO
 EOF
 	exit 1
 }
 
-# É obrigatório informar um parâmetro
 [[ $# -eq 0 ]] && usage
-FLAVOR="${1,,}"
 
-case "$FLAVOR" in
-all)
-	FLAVORS=(
-		base
-		install
-		xfce
-		gnome
-		plasma
-		cinnamon
-		mate
-		sway
-		mango
-		hyprland
-		fullx
-	)
-	;;
-base|install|xfce|gnome|plasma|cinnamon|mate|mango|sway|hypr|hyprland|fullx)
-	[ "${FLAVOR}" == 'hypr' ] && FLAVOR=hyprland
-	FLAVORS=("$FLAVOR")
-	;;
-*)
-	msg "${red}Error:${reset} Invalid flavor '${yellow}${FLAVOR}${reset}'."
-	echo
-	usage
-	;;
-esac
+FLAVORS=()
+
+for arg in "$@"; do
+	flavor="${arg,,}"
+
+	case "$flavor" in
+	all)
+		FLAVORS=(
+			base
+			install
+			xfce
+			gnome
+			plasma
+			cinnamon
+			mate
+			sway
+			mango
+			hyprland
+			fullx
+		)
+		break
+		;;
+	base|install|xfce|gnome|plasma|cinnamon|mate|mango|sway|hypr|hyprland|fullx)
+		[[ "$flavor" == "hypr" ]] && flavor="hyprland"
+		FLAVORS+=("$flavor")
+		;;
+	*)
+		msg "${red}Error:${reset} Invalid flavor '${yellow}${arg}${reset}'."
+		echo
+		usage
+		;;
+	esac
+done
 
 msg "${cyan}Kernel   :${rst} ${green}${VERSION}${rst}"
+
 for flavor in "${FLAVORS[@]}"; do
 	msg "${cyan}Building :${rst} ${green}${flavor}${rst}"
 	msg "${cyan}Running  :${rst} ${green}sudo bash mkiso --automatic -v ${VERSION} ${flavor}${rst}"
 
-	[ "${flavor}" == 'base' ] && flavor=
-	if sudo bash mkiso --automatic -v	"${VERSION}" "${flavor}"; then
+	build_flavor="$flavor"
+	[[ "$build_flavor" == "base" ]] && build_flavor=""
+
+	if sudo bash mkiso --automatic -v "${VERSION}" "${build_flavor}"; then
 		echo
 		msg "${green}✓ ${flavor} completed.${reset}"
 	else
@@ -98,4 +141,5 @@ for flavor in "${FLAVORS[@]}"; do
 		exit 1
 	fi
 done
+
 msg "${green}✓ All requested builds completed successfully.${reset}"
