@@ -31,6 +31,7 @@ ${yellow}Examples:${reset}
     $0 cinnamon
     $0 mate
     $0 sway
+    $0 mango
     $0 hyprland/hypr
     $0 fullx
 
@@ -44,6 +45,7 @@ ${yellow}Available flavors:${reset}
     ${green}mate${reset}            Build MATE ISO
     ${green}plasma${reset}          Build KDE Plasma ISO
     ${green}sway${reset}            Build SWAY ISO
+    ${green}mango${reset}           Build MANGO ISO
     ${green}xfce${reset}            Build XFCE ISO
     ${green}fullx${reset}           Build ALL ISo
 EOF
@@ -65,11 +67,12 @@ all)
 		cinnamon
 		mate
 		sway
+		mango
 		hyprland
 		fullx
 	)
 	;;
-base|install|xfce|gnome|plasma|cinnamon|mate|sway|hypr|hyprland|fullx)
+base|install|xfce|gnome|plasma|cinnamon|mate|mango|sway|hypr|hyprland|fullx)
 	[ "${FLAVOR}" == 'hypr' ] && FLAVOR=hyprland
 	FLAVORS=("$FLAVOR")
 	;;

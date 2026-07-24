@@ -78,6 +78,7 @@ declare -g MAKE_GNOME=false
 declare -g MAKE_CINNAMON=false
 declare -g MAKE_MATE=false
 declare -g MAKE_SWAY=false
+declare -g MAKE_MANGO=false
 declare -g MAKE_HYPRLAND=false
 declare -g MAKE_ONLY_XORG=false
 declare -g MAKE_FULL_X=false
@@ -108,6 +109,7 @@ sh_choose_packages_base() {
 sh_choose_required_packages() {
 	print_step "Selecionando pacotes essenciais"
 	REQUIRED_PKGS+=" base-files"
+	REQUIRED_PKGS+=" voidbr-vinstall"
 	REQUIRED_PKGS+=" coreutils"
 	REQUIRED_PKGS+=" binutils"
 	# REQUIRED_PKGS+=" dash"
@@ -401,6 +403,13 @@ sh_choose_packages_mate() {
 	AEXTRA_PKGS+=" engrampa eom mozo pluma plank brisk-menu"
 
 	ASKEL_PKGS+=(voidbr-mate-config)
+}
+
+sh_choose_packages_mango() {
+	print_step "Selecionando pacotes MANGO"
+	ADISTRO_PKGS+=" voidbr-mango"
+	ASKEL_PKGS+=(voidbr-mango-config)
+  return
 }
 
 sh_choose_packages_sway() {
@@ -801,11 +810,11 @@ cmd_install() {
 	LC_ALL=C \
 		XBPS_ARCH=$BASE_ARCH \
 		$XBPS_INSTALL_CMD \
+		--ignore-file-conflicts \
 		--unpack-only \
 		--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
 		--cachedir "$XBPS_CACHEDIR" \
 		--update \
-		--ignore-file-conflicts \
 		--yes $PKGS
 }
 
@@ -814,12 +823,12 @@ cmd_install_force() {
 	LC_ALL=C \
 		XBPS_ARCH=$BASE_ARCH \
 		$XBPS_INSTALL_CMD \
+		--ignore-file-conflicts \
 		--unpack-only \
 		--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
 		--cachedir "$XBPS_CACHEDIR" \
 		--update \
 		--force --force \
-		--ignore-file-conflicts \
 		--yes $PKGS
 }
 
@@ -864,7 +873,7 @@ install_packages() {
 
 	if [[ -n $ADISTRO_PKGS ]]; then
 		cmd_logger "Instalando grupo de pacotes : ADISTRO_PKGS -> $ROOTFS" '
-      cmd_install $ADISTRO_PKGS
+      cmd_install --ignore-file-conflicts $ADISTRO_PKGS
     '
 		replicate '-'
 	fi
@@ -1325,6 +1334,7 @@ ${bold}Desktop presets:${rst}
   -Y|xfce           ${green}XFCE${rst}
   -M|mate           ${green}MATE${rst}
   -S|sway           ${green}SWAY${rst}
+  -O|mango          ${green}MANGO${rst}
   -H|hyprland       ${green}HYPRLAND${rst}
   -A|fullx          ${green}ALL X${rst}
 
@@ -1379,6 +1389,10 @@ sh_config_distroname() {
 		title='VoidBR Linux Live Sway'
 		VOL_ID='VOIDBR_LIVE_SWAY'
 		name='sway'
+	elif $MAKE_MANGO; then
+		title='VoidBR Linux Live Mango'
+		VOL_ID='VOIDBR_LIVE_MANGO'
+		name='mango'
 	elif $MAKE_HYPRLAND; then
 		title='VoidBR Linux Live Hyprland'
 		VOL_ID='VOIDBR_LIVE_HYPRLAND'
@@ -1457,6 +1471,7 @@ sh_configure_packages() {
 			sh_choose_packages_enlightenment
 			sh_choose_packages_fluxbox
 			sh_choose_packages_sway
+			sh_choose_packages_mango
 			sh_choose_packages_hyprland
 		elif $MAKE_ENLIGHTENMENT; then
 			sh_choose_packages_enlightenment
@@ -1479,6 +1494,8 @@ sh_configure_packages() {
 			sh_choose_packages_mate
 		elif $MAKE_SWAY; then
 			sh_choose_packages_sway
+		elif $MAKE_MANGO; then
+			sh_choose_packages_mango
 		elif $MAKE_HYPRLAND; then
 			sh_choose_packages_hyprland
 		fi
@@ -1540,6 +1557,7 @@ sh_configure_rootfs() {
 	: ${SPLASH_IMAGE:=data/splash.png}
 	: ${XBPS_INSTALL_UNPACK_ONLY:=xbps-install --unpack-only --yes --ignore-file-conflicts}
 	: ${XBPS_INSTALL_CMD:=xbps-install}
+	: ${VINSTALL_CMD:=vinstall}
 	: ${XBPS_REMOVE_CMD:=xbps-remove}
 	: ${XBPS_QUERY_CMD:=xbps-query}
 	: ${XBPS_RINDEX_CMD:=xbps-rindex}
@@ -1826,6 +1844,10 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFfAGPmM" opt; do
 		MAKE_X=true
 		MAKE_SWAY=true
 		;;
+	O)
+		MAKE_X=true
+		MAKE_MANGO=true
+		;;
 	H)
 		MAKE_X=true
 		MAKE_HYPRLAND=true
@@ -1911,6 +1933,11 @@ for arg in "$@"; do
 	sway)
 		MAKE_X=true
 		MAKE_SWAY=true
+		;;
+
+	mango)
+		MAKE_X=true
+		MAKE_MANGO=true
 		;;
 
 	hyprland)
