@@ -1,36 +1,4 @@
 #!/usr/bin/env bash
-# -*- coding: utf-8 -*-
-# shellcheck shell=bash disable=SC1091,SC2039,SC2166
-# vim: set ts=4 sw=4 et:
-#
-# lib.sh
-# Created: 2023/09/18 - 09:05
-# Updated: sáb 25 jul 2026 16:42:53 -04
-#
-# Copyright (c) 2009-2015 Juan Romero Pardines.
-# Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-# IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-##############################################################################
 
 # This contains the COMPLETE list of binaries that this script needs
 # to function.  The only exception is the QEMU binary since it is not
@@ -73,47 +41,6 @@ DONE="${COL_LIGHT_GREEN} done!${COL_NC}"
 OVER="\\r\\033[K"
 DOTPREFIX="  ${black}::${reset} "
 declare -a public_repos=()
-
-detect_distro() {
-	local id=""
-	if [[ -r /etc/os-release ]]; then
-		# Lê ID=void|arch|debian|... exatamente como a distro declara
-		id=$(grep -E '^ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
-	elif [[ -r /usr/lib/os-release ]]; then
-		id=$(grep -E '^ID=' /usr/lib/os-release | cut -d= -f2 | tr -d '"')
-	else
-		echo "unknown"
-		return
-	fi
-	echo "$id"
-}
-
-sh_version() {
-  cat <<EOF
-    ${bold}${cyan}${0##*/} v${_VERSION_}${reset}
-    ${bold}${black}Copyright (C) 2023 vcatafesta@gmail.com
-    $(gettext 'Licença GPL v3+: GNU GPL versão 3 ou posterior') <https://gnu.org/licenses/gpl.html>
-    $(gettext 'Este é um software livre: você é livre para alterá-lo e redistribuí-lo.')
-    $(gettext 'NÃO HÁ QUALQUER GARANTIA, na máxima extensão permitida em lei.')${reset}
-EOF
-}
-
-sh_checkroot() {
-  (( EUID != 0 )) && elevate_to_root "$@" || return 0
-}
-elevate_to_root() {
-  log_ok "This script must be run as root. ${INFO} Elevating privileges..."
-  ccabec+='root [elevated]'
-  # Tenta usar sudo primeiro (caso esteja configurado)
-  if command -v sudo >/dev/null 2>&1; then
-    exec sudo bash "$0" "$@"
-  fi
-  # Se sudo falhar, tenta su
-  if command -v su >/dev/null 2>&1; then
-    exec su -c "$0 $*"
-  fi
-  die "Error: Unable to elevate privileges. Run manually as root."
-}
 
 #msg_info() {  printf "%s\n" "${white}${pink}[INFO] ${rst}${*}${rst}"; }
 msg_info() { echo -e "${INFO} ${*}${reset}"; }
@@ -196,128 +123,6 @@ run_cmd() {
 	fi
 
 	return 0
-}
-
-run_cmd_new() {
-	local cmd="$*"
-
-	if [[ $DRYRUN -eq 1 ]]; then
-		msg "${cyan}[DRY-RUN]${rst} ${cmd}"
-	else
-		$QUIET || echo -e "  [⚙  ] ${cyan}${cmd}${rst}"
-		# Executa o comando, falha se houver erro
-		# Redireciona stderr para /dev/null apenas para mkdir -p e ummount -R
-		if [[ "$cmd" =~ ^mkdir\ -p ]] || [[ "$cmd" =~ ^umount\ -R ]]; then
-			#     eval "$cmd" &>/dev/null || true
-			"$@" &>/dev/null || true
-		else
-			#     eval "$cmd" || log_warn_tab "Falha ao executar: $cmd"
-			if $QUIET; then
-				"$@" &>/dev/null || log_warn_tab "Falha ao executar: $cmd"
-			else
-				"$@" || log_warn_tab "Falha ao executar: $cmd"
-			fi
-		fi
-	fi
-}
-
-readconf() {
-	if [[ ${LC_DEFAULT:-0} -eq 0 ]]; then
-		read -r -p "$@ [S/n]"
-	else
-		read -r -p "$@ [Y/n]"
-	fi
-	[[ ${REPLY^} == "" ]] && return 0
-	[[ ${REPLY^} == N ]] && return 1 || return 0
-}
-
-print_step() {
-	local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
-	local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
-	local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
-	CURRENT_STEP=$((CURRENT_STEP + 1))
-	#info_msg "$script_name1=>$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
-	#	info_msg "=>$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
-	#	msg "=>$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
-	msgDot "$*"
-}
-
-msgDot() {
-	local s="$*"
-	local MSG_PAD="${2:-40}" # largura antes do :
-
-	if [[ "$s" == *:* ]]; then
-		local left="${s%%:*}"
-		local right="${s#*:}"
-
-		printf "=>%s[%s/%s]%s %-*s :%s%s%s\n" \
-			"$cyan" "$CURRENT_STEP" "$STEP_COUNT" "$reset" \
-			"$MSG_PAD" "$left" \
-			"$yellow" "$right" "$reset"
-	else
-		printf "=>%s[%s/%s]%s %s\n" \
-			"$cyan" "$CURRENT_STEP" "$STEP_COUNT" "$reset" \
-			"$s"
-	fi
-}
-
-copy_void_keys() {
-	mkdir -p "$1"/var/db/xbps/keys
-	cp keys/*.plist "$1"/var/db/xbps/keys
-}
-
-cmd_install() {
-	local PKGS="$*"
-	LC_ALL=C \
-		XBPS_ARCH=$BASE_ARCH \
-		$XBPS_INSTALL_CMD \
-		--ignore-file-conflicts \
-		--unpack-only \
-		--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
-		--cachedir "$XBPS_CACHEDIR" \
-		--update \
-		--yes $PKGS
-}
-
-cmd_install_force() {
-	local PKGS="$*"
-	LC_ALL=C \
-		XBPS_ARCH=$BASE_ARCH \
-		$XBPS_INSTALL_CMD \
-		--ignore-file-conflicts \
-		--unpack-only \
-		--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
-		--cachedir "$XBPS_CACHEDIR" \
-		--update \
-		--force --force \
-		--yes $PKGS
-}
-
-cmd_logger() {
-	local cmd="$*"
-	local msg="$1"
-	local check_error="$3"
-
-	print_step "$msg"
-	#! $quiet msg_tab "${cyan}[⚙   ] [running] : ${reset} $cmd"
-	{
-		eval "$2"
-		#   } 2>&1 | tee -i -a "$BOOTLOG" >$([[ "$QUIET" == false ]] && echo /dev/stdout || echo "$LOGGER")
-	} \
-		1> >(tee -i -a "$BOOTLOG" >>"$LOGGER") \
-		2> >(tee -i -a "$BOOTLOG" >$([[ "$QUIET" == false ]] && echo /dev/stderr || echo /dev/null))
-	local result="${PIPESTATUS[0]}"
-	[[ -z $check_error ]] && check_error=1
-	[[ $check_error -eq 0 ]] && return
-	[[ $result -ne 0 ]] && die "FAILED... $msg - exiting..."
-}
-
-verificar_espaco_livre() {
-	# Garante que há pelo menos 15GB livres no diretório de compilação
-	local espaco_livre=$(df -m "$ROOTDIR" | awk 'NR==2 {print $4}')
-	if [ "$espaco_livre" -lt 15360 ]; then
-		die "Espaço insuficiente em $ROOTDIR. São necessários pelo menos 15GB livres."
-	fi
 }
 
 debug() {
@@ -722,7 +527,7 @@ select_mirrors_dialog() {
 		status=$?
 		if ((status != 0)); then
 			echo "Cancelado."
-			exit 1
+			return 1
 		fi
 		repos+=("$repo")
 	else
@@ -813,3 +618,5 @@ platform2arch)
 	echo "$XBPS_TARGET_ARCH"
 	;;
 esac
+
+select_mirrors_dialog
