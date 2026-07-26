@@ -5,11 +5,10 @@
 #
 # mkiso
 # Created: 2023/09/18 - 09:05
-# Altered: 2024/12/17 - 12:43
-# Updated: dom 28 jun 2026 13:34:50 -04
+# Updated: sáb 25 jul 2026 15:40:28 -04
 #
-# Copyright (c) 2009-2015 Juan Romero Pardines.
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
+# Copyright (c) 2009-2015 Juan Romero Pardines.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,7 +30,7 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#-
+##############################################################################
 #xbps-install -U -r /tmp/fakeroot --repository=https://repo-fastly.voidlinux.org/current bash -S
 
 export LANGUAGE="${LANGUAGE:-pt_BR}"
@@ -54,8 +53,35 @@ shopt -s extglob
 #system
 readonly APP="${0##*/}"
 readonly _VERSION_='0.06.28-20260628'
-readonly distro=$(uname -n)
+
+# Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
+# eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
+# o que o usuário digitou, incluindo --automatic.
+ORIGINAL_ARGS=("$@")
+
+# Pre-parse de --automatic: precisa acontecer ANTES do source ./lib.sh, pois
+# select_mirrors_dialog() (chamada automaticamente ao carregar lib.sh) usa
+# a variável $automatic internamente.
+automatic=false
+new_args=()
+for arg in "$@"; do
+	if [[ "$arg" == "--automatic" ]]; then
+		automatic=true
+		continue
+	fi
+	new_args+=("$arg")
+done
+set -- "${new_args[@]}"
+
+# shellcheck source=./lib.sh
+source ./lib.sh
+
+readonly distro=$(detect_distro)
 readonly DEPENDENCIES=(rsync sed grep cat umount losetup tput chroot mkfs.vfat tee)
+
+# Eleva privilégios automaticamente se necessário (re-executa como root via
+# sudo/su, preservando os argumentos originais).
+sh_checkroot "${ORIGINAL_ARGS[@]}"
 
 cleanup() {
 	umount_pseudofs
@@ -603,6 +629,15 @@ sh_setEnvironment() {
 }
 
 sh_setLanguage() {
+	# Detecta o locale real do host (LC_ALL tem prioridade sobre LANG, como no
+	# sistema de locale padrão) para decidir o idioma do prompt [S/n] vs [Y/n]
+	# em readconf(). Não usamos $LANGUAGE aqui porque ela é forçada para
+	# pt_BR logo no topo do script quando não definida, o que mascararia o
+	# locale de verdade configurado no host.
+	: "${LC_DEFAULT:=$([[ ${LC_ALL:-${LANG:-}} == pt_BR* ]] && echo 0 || echo 1)}"
+
+	cmsg_ERRO=$(gettext "ERRO")
+	cmsg_InstalacaoAbortada=$(gettext "Instalação abortada")
 	cmsg_CommandNotFound=$(gettext "não encontrei o comando")
 	cmsg_ImpossivelContinuar=$(gettext "IMPOSSÍVEL CONTINUAR")
 	cmsg_ImpossivelContinuar1=$(gettext "Esse script precisa dos comandos listados acima")
@@ -610,16 +645,6 @@ sh_setLanguage() {
 	cmsg_InstCommand=$(gettext "Instalar o(s) comando(s)")
 	cmsg_RunNew=$(gettext "INFO: Rode novamente o aplicativo")
 	cmsg_RunNewErro=$(gettext "ERRO na instalação dos comandos. Tente manualmente")
-}
-
-readconf() {
-	if [[ $LC_DEFAULT -eq 0 ]]; then
-		read -r -p "$@ [S/n]"
-	else
-		read -r -p "$@ [Y/n]"
-	fi
-	[[ ${REPLY^} == "" ]] && return 0
-	[[ ${REPLY^} == N ]] && return 1 || return 0
 }
 
 sh_checkDependencies() {
@@ -687,29 +712,6 @@ sh_setVarColors() {
 	bright_white=$(tput setaf 15)
 }
 
-run_cmd_new() {
-	local cmd="$*"
-
-	if [[ $DRYRUN -eq 1 ]]; then
-		msg "${cyan}[DRY-RUN]${rst} ${cmd}"
-	else
-    $QUIET || echo -e "  [⚙  ] ${cyan}${cmd}${rst}"
-		# Executa o comando, falha se houver erro
-		# Redireciona stderr para /dev/null apenas para mkdir -p e ummount -R
-		if [[ "$cmd" =~ ^mkdir\ -p ]] || [[ "$cmd" =~ ^umount\ -R ]]; then
-			#     eval "$cmd" &>/dev/null || true
-			"$@" &>/dev/null || true
-		else
-			#     eval "$cmd" || log_warn_tab "Falha ao executar: $cmd"
-			if $QUIET; then
-				"$@" &>/dev/null || log_warn_tab "Falha ao executar: $cmd"
-			else
-				"$@" || log_warn_tab "Falha ao executar: $cmd"
-			fi
-		fi
-	fi
-}
-
 msg() { echo -e "${INFO} ${*}${reset}"; }
 log_ok() { echo -e "${TICK} ${*}${reset}"; }
 log_err() { echo -e "${CROSS} ${*}${reset}"; }
@@ -723,36 +725,6 @@ log_warn_tab() { echo -e "  ${WARN} ${*}${reset}"; }
 
 info_msg() {
 	printf "${yellow}$@${reset}\n"
-}
-
-print_step() {
-	local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
-	local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
-	local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
-	CURRENT_STEP=$((CURRENT_STEP + 1))
-	#info_msg "$script_name1=>$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
-	#	info_msg "=>$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
-	#	msg "=>$cyan[${CURRENT_STEP}/${STEP_COUNT}]$reset $@"
-	msgDot "$*"
-}
-
-msgDot() {
-	local s="$*"
-	local MSG_PAD="${2:-40}" # largura antes do :
-
-	if [[ "$s" == *:* ]]; then
-		local left="${s%%:*}"
-		local right="${s#*:}"
-
-		printf "=>%s[%s/%s]%s %-*s :%s%s%s\n" \
-			"$cyan" "$CURRENT_STEP" "$STEP_COUNT" "$reset" \
-			"$MSG_PAD" "$left" \
-			"$yellow" "$right" "$reset"
-	else
-		printf "=>%s[%s/%s]%s %s\n" \
-			"$cyan" "$CURRENT_STEP" "$STEP_COUNT" "$reset" \
-			"$s"
-	fi
 }
 
 mount_pseudofs() {
@@ -786,11 +758,6 @@ error_out() {
 	exit "${1:-0}"
 }
 
-copy_void_keys() {
-	mkdir -p "$1"/var/db/xbps/keys
-	cp keys/*.plist "$1"/var/db/xbps/keys
-}
-
 copy_dracut_files() {
 	mkdir -p "$1"/usr/lib/dracut/modules.d/01vmklive
 	cp dracut/vmklive/* "$1"/usr/lib/dracut/modules.d/01vmklive/
@@ -803,33 +770,6 @@ copy_dracut_files() {
 copy_autoinstaller_files() {
 	mkdir -p "$1"/usr/lib/dracut/modules.d/01autoinstaller
 	cp dracut/autoinstaller/* "$1"/usr/lib/dracut/modules.d/01autoinstaller/
-}
-
-cmd_install() {
-	local PKGS="$*"
-	LC_ALL=C \
-		XBPS_ARCH=$BASE_ARCH \
-		$XBPS_INSTALL_CMD \
-		--ignore-file-conflicts \
-		--unpack-only \
-		--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
-		--cachedir "$XBPS_CACHEDIR" \
-		--update \
-		--yes $PKGS
-}
-
-cmd_install_force() {
-	local PKGS="$*"
-	LC_ALL=C \
-		XBPS_ARCH=$BASE_ARCH \
-		$XBPS_INSTALL_CMD \
-		--ignore-file-conflicts \
-		--unpack-only \
-		--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
-		--cachedir "$XBPS_CACHEDIR" \
-		--update \
-		--force --force \
-		--yes $PKGS
 }
 
 install_packages() {
@@ -1089,32 +1029,32 @@ generate_initramfs() {
 	fi
 
 	print_step "Gerando imagem initramfs (${INITRAMFS_COMPRESSION}) : ${yellow}${BOOT_DIR}/initrd"
-	{
-		copy_dracut_files "$ROOTFS"
-		copy_autoinstaller_files "$ROOTFS"
 
-		# Executa o dracut preservando o ambiente necessário para evitar o erro de 'dwarning: command not found'
-		chroot "$ROOTFS" env PYTHONWARNINGS="ignore::SyntaxWarning" \
-			/usr/bin/dracut \
-			-N \
-			--"${INITRAMFS_COMPRESSION}" \
-			--add-drivers "ahci" \
-			--force-add "vmklive autoinstaller" \
-			--omit systemd "/boot/initrd" \
-			$KERNELVERSION
+	copy_dracut_files "$ROOTFS"
+	copy_autoinstaller_files "$ROOTFS"
 
-		result="${PIPESTATUS[0]}"
-		[ $result -ne 0 ] && die "Failed to generate the initramfs"
+	# NOTA: o comando abaixo mantém o log via tee, mas a checagem de $result e o
+	# die() ficam FORA do pipe -- um 'die' dentro de um bloco à esquerda de um
+	# pipe roda em subshell e NÃO interrompe o script principal.
+	chroot "$ROOTFS" env PYTHONWARNINGS="ignore::SyntaxWarning" \
+		/usr/bin/dracut \
+		-N \
+		--"${INITRAMFS_COMPRESSION}" \
+		--add-drivers "ahci" \
+		--force-add "vmklive autoinstaller" \
+		--omit systemd "/boot/initrd" \
+		$KERNELVERSION 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 
-		# Verifica se o arquivo de initrd foi realmente gerado antes de tentar mover ou copiar
-		if [ ! -f "$ROOTFS/boot/initrd" ]; then
-			die "Erro crítico: O arquivo $ROOTFS/boot/initrd não foi gerado pelo dracut!"
-		fi
+	result="${PIPESTATUS[0]}"
+	[ $result -ne 0 ] && die "Failed to generate the initramfs"
 
-		mv "$ROOTFS"/boot/initrd "$BOOT_DIR"
-		cp "$ROOTFS"/boot/vmlinuz-$KERNELVERSION "$BOOT_DIR"/vmlinuz
-		cp -Rpva "$ROOTFS"/boot/grub/themes "$BOOT_DIR/grub/"
-	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+	if [ ! -f "$ROOTFS/boot/initrd" ]; then
+		die "Erro crítico: O arquivo $ROOTFS/boot/initrd não foi gerado pelo dracut!"
+	fi
+
+	mv "$ROOTFS"/boot/initrd "$BOOT_DIR"
+	cp "$ROOTFS"/boot/vmlinuz-$KERNELVERSION "$BOOT_DIR"/vmlinuz
+	cp -Rpva "$ROOTFS"/boot/grub/themes "$BOOT_DIR/grub/"
 }
 
 cleanup_rootfs() {
@@ -1225,6 +1165,9 @@ get_compression_options() {
 	zstd) param=" -noappend -b 1M -comp zstd -Xcompression-level 3" ;;
 	lzma) param=" -noappend -b 1M -comp lzma" ;;
 	lz4) param=" -noappend -b 1M -comp lz4 -Xhc" ;;
+	bzip2) param=" -noappend -b 1M -comp bzip2" ;;
+	lzo) param=" -noappend -b 1M -comp lzo" ;;
+	*) die "Tipo de compressão squashfs desconhecido: '$1' (use lz4|gzip|bzip2|xz|zstd|lzma|lzo)" ;;
 	esac
 	echo "$param"
 }
@@ -1303,6 +1246,7 @@ ${bold}OPTIONS${rst}
   -b <system-pkg>    ${cyan}Set an alternative base package${rst} (default: base-system)
   -r <repo>          ${cyan}Use this XBPS repository${rst} (can be used multiple times)
   -c <cachedir>      ${cyan}XBPS cache directory${rst} (default: ./xbps-cachedir-<arch>)
+  -D <dir>           ${cyan}Build root directory${rst} (default: /lfs/voidlinux, sobrescrevível também via \$ROOTDIR)
   -k <keymap>        ${cyan}Default keymap${rst} (default: us)
   -l <locale>        ${cyan}Default locale${rst} (default: en_US.UTF-8)
 
@@ -1314,7 +1258,7 @@ ${bold}OPTIONS${rst}
   -g "<pkg> ..."     ${cyan}Ignore packages${rst}
   -I <dir>           ${cyan}Include directory into ROOTFS${rst}
 
-  -S "<service> ..." ${cyan}Enable services${rst}
+  -Z "<service> ..." ${cyan}Enable services${rst}
   -C "<arg> ..."     ${cyan}Extra kernel cmdline args${rst}
   -T <title>         ${cyan}Bootloader title${rst} (default: Void Linux)
   -v linux<ver>      ${cyan}Custom kernel version${rst}
@@ -1429,25 +1373,6 @@ sh_print_resume() {
 	replicate
 }
 
-cmd_logger() {
-	local cmd="$*"
-	local msg="$1"
-	local check_error="$3"
-
-	print_step "$msg"
-	#! $quiet msg_tab "${cyan}[⚙   ] [running] : ${reset} $cmd"
-	{
-		eval "$2"
-		#   } 2>&1 | tee -i -a "$BOOTLOG" >$([[ "$QUIET" == false ]] && echo /dev/stdout || echo "$LOGGER")
-	} \
-		1> >(tee -i -a "$BOOTLOG" >>"$LOGGER") \
-		2> >(tee -i -a "$BOOTLOG" >$([[ "$QUIET" == false ]] && echo /dev/stderr || echo /dev/null))
-	local result="${PIPESTATUS[0]}"
-	[[ -z $check_error ]] && check_error=1
-	[[ $check_error -eq 0 ]] && return
-	[[ $result -ne 0 ]] && die "FAILED... $msg - exiting..."
-}
-
 sh_configure_packages() {
 	#	sh_config_distroname
 
@@ -1528,7 +1453,7 @@ sh_configure_rootfs() {
 	#ROOTDIR='/dev/shm'
 	#mount /dev/nvme0n1p2 /mnt/voidlinux
 	#ROOTDIR='/mnt/voidlinux/@/lixo'
-	ROOTDIR="/lfs/voidlinux"
+	: "${ROOTDIR:=/lfs/voidlinux}"
 
 	if [ -n "$ROOTDIR" ]; then
 		BUILDDIR="$ROOTDIR/$name"
@@ -1766,38 +1691,18 @@ sh_remove_etc_xbps_00_repository_main_conf() {
  	'
 }
 
-verificar_espaco_livre() {
-	# Garante que há pelo menos 15GB livres no diretório de compilação
-	local espaco_livre=$(df -m "$ROOTDIR" | awk 'NR==2 {print $4}')
-	if [ "$espaco_livre" -lt 15360 ]; then
-		die "Espaço insuficiente em $ROOTDIR. São necessários pelo menos 15GB livres."
-	fi
-}
-
-automatic=false
-new_args=()
-for arg in "$@"; do
-	if [[ "$arg" == "--automatic" ]]; then
-		automatic=true
-		continue
-	fi
-	new_args+=("$arg")
-done
-
-# substitui os argumentos atuais
-set -- "${new_args[@]}"
-
 for arg in "$@"; do
 	case "$arg" in
-	-H | -h | --help)
+	-h | --help)
 		usage
+		exit 0
+		;;
+	--version)
+		sh_version
 		exit 0
 		;;
 	esac
 done
-
-# shellcheck source=./lib.sh
-source ./lib.sh
 
 # main()
 #
@@ -1806,11 +1711,12 @@ sh_setEnvironment
 sh_setLanguage
 sh_checkDependencies
 
-while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFfAGPmM" opt; do
+while getopts "a:b:r:c:C:T:Kk:l:i:I:s:o:p:g:v:VhXxYyQqWwNnEeFfAGOHPmMSZ:D:" opt; do
 	case $opt in
 	a) BASE_ARCH="$OPTARG" ;;
+	D) ROOTDIR="$OPTARG" ;;
 	b) BASE_SYSTEM_PKG="$OPTARG" ;;
-	r) XBPS_REPOSITORY="--repository=$OPTARG $XBPS_REPOSITORY" ;;
+	r) EXTRA_REPOSITORY="--repository=$OPTARG $EXTRA_REPOSITORY" ;;
 	c) XBPS_CACHEDIR="$OPTARG" ;;
 	g) IGNORE_PKGS="$IGNORE_PKGS $OPTARG" ;;
 	K) KEEP_BUILDDIR=1 ;;
@@ -1819,7 +1725,7 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFfAGPmM" opt; do
 	I) INCLUDE_DIRS+=("$OPTARG") ;;
 	i) INITRAMFS_COMPRESSION="$OPTARG" ;;
 	s) SQUASHFS_COMPRESSION="$OPTARG" ;;
-	S) SERVICE_LIST="$SERVICE_LIST $OPTARG" ;;
+	Z) SERVICE_LIST="$SERVICE_LIST $OPTARG" ;;
 	o) OUTPUT_FILE="$OPTARG" ;;
 	p) PACKAGE_LIST="$PACKAGE_LIST $OPTARG" ;;
 	C) BOOT_CMDLINE="$OPTARG" ;;
@@ -1879,7 +1785,7 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:S:s:o:p:g:v:VhXxYyQqWwNnEeFfAGPmM" opt; do
 	q | Q) QUIET=true ;;
 	v) LINUX_VERSION="$OPTARG" ;;
 	V)
-		version
+		sh_version
 		exit 0
 		;;
 	h)
@@ -1976,8 +1882,15 @@ if [ "$(id -u)" -ne 0 ]; then
 	die "Must be run as root, exiting..."
 fi
 
+# Seleção de mirrors: chamada explicitamente aqui (não mais automática ao dar
+# source em lib.sh), para não disparar em opções rápidas como -h/-V, e para
+# não sobrescrever o que -r já tiver definido em EXTRA_REPOSITORY.
+select_mirrors_dialog
+XBPS_REPOSITORY="$EXTRA_REPOSITORY $XBPS_REPOSITORY"
+
 sh_config_distroname
 sh_configure_rootfs
+LBIND=true
 umount_pseudofs
 sh_configure_packages
 sh_install_rootfs

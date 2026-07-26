@@ -4,8 +4,9 @@
 # vim: set ts=4 sw=4 et:
 #
 # mkiso
+#  
 # Created: 2023/09/18 - 09:05
-# Updated: sáb 25 jul 2026 15:40:28 -04
+# Updated: sáb 25 jul 2026 16:48:16 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -777,74 +778,26 @@ install_packages() {
     cmd_install -yu xbps
   '
 
-	#	cmd_logger "Running dry-run for packages list selected..." '
-	#		LC_ALL=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" \
-	#			--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
-	#			--cachedir "$XBPS_CACHEDIR" \
-	#			--unpack-only \
-	#      --update \
-	#			--yes \
-	#			--dry-run $PACKAGE_LIST $INITRAMFS_PKGS
-	#    '
-
 	mount_pseudofs
 
-	cmd_logger "Instalando grupo de pacotes : PACKAGE_LIST -> $ROOTFS" '
-    cmd_install $PACKAGE_LIST
+	# Todos os grupos "normais" (sem necessidade de --force) instalados em uma
+	# UNICA transacao xbps-install, em vez de uma chamada separada por grupo.
+	# Cada chamada de xbps-install reprocessa repodata e recalcula a arvore de
+	# dependencias do zero -- unificar evita esse retrabalho repetido.
+	local ALL_NORMAL_PKGS="$PACKAGE_LIST $INITRAMFS_PKGS $ADDITIONAL_PKGS $COMMON_PKGS $ADISTRO_PKGS $AEXTRA_COMMON_PKGS ${ACONFIG_PKGS[*]} $AEXTRA_PKGS"
+	cmd_logger "Instalando pacotes (grupo unificado: PACKAGE_LIST+INITRAMFS_PKGS+ADDITIONAL_PKGS+COMMON_PKGS+ADISTRO_PKGS+AEXTRA_COMMON_PKGS+ACONFIG_PKGS+AEXTRA_PKGS) -> $ROOTFS" '
+    cmd_install $ALL_NORMAL_PKGS
   '
 	replicate '-'
 
-	cmd_logger "Instalando grupo de pacotes : INITRAMFS_PKGS -> $ROOTFS" '
-    cmd_install $INITRAMFS_PKGS
-  '
-	replicate '-'
-
-	cmd_logger "Instalando grupo de pacotes : ADDITIONAL_PKG -> $ROOTFS" '
-    cmd_install $ADDITIONAL_PKGS
-  '
-	replicate '-'
-
-	if [[ -n $COMMON_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : COMMON_PKGS  -> $ROOTFS" '
-      cmd_install $COMMON_PKGS
+	# ASKEL_PKGS continua em transacao SEPARADA de propósito: são pacotes de
+	# config que precisam de --force --force (sobrescrevem arquivos que
+	# conflitam com pacotes já instalados). Antes eram N chamadas (uma por
+	# pacote); agora é 1 chamada só, com todos de uma vez.
+	if [[ -n "${ASKEL_PKGS[*]}" ]]; then
+		cmd_logger "Instalando pacotes ASKEL_PKGS (forçado, grupo unificado) -> $ROOTFS" '
+      cmd_install_force "${ASKEL_PKGS[*]}"
     '
-		replicate '-'
-	fi
-
-	if [[ -n $ADISTRO_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : ADISTRO_PKGS -> $ROOTFS" '
-      cmd_install --ignore-file-conflicts $ADISTRO_PKGS
-    '
-		replicate '-'
-	fi
-
-	if [[ -n $AEXTRA_COMMON_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : AEXTRA_COMMON_PKGS -> $ROOTFS" '
-      cmd_install $AEXTRA_COMMON_PKGS
-		'
-		replicate '-'
-	fi
-
-	if [[ -n $ACONFIG_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : ACONFIG_PKGS -> $ROOTFS" '
-      cmd_install ${ACONFIG_PKGS[*]}
-    '
-		replicate '-'
-	fi
-
-	if [[ -n $ASKEL_PKGS ]]; then
-		for pkg in "${ASKEL_PKGS[@]}"; do
-			cmd_logger "Instalando pacote : $pkg -> $ROOTFS" '
-        cmd_install_force "$pkg"
-      '
-		done
-		replicate '-'
-	fi
-
-	if [[ -n $AEXTRA_PKGS ]]; then
-		cmd_logger "Instalando grupo de pacotes : AEXTRA_PKGS -> $ROOTFS" '
-      cmd_install $AEXTRA_PKGS
-		'
 		replicate '-'
 	fi
 	#    sh_reconfigure_pass1
@@ -1124,28 +1077,54 @@ generate_grub_efi_boot() {
 		run_cmd_new mount -o rw,flush -t vfat "${LOOP_DEVICE}" "${GRUB_EFI_TMPDIR}"
 
 		run_cmd_new cp -a "$IMAGEDIR"/boot "$HOSTDIR"
-		run_cmd_new xbps-uchroot "$HOSTDIR" grub-mkstandalone -- \
-			--directory="/usr/lib/grub/i386-efi" \
-			--format="i386-efi" \
-			--output="/tmp/bootia32.efi" \
-			"boot/grub/grub.cfg"
-		if [ $? -ne 0 ]; then
+
+		# Os dois grub-mkstandalone abaixo (i386-efi e x86_64-efi) sao
+		# independentes entre si (saidas e diretorios de origem diferentes),
+		# entao rodam em paralelo para ganhar tempo, em vez de sequencialmente.
+		msg "${cyan}[⚙  ]${rst} grub-mkstandalone i386-efi + x86_64-efi (em paralelo)"
+		if $QUIET; then
+			xbps-uchroot "$HOSTDIR" grub-mkstandalone -- \
+				--directory="/usr/lib/grub/i386-efi" \
+				--format="i386-efi" \
+				--output="/tmp/bootia32.efi" \
+				"boot/grub/grub.cfg" &>/dev/null &
+		else
+			xbps-uchroot "$HOSTDIR" grub-mkstandalone -- \
+				--directory="/usr/lib/grub/i386-efi" \
+				--format="i386-efi" \
+				--output="/tmp/bootia32.efi" \
+				"boot/grub/grub.cfg" &
+		fi
+		pid_i386=$!
+
+		if $QUIET; then
+			xbps-uchroot "$HOSTDIR" grub-mkstandalone -- \
+				--directory="/usr/lib/grub/x86_64-efi" \
+				--format="x86_64-efi" \
+				--output="/tmp/bootx64.efi" \
+				"boot/grub/grub.cfg" &>/dev/null &
+		else
+			xbps-uchroot "$HOSTDIR" grub-mkstandalone -- \
+				--directory="/usr/lib/grub/x86_64-efi" \
+				--format="x86_64-efi" \
+				--output="/tmp/bootx64.efi" \
+				"boot/grub/grub.cfg" &
+		fi
+		pid_x86_64=$!
+
+		wait "$pid_i386"
+		result_i386=$?
+		wait "$pid_x86_64"
+		result_x86_64=$?
+
+		if [ "$result_i386" -ne 0 ] || [ "$result_x86_64" -ne 0 ]; then
 			run_cmd_new umount "$GRUB_EFI_TMPDIR"
 			run_cmd_new losetup --detach "${LOOP_DEVICE}"
 			die "Failed to generate EFI loader"
 		fi
+
 		run_cmd_new mkdir -p "${GRUB_EFI_TMPDIR}"/EFI/BOOT
 		run_cmd_new cp -f "$HOSTDIR"/tmp/bootia32.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTIA32.EFI
-		run_cmd_new xbps-uchroot "$HOSTDIR" grub-mkstandalone -- \
-			--directory="/usr/lib/grub/x86_64-efi" \
-			--format="x86_64-efi" \
-			--output="/tmp/bootx64.efi" \
-			"boot/grub/grub.cfg"
-		if [ $? -ne 0 ]; then
-			run_cmd_new umount "$GRUB_EFI_TMPDIR"
-			run_cmd_new losetup --detach "${LOOP_DEVICE}"
-			die "Failed to generate EFI loader"
-		fi
 		run_cmd_new cp -f "$HOSTDIR"/tmp/bootx64.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTX64.EFI
 		run_cmd_new umount "$GRUB_EFI_TMPDIR"
 		run_cmd_new losetup --detach "${LOOP_DEVICE}"
@@ -1180,12 +1159,17 @@ generate_squashfs() {
 	{
 		ROOTFS_SIZE=$(du --apparent-size -sm "$ROOTFS" | awk '{print $1}')
 		run_cmd_new mkdir -p "$BUILDDIR/tmp/LiveOS"
-		run_cmd_new truncate -s "$((ROOTFS_SIZE + ROOTFS_SIZE))M" "$BUILDDIR"/tmp/LiveOS/ext3fs.img
-		run_cmd_new mkdir -p "$BUILDDIR/tmp-rootfs"
-		run_cmd_new mkfs.ext3 -F -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
-		run_cmd_new mount -o loop "$BUILDDIR/tmp/LiveOS/ext3fs.img" "$BUILDDIR/tmp-rootfs"
-		run_cmd_new cp -a "$ROOTFS"/* "$BUILDDIR"/tmp-rootfs/
-		run_cmd_new umount -f "$BUILDDIR/tmp-rootfs"
+		# Folga reduzida de 2x para ~1.15x + margem fixa de 256M (a imagem antiga
+		# usava o dobro do tamanho do rootfs sem necessidade real).
+		EXT3_IMG_SIZE=$(( (ROOTFS_SIZE * 115 / 100) + 256 ))
+		run_cmd_new truncate -s "${EXT3_IMG_SIZE}M" "$BUILDDIR"/tmp/LiveOS/ext3fs.img
+		# mke2fs -d popula o filesystem DIRETO a partir do ROOTFS, sem precisar
+		# montar via loop + cp -a + umount (evita uma copia inteira do rootfs
+		# passando por I/O de mount de loop device). Journal desabilitado
+		# (^has_journal) porque essa imagem só existe para ser lida uma vez
+		# pelo mksquashfs logo em seguida e depois é apagada -- journaling é
+		# overhead puro aqui.
+		run_cmd_new mkfs.ext3 -F -q -O ^has_journal -d "$ROOTFS" -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 		run_cmd_new mkdir -p "$IMAGEDIR/LiveOS"
 
 		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
@@ -1193,11 +1177,10 @@ generate_squashfs() {
 		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp xz -Xbcj x86 -Xdict-size 100% || die "Failed to generate squashfs image"
 		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp lz4 || die "Failed to generate squashfs image"
 		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 3 || die "Failed to generate squashfs image"
-		run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 1 || die "Failed to generate squashfs image"
+		run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 1 -processors "$(nproc)" || die "Failed to generate squashfs image"
 
 		run_cmd_new chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
 		#[ -z "$KEEP_BUILDDIR" ] && rm -rf "$ROOTFS"
-		run_cmd_new rm -rf "$BUILDDIR/tmp-rootfs"
 		run_cmd_new rm -rf "$BUILDDIR/tmp"
 	}
 	#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER

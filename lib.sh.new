@@ -4,12 +4,11 @@
 # vim: set ts=4 sw=4 et:
 #
 # lib.sh
-#  
 # Created: 2023/09/18 - 09:05
-# Updated: sáb 25 jul 2026 16:48:16 -04
+# Updated: sáb 25 jul 2026 16:42:53 -04
 #
-# Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
+# Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

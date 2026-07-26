@@ -693,7 +693,7 @@ run_cmd_new() {
 	if [[ $DRYRUN -eq 1 ]]; then
 		msg "${cyan}[DRY-RUN]${rst} ${cmd}"
 	else
-		! $QUIET echo -e "  [⚙  ] ${cyan}${cmd}${rst}"
+    $QUIET || echo -e "  [⚙  ] ${cyan}${cmd}${rst}"
 		# Executa o comando, falha se houver erro
 		# Redireciona stderr para /dev/null apenas para mkdir -p e ummount -R
 		if [[ "$cmd" =~ ^mkdir\ -p ]] || [[ "$cmd" =~ ^umount\ -R ]]; then
@@ -1706,7 +1706,7 @@ enable_services() {
 
 		run_cmd_new ln -snf "/etc/sv/$service" "$link"
 		if [[ ! -L "$link" && ! -e "$link" ]] &&
-			[[! "$(readlink "$link")" == "/etc/sv/$service" ]]; then
+			[[ ! "$(readlink "$link")" == "/etc/sv/$service" ]]; then
 			info_msg "failed to enable service $service (broken symlink)"
 		fi
 	done
