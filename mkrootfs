@@ -344,6 +344,9 @@ main() {
         rm -rf "$ROOTFS/var/cache/*"
         rm -fv $ROOTFS/var/cache/xbps/*.xbps
         rm -fv $ROOTFS/var/cache/xbps/*.sig*
+
+        find "$ROOTFS" -name '*.a' -delete    # bibliotecas estáticas
+        find "$ROOTFS" -name '*.la' -delete   # libtool
     '
 
 	# Finally we can compress the tarball, the name will include the
@@ -359,7 +362,9 @@ main() {
 	#tar -cp --posix --xattrs -C $ROOTFS . | xz -T${COMPRESSOR_THREADS:-0} -9 > $FILENAME
 	run_cmd '
         FILENAME=void-"${XBPS_TARGET_ARCH}-base-custom"-$(date +%Y%m%d)-$(date +%H%M).tar.xz
-        tar -cp --posix --xattrs -C $ROOTFS . | xz -T${COMPRESSOR_THREADS:-0} -6 > $FILENAME
+#        tar -cp --posix --xattrs -C "$ROOTFS" . | xz -T0 -9e --check=crc32 > "$FILENAME"
+#        tar -cp --posix --xattrs -C "$ROOTFS" . | xz -T${COMPRESSOR_THREADS:-0} -6 > $FILENAME
+        tar -cp --posix --xattrs -C "$ROOTFS" . | xz -T${COMPRESSOR_THREADS:-0} -9 > $FILENAME
     '
 
 	# Now that we have the tarball we don't need the rootfs anymore, so we
