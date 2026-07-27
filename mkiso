@@ -229,6 +229,7 @@ sh_choose_voidbr_X_packages() {
 	AEXTRA_COMMON_PKGS+=" voidbr-dracula-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-webapps"
 	AEXTRA_COMMON_PKGS+=" chili-iso2usb"
+	AEXTRA_COMMON_PKGS+=" voidbr-iso-writer"
 }
 
 sh_choose_packages_common_X_base() {
