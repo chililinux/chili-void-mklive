@@ -64,11 +64,11 @@ COL_LIGHT_RED='\e[1;31m'
 #   INFO="[i]"
 #   : "${clrkey=${rst}${light_white}}"
 : "${clrkey=${rst}${black}}"
-: "${TICK="${clrkey}[${green} ✓ ${clrkey}]${rst}"}"
-: "${CROSS="${clrkey}[${red} ✗ ${clrkey}]${rst}"}"
-: "${MID="${clrkey}[${red}✗✗${green}✓${clrkey}]${rst}"}"
-: "${WARN="${clrkey}[${yellow}⚠  ${clrkey}]${yellow}"}"
-: "${INFO="${clrkey}[${yellow}➡  ${clrkey}]${rst}"}"
+: "${TICK="${clrkey}[${green}✓${clrkey}]${rst}"}"
+: "${CROSS="${clrkey}[${red}✗${clrkey}]${rst}"}"
+: "${MID="${clrkey}[${red}✗${green}✓${clrkey}]${rst}"}"
+: "${WARN="${clrkey}[${yellow}⚠${clrkey}]${yellow}"}"
+: "${INFO="${clrkey}[${yellow}➜${clrkey}]${rst}"}"
 # shellcheck disable=SC2034
 DONE="${COL_LIGHT_GREEN} done!${COL_NC}"
 OVER="\\r\\033[K"
@@ -180,7 +180,7 @@ export -f test_repo_online
 run_cmd() {
 	local cmd="$*"
 
-	msg_tab "${cyan}[⚙   ] [running] : ${reset} $cmd"
+	msg_tab "${cyan}[⚙] [running] : ${reset} $cmd"
 	# executa comando
 	$quiet && eval "$@" >/dev/null 2>&1 || eval "$@"
 	local rc=$?
