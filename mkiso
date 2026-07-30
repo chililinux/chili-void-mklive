@@ -288,9 +288,9 @@ sh_choose_packages_common_X_advanced() {
 	COMMON_PKGS+=" octoxbps"
 	COMMON_PKGS+=" mate-calc"
 	COMMON_PKGS+=" 7zip p7zip file-roller"
-	COMMON_PKGS+=" avahi avahi-discover"
 	COMMON_PKGS+=" gvfs gvfs-smb gvfs-cdda inetutils iputils"
 
+	# COMMON_PKGS+=" avahi avahi-discover"
 	#	COMMON_PKGS+=" brave-bin"
 	# COMMON_PKGS+=" fonts-roboto-ttf"
 	# COMMON_PKGS+=" liberation-fonts-ttf"
