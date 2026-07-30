@@ -202,10 +202,10 @@ sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" duf"
 	ADDITIONAL_PKGS+=" umc"
 	ADDITIONAL_PKGS+=" fzf"
+	ADDITIONAL_PKGS+=" eza"
 	ADDITIONAL_PKGS+=" exa"
 	ADDITIONAL_PKGS+=" fastfetch"
 	ADDITIONAL_PKGS+=" grub"
-	ADDITIONAL_PKGS+=" exa"
 	#
 	ASKEL_PKGS+=(voidbr-base-config)
 	ASKEL_PKGS+=(voidbr-nano-config)
@@ -289,6 +289,7 @@ sh_choose_packages_common_X_advanced() {
 	COMMON_PKGS+=" mate-calc"
 	COMMON_PKGS+=" 7zip p7zip file-roller"
 	COMMON_PKGS+=" gvfs gvfs-smb gvfs-cdda inetutils iputils"
+	COMMON_PKGS+=" inxi"
 
 	# COMMON_PKGS+=" avahi avahi-discover"
 	#	COMMON_PKGS+=" brave-bin"
@@ -310,7 +311,6 @@ sh_choose_packages_common_X_advanced() {
 	#	COMMON_PKGS+=" bluez-cups"
 	#	COMMON_PKGS+=" gnome-bluetooth1"
 	#	COMMON_PKGS+=" orca"
-	#	COMMON_PKGS+=" inxi"
 	#	COMMON_PKGS+=" setxkbmap"
 	#	COMMON_PKGS+=" numlockx"
 	#	COMMON_PKGS+=" nitrogen"
