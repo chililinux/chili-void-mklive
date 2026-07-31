@@ -4,7 +4,7 @@
 # vim: set ts=4 sw=4 et:
 #
 # mkiso
-#  
+#
 # Created: 2023/09/18 - 09:05
 # Updated: sáb 25 jul 2026 16:48:16 -04
 #
@@ -202,9 +202,11 @@ sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" duf"
 	ADDITIONAL_PKGS+=" umc"
 	ADDITIONAL_PKGS+=" fzf"
+	ADDITIONAL_PKGS+=" eza"
 	ADDITIONAL_PKGS+=" exa"
 	ADDITIONAL_PKGS+=" fastfetch"
 	ADDITIONAL_PKGS+=" grub"
+	ADDITIONAL_PKGS+=" inxi"
 	#
 	ASKEL_PKGS+=(voidbr-base-config)
 	ASKEL_PKGS+=(voidbr-nano-config)
@@ -280,15 +282,16 @@ sh_choose_packages_common_X_advanced() {
 	COMMON_PKGS+=" adwaita-icon-theme"
 	COMMON_PKGS+=" adwaita-plus"
 	COMMON_PKGS+=" network-manager-applet"
-	COMMON_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1"
+	COMMON_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1 alsa-plugins-pulseaudio alsa-utils"
+	COMMON_PKGS+=" pipewire wireplumber alsa-pipewire pulseaudio-utils pavucontrol libspa-bluetooth libjack-pipewire alsa-plugins-pulseaudio alsa-utils"
 	COMMON_PKGS+=" xfce4-pulseaudio-plugin"
 	COMMON_PKGS+=" gparted"
 	COMMON_PKGS+=" octoxbps"
 	COMMON_PKGS+=" mate-calc"
 	COMMON_PKGS+=" 7zip p7zip file-roller"
-	COMMON_PKGS+=" avahi avahi-discover"
 	COMMON_PKGS+=" gvfs gvfs-smb gvfs-cdda inetutils iputils"
 
+	# COMMON_PKGS+=" avahi avahi-discover"
 	#	COMMON_PKGS+=" brave-bin"
 	# COMMON_PKGS+=" fonts-roboto-ttf"
 	# COMMON_PKGS+=" liberation-fonts-ttf"
@@ -307,9 +310,7 @@ sh_choose_packages_common_X_advanced() {
 	#	COMMON_PKGS+=" blueman"
 	#	COMMON_PKGS+=" bluez-cups"
 	#	COMMON_PKGS+=" gnome-bluetooth1"
-	#	COMMON_PKGS+=" pipewire wireplumber pulseaudio-utils alsa-pipewire libspa-bluetooth libjack-pipewire"
 	#	COMMON_PKGS+=" orca"
-	#	COMMON_PKGS+=" inxi"
 	#	COMMON_PKGS+=" setxkbmap"
 	#	COMMON_PKGS+=" numlockx"
 	#	COMMON_PKGS+=" nitrogen"
@@ -437,178 +438,18 @@ sh_choose_packages_mango() {
 	print_step "Selecionando pacotes MANGO"
 	ADISTRO_PKGS+=" voidbr-mango"
 	ASKEL_PKGS+=(voidbr-mango-config)
-  return
+	return
 }
 
 sh_choose_packages_sway() {
 	print_step "Selecionando pacotes SWAY"
 	ADISTRO_PKGS+=" voidbr-sway"
 	ASKEL_PKGS+=(voidbr-sway-config)
-  return
-
-	ADISTRO_PKGS+=" sway"
-	ACONFIG_PKGS+=(
-		dbus                    # Message bus system
-		elogind                 # Gerenciador de login e sessões (seat management)
-		foot                    # Terminal leve e otimizado para Wayland
-		wofi                    # Lançador de aplicativos e menu de busca
-		rofi
-		grim                    # Utilitário para captura de tela (screenshot)
-		slurp                   # Seleção de área para captura de tela
-		brightnessctl           # Controle de brilho via linha de comando
-		eom                     # Visualizador de imagens (Eye of MATE)
-		fuse-exfat              # Suporte para montagem de sistemas exFAT
-		ffmpeg                  # Ferramentas para manipulação de áudio e vídeo
-		mesa-dri                # Drivers gráficos (Direct Rendering Infrastructure)
-		mesa-vaapi              # Aceleração de vídeo via hardware (VA-API)
-		mesa-demos              # Coleção de ferramentas de teste para o Mesa
-		psmisc                  # Utilitários de processo (killall, fuser, pstree)
-		cpupower                # Ferramenta de gerenciamento de frequência da CPU
-		noto-fonts-ttf          # Fontes Noto da Google
-		font-awesome            # Fontes de ícones para barras e interfaces
-		optipng                 # Otimizador de compressão para arquivos PNG
-		sassc                   # Compilador CSS (SASS)
-		jq                      # Processador de arquivos JSON via CLI
-		swaylock                # Bloqueador de tela para Wayland
-		swayidle                # Gerenciador de inatividade (idle) e bloqueio
-		wl-clipboard            # Ferramentas de clipboard (wl-copy/wl-paste)
-		sway-audio-idle-inhibit # Inibe o bloqueio/hibernação durante reprodução de áudio
-		Waybar                  # Barra de status customizável para Wayland
-		wmenu                   # Menu de seleção estilo dmenu/wofi para Wayland
-		xdg-utils               # Ferramentas de integração com a área de trabalho
-		xdg-desktop-portal      # Camada de comunicação entre apps e o desktop
-		xdg-desktop-portal-gtk  # Implementação GTK do portal XDG
-		xdg-desktop-portal-wlr  # Implementação WLR (Sway) do portal XDG
-		rtkit                   # Gerenciamento de prioridade de tempo real
-		mate-polkit             # Agente de autenticação para permissões root
-		kanshi                  # Gerenciador dinâmico de monitores
-		Thunar                  # Gerenciador de arquivos (XFCE)
-		thunar-archive-plugin   # Integração de compactação no Thunar
-		engrampa                # Gerenciador de arquivos compactados
-		cliphist                # Histórico da área de transferência
-		mate-calc               # Calculadora do ambiente MATE
-		pluma                   # Editor de texto leve (MATE)
-		nwg-look                # Configurador de temas GTK para Wayland
-		atril                   # Visualizador de documentos (PDFs)
-		mako                    # Servidor de notificações Wayland
-		pipewire                # Servidor de áudio moderno
-		wireplumber             # Gerenciador de sessão para PipeWire
-		pavucontrol             # Volume control applet for Pipewire
-		alsa-pipewire
-		pulseaudio-utils
-		libspa-bluetooth
-		libjack-pipewire
-		alsa-plugins-pulseaudio
-		alsa-utils
-#		xfce4-terminal          # Modern terminal emulator primarly for the Xfce desktop environment
-#		NetworkManager         # Gerenciador de rede (daemon)
-#		network-manager-applet # Ícone de bandeja para controlar conexões
-		firefox                # Mozilla Firefox web browser
-		firefox-i18n-pt-BR     # Firefox Portuguese (Brazilian) language pack
-		#		nerd-fonts                # Iconic font aggregator collection
-#		ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
-		lm_sensors              # Utilities to read temperature/voltage/fan sensors
-		xdg-user-dirs-gtk       # GTK+ tool to help manage user directories
-		xdg-user-dirs           # Tool to help manage user directories
-#		voidbr-base-config      # Configuração base personalizada
-#		voidbr-theme-dracula    # Tema visual Dracula aplicado
-#		voidbr-tokyo-theme      # TokyoNight-Dark theme with icons, cursors, and wallpaper
-		acpi
-		acpid
-	)
-
-	ASKEL_PKGS+=(voidbr-sway-config)
 }
 
 sh_choose_packages_hyprland() {
 	print_step "Selecionando pacotes HYPRLAND"
 	ADISTRO_PKGS+=" voidbr-hyprland"
-	ASKEL_PKGS+=(voidbr-hyprland-config)
-  return
-
-	ADISTRO_PKGS+=" hyprland"
-	ACONFIG_PKGS+=(
-		hyprpaper
-		hyprlock
-		hypridle
-		hyprlauncher
-		hyprpicker-0.4.7_3
-		Waybar
-		rofi
-		wofi
-		mako
-		grim
-		slurp
-		swappy
-		wl-clipboard
-		brightnessctl
-		playerctl
-		xdg-desktop-portal-hyprland
-		xorg-server-xwayland
-		lua55
-
-		dbus           # Message bus system
-		elogind        # Gerenciador de login e sessões (seat management)
-		foot           # Terminal leve e otimizado para Wayland
-		eom            # Visualizador de imagens (Eye of MATE)
-		fuse-exfat     # Suporte para montagem de sistemas exFAT
-		ffmpeg         # Ferramentas para manipulação de áudio e vídeo
-		mesa-dri       # Drivers gráficos (Direct Rendering Infrastructure)
-		mesa-vaapi     # Aceleração de vídeo via hardware (VA-API)
-		mesa-demos     # Coleção de ferramentas de teste para o Mesa
-		psmisc         # Utilitários de processo (killall, fuser, pstree)
-		cpupower       # Ferramenta de gerenciamento de frequência da CPU
-		noto-fonts-ttf # Fontes Noto da Google
-		font-awesome   # Fontes de ícones para barras e interfaces
-		optipng        # Otimizador de compressão para arquivos PNG
-		sassc          # Compilador CSS (SASS)
-		jq             # Processador de arquivos JSON via CLI
-		#		swaylock                # Bloqueador de tela para Wayland
-		#		swayidle                # Gerenciador de inatividade (idle) e bloqueio
-		sway-audio-idle-inhibit # Inibe o bloqueio/hibernação durante reprodução de áudio
-		#		wmenu                   # Menu de seleção estilo dmenu/wofi para Wayland
-		#		xdg-utils               # Ferramentas de integração com a área de trabalho
-		#		xdg-desktop-portal      # Camada de comunicação entre apps e o desktop
-		xdg-desktop-portal-gtk # Implementação GTK do portal XDG
-		#		xdg-desktop-portal-wlr  # Implementação WLR (Sway) do portal XDG
-		rtkit                 # Gerenciamento de prioridade de tempo real
-		mate-polkit           # Agente de autenticação para permissões root
-		mate-calc             # Calculadora do ambiente MATE
-		kanshi                # Gerenciador dinâmico de monitores
-		Thunar                # Gerenciador de arquivos (XFCE)
-		thunar-archive-plugin # Integração de compactação no Thunar
-		engrampa              # Gerenciador de arquivos compactados
-		cliphist              # Histórico da área de transferência
-		pluma                 # Editor de texto leve (MATE)
-		nwg-look              # Configurador de temas GTK para Wayland
-		atril                 # Visualizador de documentos (PDFs)
-		mako                  # Servidor de notificações Wayland
-		pipewire              # Servidor de áudio moderno
-		wireplumber           # Gerenciador de sessão para PipeWire
-		pavucontrol           # Volume control applet for Pipewire
-		alsa-pipewire
-		pulseaudio-utils
-		libspa-bluetooth
-		libjack-pipewire
-		alsa-plugins-pulseaudio
-		alsa-utils
-#		xfce4-terminal        # Modern terminal emulator primarly for the Xfce desktop environment
-#		NetworkManager          # Gerenciador de rede (daemon)
-#		network-manager-applet  # Ícone de bandeja para controlar conexões
-		firefox                 # Mozilla Firefox web browser
-		firefox-i18n-pt-BR      # Firefox Portuguese (Brazilian) language pack
-		#		nerd-fonts          # Iconic font aggregator collection
-#		ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
-		lm_sensors              # Utilities to read temperature/voltage/fan sensors
-		xdg-user-dirs-gtk       # GTK+ tool to help manage user directories
-		xdg-user-dirs           # Tool to help manage user directories
-#		voidbr-base-config      # Configuração base personalizada
-#		voidbr-dracula-theme    # Tema visual Dracula aplicado
-#		voidbr-tokyo-theme      # TokyoNight-Dark theme with icons, cursors, and wallpaper
-		acpi
-		acpid
-	)
-
 	ASKEL_PKGS+=(voidbr-hyprland-config)
 }
 
@@ -835,7 +676,8 @@ Comment=Executa o instalador VoidBR Linux
 #Exec=xfce4-terminal --fullscreen --hide-menubar --hide-toolbar --disable-server --font="Monospace 14" -e "sudo void-install"
 #Exec=xfce4-terminal --fullscreen --hide-menubar --hide-toolbar --disable-server --zoom=3 -e "sudo void-install"
 #Exec=xfce4-terminal --maximize --hide-menubar --hide-toolbar --disable-server --zoom=3 -x sudo void-install
-Exec=xfce4-terminal --geometry=162x50 --hide-menubar --hide-toolbar --disable-server --zoom=0 -x sudo void-install
+#Exec=xfce4-terminal --geometry=162x50 --hide-menubar --hide-toolbar --disable-server --zoom=0 -x sudo void-install
+Exec=xfce4-terminal --geometry=162x50 --font=Monospace --hide-menubar --hide-toolbar --disable-server --zoom=0 -x sudo void-install
 Type=Application
 DesktopNames=VoidInstall
 EOF
@@ -887,8 +729,8 @@ configure_plymouth() {
 	[ $result -ne 0 ] && die "Falha ao configurar tema"
 
 	print_step "Criando wrapper plymouth : $ROOTFS/usr/bin/plymouth-show-log-voidlinux.sh"
-  mkdir -p "$ROOTFS/usr/bin"
-  cat <<'EOF' >"$ROOTFS/usr/bin/plymouth-show-log-voidlinux.sh"
+	mkdir -p "$ROOTFS/usr/bin"
+	cat <<'EOF' >"$ROOTFS/usr/bin/plymouth-show-log-voidlinux.sh"
 #!/usr/bin/env bash
 
 file=/var/log/boot.log
@@ -966,6 +808,65 @@ if command -v plymouth >/dev/null; then
 fi
 EOF
 	chmod +x "$ROOTFS/etc/runit/core-services/99-voidbr-plymouth-quit.sh"
+}
+
+sh_global_audio_cleaning() {
+	local root="${ROOTFS:?ROOTFS não definido}"
+	local file
+
+	print_step "Ajustando Pipewire (sound global)"
+
+	# Autostarts globais e do usuário
+	for file in \
+		pipewire.desktop \
+		pipewire-pulse.desktop \
+		wireplumber.desktop \
+		pulseaudio.desktop \
+		pulseaudio-kde.desktop; do
+		rm -f \
+			"$root/etc/xdg/autostart/$file" \
+			"$root/etc/skel/.config/autostart/$file"
+	done
+
+	# Configurações globais do ALSA
+	rm -f \
+		"$root/etc/alsa/conf.d/50-pipewire.conf" \
+		"$root/etc/alsa/conf.d/99-pipewire-default.conf" \
+		"$root/etc/alsa/conf.d/50-pulseaudio.conf" \
+		"$root/etc/asound.conf"
+
+	# Configurações de áudio do usuário
+	rm -rf \
+		"$root/etc/skel/.config/pipewire" \
+		"$root/etc/skel/.config/wireplumber" \
+		"$root/etc/skel/.config/pulse" \
+		"$root/etc/skel/.config/alsa"
+}
+
+sh_activating_pipewire() {
+	sh_global_audio_cleaning
+	print_step "Ajustando Pipewire (user autostart)"
+
+	# DESATIVAR AUTOSPAWN DO PULSEAUDIO (usuário)
+	# impede PulseAudio iniciar automaticamente
+	mkdir -p ${ROOTFS}/etc/skel/.config/pulse
+	mkdir -p ${ROOTFS}/etc/skel/.config/autostart
+	mkdir -p ${ROOTFS}/etc/skel/.config/pipewire/pipewire.conf.d
+	mkdir -p ${ROOTFS}/etc/alsa/conf.d
+
+	cat >"${ROOTFS}/etc/skel/.config/pulse/client.conf" <<'EOF'
+autospawn = no
+daemon-binary = /bin/true
+EOF
+
+	#AUTOSTART CORRETO (SÓ USUÁRIO)
+	chroot ${ROOTFS} ln -sf /usr/share/applications/pipewire.desktop /etc/skel/.config/autostart/pipewire.desktop
+	chroot ${ROOTFS} ln -sf /usr/share/examples/wireplumber/10-wireplumber.conf /etc/skel/.config/pipewire/pipewire.conf.d/10-wireplumber.conf
+	chroot ${ROOTFS} ln -sf /usr/share/examples/pipewire/20-pipewire-pulse.conf /etc/skel/.config/pipewire/pipewire.conf.d/20-pipewire-pulse.conf
+
+	# ---- integração ALSA → PipeWire ----
+	chroot ${ROOTFS} ln -sf /usr/share/alsa/alsa.conf.d/50-pipewire.conf /etc/alsa/conf.d/50-pipewire.conf
+	chroot ${ROOTFS} ln -sf /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf /etc/alsa/conf.d/99-pipewire-default.conf
 }
 
 generate_initramfs() {
@@ -1162,7 +1063,7 @@ generate_squashfs() {
 		run_cmd_new mkdir -p "$BUILDDIR/tmp/LiveOS"
 		# Folga reduzida de 2x para ~1.15x + margem fixa de 256M (a imagem antiga
 		# usava o dobro do tamanho do rootfs sem necessidade real).
-		EXT3_IMG_SIZE=$(( (ROOTFS_SIZE * 115 / 100) + 256 ))
+		EXT3_IMG_SIZE=$(((ROOTFS_SIZE * 115 / 100) + 256))
 		run_cmd_new truncate -s "${EXT3_IMG_SIZE}M" "$BUILDDIR"/tmp/LiveOS/ext3fs.img
 		# mke2fs -d popula o filesystem DIRETO a partir do ROOTFS, sem precisar
 		# montar via loop + cp -a + umount (evita uma copia inteira do rootfs
@@ -1629,9 +1530,9 @@ sh_make_iso() {
 	: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 dbus socklog-unix nanoklogd udevd sshd NetworkManager dhcpcd chronyd}
 	if $MAKE_X; then
 		if $MAKE_GNOME; then
-			: ${ADDITIONAL_SERVICE_LIST:=gdm avahi-daemon}
+			: ${ADDITIONAL_SERVICE_LIST:=gdm}
 		else
-			: ${ADDITIONAL_SERVICE_LIST:=lightdm avahi-daemon}
+			: ${ADDITIONAL_SERVICE_LIST:=lightdm}
 		fi
 	fi
 
@@ -1664,6 +1565,7 @@ sh_make_iso() {
 	cleanup_rootfs
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
 	sh_remove_etc_xbps_00_repository_main_conf "$conf"
+	sh_activating_pipewire
 	# generate_squashfs
 	#	generate_iso_image
 }
