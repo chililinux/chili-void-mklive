@@ -77,10 +77,10 @@ ${yellow}Available flavors:${reset}
     ${green}gnome${reset}           Build GNOME ISO
     ${green}hyprland/hypr${reset}   Build Hyprland ISO
     ${green}install${reset}         Build Installer ISO
+    ${green}mango${reset}          Build Mango ISO
     ${green}mate${reset}            Build MATE ISO
     ${green}plasma${reset}          Build KDE Plasma ISO
     ${green}sway${reset}           Build Sway ISO
-    ${green}mango${reset}          Build Mango ISO
     ${green}xfce${reset}           Build XFCE ISO
     ${green}fullx${reset}          Build FullX ISO
 EOF
@@ -98,15 +98,15 @@ for arg in "$@"; do
 	all)
 		FLAVORS=(
 			base
-			install
-			xfce
-			gnome
-			plasma
 			cinnamon
-			mate
-			sway
-			mango
+			gnome
 			hyprland
+			install
+			mango
+			mate
+			plasma
+			sway
+			xfce
 			fullx
 		)
 		break

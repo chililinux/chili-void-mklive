@@ -676,7 +676,8 @@ Comment=Executa o instalador VoidBR Linux
 #Exec=xfce4-terminal --fullscreen --hide-menubar --hide-toolbar --disable-server --font="Monospace 14" -e "sudo void-install"
 #Exec=xfce4-terminal --fullscreen --hide-menubar --hide-toolbar --disable-server --zoom=3 -e "sudo void-install"
 #Exec=xfce4-terminal --maximize --hide-menubar --hide-toolbar --disable-server --zoom=3 -x sudo void-install
-Exec=xfce4-terminal --geometry=162x50 --hide-menubar --hide-toolbar --disable-server --zoom=0 -x sudo void-install
+#Exec=xfce4-terminal --geometry=162x50 --hide-menubar --hide-toolbar --disable-server --zoom=0 -x sudo void-install
+Exec=xfce4-terminal --geometry=162x50 --font=Monospace --hide-menubar --hide-toolbar --disable-server --zoom=0 -x sudo void-install
 Type=Application
 DesktopNames=VoidInstall
 EOF
