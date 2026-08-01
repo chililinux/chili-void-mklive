@@ -1,0 +1,230 @@
+#!/usr/bin/env bash
+#
+# normalize-isos
+#
+
+set -euo pipefail
+
+###############################################################################
+# Cores
+###############################################################################
+
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+blue=$(tput setaf 4)
+cyan=$(tput setaf 6)
+bold=$(tput bold)
+reset=$(tput sgr0)
+
+msg()  { printf "%b==>%b %s\n" "$green$bold" "$reset" "$*"; }
+warn() { printf "%b==>%b %s\n" "$yellow$bold" "$reset" "$*"; }
+err()  { printf "%b==>%b %s\n" "$red$bold" "$reset" "$*" >&2; }
+
+###############################################################################
+# Usage
+###############################################################################
+
+usage() {
+cat <<EOF
+${bold}${green}normalize-isos${reset} - Normaliza nome e data/hora das imagens ISO do VoidBR
+
+${bold}Uso:${reset}
+  ${cyan}${0##*/}${reset} [${yellow}OPÇÕES${reset}] [${yellow}arquivo.iso${reset}]
+
+${bold}Modo de operação (escolha um):${reset}
+  ${cyan}(nenhuma opção)${reset}  Usa a ISO mais recente como referência
+  ${cyan}arquivo.iso${reset}      Usa a ISO informada como referência
+  ${cyan}--now${reset}            Usa a data/hora atual
+
+${bold}Opções:${reset}
+  ${cyan}--dry-run${reset}        Apenas exibe as alterações
+  ${cyan}-h${reset}, ${cyan}--help${reset}       Exibe esta ajuda
+
+${bold}Exemplos:${reset}
+  ${cyan}${0##*/}${reset}
+  ${cyan}${0##*/} voidbr-live-base-x86_64-7.0.14_1-20260731-1112.iso${reset}
+  ${cyan}${0##*/} --now${reset}
+  ${cyan}${0##*/} --now --dry-run${reset}
+EOF
+}
+
+###############################################################################
+# Root
+###############################################################################
+
+if [ "$(id -u)" -ne 0 ]; then
+    err "Este script deve ser executado como root."
+    exit 1
+fi
+
+###############################################################################
+# Dependências
+###############################################################################
+
+for cmd in mv touch ls date; do
+    command -v "$cmd" >/dev/null || {
+        err "Comando não encontrado: $cmd"
+        exit 1
+    }
+done
+
+###############################################################################
+# ISOs
+###############################################################################
+
+shopt -s nullglob
+
+isos=(voidbr-live-*.iso)
+
+[ ${#isos[@]} -gt 0 ] || {
+    err "Nenhuma ISO encontrada."
+    exit 1
+}
+
+###############################################################################
+# Opções
+###############################################################################
+
+dryrun=0
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+
+        --dry-run)
+            dryrun=1
+            ;;
+
+        --now)
+            use_touch=0
+            ;;
+
+        -*)
+            err "Opção inválida: $1"
+            exit 1
+            ;;
+
+        *)
+            ref="$1"
+            ;;
+    esac
+
+    shift
+done
+
+###############################################################################
+# Referência
+###############################################################################
+
+: "${use_touch:=1}"
+
+if [ "$use_touch" -eq 1 ]; then
+
+    if [ -z "${ref:-}" ]; then
+        ref=$(ls -1t voidbr-live-*.iso | head -n1)
+    fi
+
+    [ -f "$ref" ] || {
+        err "Arquivo não encontrado: $ref"
+        exit 1
+    }
+
+    base=$(basename "$ref")
+
+    [[ $base =~ ^(voidbr-live-)(.+)(-x86_64-)([^-]+)-([0-9]{8}-[0-9]{4})(\.iso)$ ]] || {
+        err "Nome inválido: $base"
+        exit 1
+    }
+
+    version="${BASH_REMATCH[4]}"
+    datetime="${BASH_REMATCH[5]}"
+
+else
+
+    version=$(
+        printf '%s\n' "${isos[@]}" |
+        sed -E 's/.*-x86_64-([^-]+)-[0-9]{8}-[0-9]{4}\.iso/\1/' |
+        head -n1
+    )
+
+    datetime=$(date +%Y%m%d-%H%M)
+
+fi
+
+###############################################################################
+# Informações
+###############################################################################
+
+msg "Versão : $version"
+msg "Data    : $datetime"
+msg "ISOs    : ${#isos[@]}"
+echo
+
+###############################################################################
+# Confirmação
+###############################################################################
+
+if [ "$dryrun" -eq 0 ]; then
+
+    warn "Todos os arquivos serão renomeados."
+
+    printf "%bContinuar? [s/N]: %b" "$yellow$bold" "$reset"
+    read -r resp
+
+    case "$resp" in
+        s|S|sim|SIM) ;;
+        *)
+            warn "Operação cancelada."
+            exit 0
+            ;;
+    esac
+
+fi
+
+###############################################################################
+# Processamento
+###############################################################################
+
+count=0
+
+for file in "${isos[@]}"; do
+
+    base=$(basename "$file")
+
+    [[ $base =~ ^(voidbr-live-)(.+)(-x86_64-)([^-]+)-([0-9]{8}-[0-9]{4})(\.iso)$ ]] || continue
+
+    flavor="${BASH_REMATCH[2]}"
+    new="voidbr-live-${flavor}-x86_64-${version}-${datetime}.iso"
+
+    printf "%b%-70s%b -> %b%s%b\n" \
+        "$blue" "$base" "$reset" \
+        "$cyan" "$new" "$reset"
+
+    if [ "$dryrun" -eq 0 ]; then
+
+        mv -f -- "$base" "$new"
+
+        if [ "$use_touch" -eq 1 ]; then
+            touch -r "$ref" "$new"
+        else
+            touch "$new"
+        fi
+
+    fi
+
+    count=$((count + 1))
+
+done
+
+echo
+msg "Arquivos processados : $count"
+
+if [ "$dryrun" -eq 1 ]; then
+    warn "Modo DRY-RUN: nenhuma alteração foi realizada."
+else
+    msg "Concluído com sucesso."
+fi
