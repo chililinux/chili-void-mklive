@@ -203,7 +203,6 @@ sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" umc"
 	ADDITIONAL_PKGS+=" fzf"
 	ADDITIONAL_PKGS+=" eza"
-	ADDITIONAL_PKGS+=" exa"
 	ADDITIONAL_PKGS+=" fastfetch"
 	ADDITIONAL_PKGS+=" grub"
 	ADDITIONAL_PKGS+=" inxi"
