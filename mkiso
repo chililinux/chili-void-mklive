@@ -136,6 +136,7 @@ sh_choose_packages_base() {
 sh_choose_required_packages() {
 	print_step "Selecionando pacotes essenciais"
 	REQUIRED_PKGS+=" base-files"
+	REQUIRED_PKGS+=" voidbr-xbps"
 	REQUIRED_PKGS+=" voidbr-vinstall"
 	REQUIRED_PKGS+=" coreutils"
 	REQUIRED_PKGS+=" binutils"
@@ -160,6 +161,7 @@ sh_choose_required_packages() {
 }
 
 sh_choose_additional_packages() {
+	ADDITIONAL_PKGS+=" voidbr-xbps"
 	ADDITIONAL_PKGS+=" bash-completion"
 	#	ADDITIONAL_PKGS+=" coreutils"
 	ADDITIONAL_PKGS+=" sed"
@@ -1420,6 +1422,18 @@ sh_configure_linux() {
 
 install_prereqs() {
 	#        --unpack-only \
+	cmd_logger "Instalando voidbr-xbps" "
+    LC_ALL=C \
+      XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" \
+        --rootdir "$HOSTDIR" ${XBPS_REPOSITORY} \
+        --cachedir "$XBPS_HOST_CACHEDIR" \
+        --update \
+        --ignore-file-conflicts \
+        --sync \
+        --yes \
+        voidbr-xbps
+  "
+
 	cmd_logger "Instalando grupo de pacotes : REQUIRED_PKGS -> $HOSTDIR" "
     LC_ALL=C \
       XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" \
