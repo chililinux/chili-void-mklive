@@ -867,6 +867,19 @@ EOF
 	chroot ${ROOTFS} ln -sf /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf /etc/alsa/conf.d/99-pipewire-default.conf
 }
 
+sh_configure_lightdm_default_session() {
+	local cpath=${ROOTFS}/var/lib/lightdm/.cache/lightdm-gtk-greeter
+
+	print_step "Ajustando sessao default no lightdm (user e session)"
+	mkdir -p ${cpath}
+
+	cat >"${cpath}/state" <<EOF
+[greeter]
+last-user=anon
+last-session=$name
+EOF
+}
+
 generate_initramfs() {
 	local _args
 
@@ -1576,6 +1589,7 @@ sh_make_iso() {
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
 	sh_remove_etc_xbps_00_repository_main_conf "$conf"
 	sh_activating_pipewire
+	sh_configure_lightdm_default_session
 	# generate_squashfs
 	#	generate_iso_image
 }
