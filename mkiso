@@ -99,7 +99,6 @@ declare -g MAKE_XFCE_BASE=false
 declare -g MAKE_XFCE=false
 declare -g MAKE_AWESOME=false
 declare -g MAKE_ENLIGHTENMENT=false
-declare -g MAKE_FLUXBOX=false
 declare -g MAKE_PLASMA=false
 declare -g MAKE_GNOME=false
 declare -g MAKE_CINNAMON=false
@@ -107,6 +106,7 @@ declare -g MAKE_MATE=false
 declare -g MAKE_SWAY=false
 declare -g MAKE_MANGO=false
 declare -g MAKE_HYPRLAND=false
+declare -g MAKE_FLUXBOX=false
 declare -g MAKE_ONLY_XORG=false
 declare -g MAKE_FULL_X=false
 declare -g LBIND=false
@@ -135,7 +135,6 @@ sh_choose_packages_base() {
 sh_choose_required_packages() {
 	print_step "Selecionando pacotes essenciais"
 	REQUIRED_PKGS+=" base-files"
-	REQUIRED_PKGS+=" voidbr-xbps"
 	REQUIRED_PKGS+=" voidbr-vinstall"
 	REQUIRED_PKGS+=" coreutils"
 	REQUIRED_PKGS+=" binutils"
@@ -362,14 +361,6 @@ sh_choose_packages_gnome() {
 	ASKEL_PKGS+=(voidbr-gnome-config)
 }
 
-sh_choose_packages_fluxbox() {
-	print_step "Selecionando pacotes FLUXBOX"
-	ADISTRO_PKGS+=" fluxbox"
-	ADISTRO_PKGS+=" polybar"
-	ADISTRO_PKGS+=" pcmanfm"
-	ADISTRO_PKGS+=" xdgmenumaker"
-}
-
 sh_choose_packages_enlightenment() {
 	print_step "Selecionando pacotes Enlightenment"
 	ADISTRO_PKGS+=" enlightenment"
@@ -447,6 +438,12 @@ sh_choose_packages_sway() {
 	ASKEL_PKGS+=(voidbr-sway-config)
 }
 
+sh_choose_packages_fluxbox() {
+	print_step "Selecionando pacotes FLUXBOX"
+	ADISTRO_PKGS+=" voidbr-fluxbox"
+	ASKEL_PKGS+=(voidbr-fluxbox-config)
+}
+
 sh_choose_packages_hyprland() {
 	print_step "Selecionando pacotes HYPRLAND"
 	ADISTRO_PKGS+=" voidbr-hyprland"
@@ -508,7 +505,7 @@ sh_checkDependencies() {
 		echo "${cmsg_ImpossivelContinuar2} \$PATH" >&2
 		echo "${yellow}-----------------------------------------------${reset}"
 
-		if [[ "$distro" = @(void|void-live|voidlinux) ]]; then
+		if [[ "$distro" = @(void|voidbr|void-live|voidlinux) ]]; then
 			echo
 			if readconf "${yellow}${cmsg_InstCommand} '${cyan}${missing[*]}${reset}' ?"; then
 				if xbps-install -Sy "${missing[@]}" -R $XBPS_REPOSITORY; then
@@ -1128,7 +1125,7 @@ ${bold}OPTIONS${rst}
   -b <system-pkg>    ${cyan}Set an alternative base package${rst} (default: base-system)
   -r <repo>          ${cyan}Use this XBPS repository${rst} (can be used multiple times)
   -c <cachedir>      ${cyan}XBPS cache directory${rst} (default: ./xbps-cachedir-<arch>)
-  -D <dir>           ${cyan}Build root directory${rst} (default: /lfs/voidlinux, sobrescrevível também via \$ROOTDIR)
+  -D <dir>           ${cyan}Build root directory${rst} (default: /lfs/voidbr, sobrescrevível também via \$ROOTDIR)
   -k <keymap>        ${cyan}Default keymap${rst} (default: us)
   -l <locale>        ${cyan}Default locale${rst} (default: en_US.UTF-8)
 
@@ -1335,7 +1332,7 @@ sh_configure_rootfs() {
 	#ROOTDIR='/dev/shm'
 	#mount /dev/nvme0n1p2 /mnt/voidlinux
 	#ROOTDIR='/mnt/voidlinux/@/lixo'
-	: "${ROOTDIR:=/lfs/voidlinux}"
+	: "${ROOTDIR:=/lfs/voidbr}"
 
 	if [ -n "$ROOTDIR" ]; then
 		BUILDDIR="$ROOTDIR/$name"
@@ -1421,7 +1418,7 @@ sh_configure_linux() {
 
 install_prereqs() {
 	#        --unpack-only \
-	cmd_logger "Instalando voidbr-xbps" "
+	cmd_logger "Instalando pacote: voidbr-xbps" "
     LC_ALL=C \
       XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" \
         --rootdir "$HOSTDIR" ${XBPS_REPOSITORY} \
