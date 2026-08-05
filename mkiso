@@ -115,7 +115,6 @@ declare -gi njobs=59
 declare -g VOL_ID='VOIDBR_LIVE'
 declare -g title
 declare -g INITRAM_COMPRESSION=xz
-declare -g SQUASHFS_COMPRESSION=xz
 declare -g SQUASHFS_COMPRESSION=zstd
 #declare -g KEEP_BUILDDIR=true
 declare -g name='base'
@@ -556,21 +555,6 @@ sh_setVarColors() {
 	bright_white=$(tput setaf 15)
 }
 
-msg() { echo -e "${INFO} ${*}${reset}"; }
-log_ok() { echo -e "${TICK} ${*}${reset}"; }
-log_err() { echo -e "${CROSS} ${*}${reset}"; }
-log_mid() { echo -e "${MID} ${*}${reset}"; }
-log_warn() { echo -e "${WARN} ${*}${reset}"; }
-msg_tab() { echo -e "  ${INFO} ${*}${reset}"; }
-log_ok_tab() { echo -e "  ${TICK} ${*}${reset}"; }
-log_err_tab() { echo -e "  ${CROSS} ${*}${reset}"; }
-log_mid_tab() { echo -e "  ${MID} ${*}${reset}"; }
-log_warn_tab() { echo -e "  ${WARN} ${*}${reset}"; }
-
-info_msg() {
-	printf "${yellow}$@${reset}\n"
-}
-
 mount_pseudofs() {
 	! $LBIND || return 0
 	for f in proc sys dev; do
@@ -617,9 +601,9 @@ copy_autoinstaller_files() {
 }
 
 install_packages() {
-	cmd_logger "Instalando xbps pkg" '
-    cmd_install -yu xbps
-  '
+#	cmd_logger "Instalando pacote voidbr-xbps" '
+#    cmd_install -yu voidbr-xbps
+#  '
 
 	mount_pseudofs
 
@@ -703,9 +687,10 @@ sh_reconfigure_pass2() {
 }
 
 finish_clean() {
+  local rootfs="${ROOTFS:?ROOTFS não definido}"
 	# Cleanup and remove useless stuff.
-	xbps-remove -r "$ROOTFS" -Ooy >/dev/null 2>&1
-	rm -rf "$ROOTFS"/var/cache/* "$ROOTFS"/run/* "$ROOTFS"/var/run/*
+	xbps-remove -r "$rootfs" -Ooy >/dev/null 2>&1
+	rm -rf "$rootfs"/var/cache/* "$rootfs"/run/* "$rootfs"/var/run/*
 }
 
 copy_include_directories() {
@@ -900,7 +885,7 @@ generate_initramfs() {
 	copy_autoinstaller_files "$ROOTFS"
 
 	# NOTA: o comando abaixo mantém o log via tee, mas a checagem de $result e o
-	# die() ficam FORA do pipe -- um 'die' dentro de um bloco à esquerda de um
+	# die ficam FORA do pipe -- um 'die' dentro de um bloco à esquerda de um
 	# pipe roda em subshell e NÃO interrompe o script principal.
 	chroot "$ROOTFS" env PYTHONWARNINGS="ignore::SyntaxWarning" \
 		/usr/bin/dracut \
@@ -1125,6 +1110,7 @@ generate_iso_image() {
 	}
 	#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	hsize=$(du -sh "$OUTPUT_FILE" | awk '{print $1}')
+  chili-make-md5-iso "$OUTPUT_FILE"
 	info_msg "Iso file created: ${green}$(readlink -f "$OUTPUT_FILE") ($hsize) successfully.${reset}"
 }
 

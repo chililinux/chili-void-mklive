@@ -137,8 +137,18 @@ log_warn_tab() { echo -e "  ${WARN} ${*}${reset}"; }
 #
 msg_ex() { echo -e "👉   ${*}${reset}"; }
 msg_ex_tab() { echo -e "  👉   ${*}${reset}"; }
+
+#die() {
+#	echo -e "${CROSS} ${red}${*}${reset}"
+#	exit 1
+#}
+
 die() {
-	echo -e "${CROSS} ${red}${*}${reset}"
+	local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
+	local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
+	local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
+	echo -e "${CROSS}${red}ERROR: $*"
+	error_out 1 $LINENO
 	exit 1
 }
 
@@ -173,12 +183,11 @@ test_repo_online() {
 
 	#	printf 'RET=%s URL=%s\n' "$ret" "$url" >&2
 	if [[ $ret -eq 0 ]]; then
-		msg "Testando $url => "
-		printf '\033[1;32mONLINE\033[0m\n'
+		msg "Testando $url => $(printf '\033[1;32m[ONLINE]\033[0m')"
 	else
-		msg "Testando $url => "
-		printf '\033[1;31mOFFLINE\033[0m\n'
+		msg "Testando $url => $(printf '\033[1;31mOFFLINE\033[0m')"
 	fi
+  echo
 	return "$ret"
 }
 export -f test_repo_online
@@ -418,15 +427,6 @@ info_msg() {
 	printf "↑ ${cyan}%03d/%03d => ${yellow}%s\n\033[m" "$ncontador" "$njobs" "$@"
 }
 
-die() {
-	local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
-	local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
-	local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
-	echo -e "${CROSS}${red}ERROR: $*"
-	error_out 1 $LINENO
-	exit 1
-}
-
 check_tools() {
 	# All scripts within mklive declare the tools they will use in a
 	# variable called "REQTOOLS".  This function checks that these
@@ -450,40 +450,27 @@ check_tools() {
 }
 
 mount_pseudofs() {
-	# This function ensures that the psuedofs mountpoints are present
-	# in the chroot.  Strictly they are not necessary to have for many
-	# commands, but bind-mounts are cheap and it isn't too bad to just
-	# mount them all the time.
-	for f in dev proc sys; do
-		# In a naked chroot there is nothing to bind the mounts to, so
-		# we need to create directories for these first.
-		[ ! -d "$ROOTFS/$f" ] && mkdir -p "$ROOTFS/$f"
-		if ! mountpoint -q "$ROOTFS/$f"; then
-			# It is VERY important that this only happen if the
-			# pseudofs isn't already mounted.  If it already is then
-			# this is virtually impossible to troubleshoot because it
-			# looks like the subsequent umount just isn't working.
-			mount -r --rbind /$f "$ROOTFS/$f" --make-rslave
-		fi
-	done
-	if ! mountpoint -q "$ROOTFS/tmp"; then
-		mkdir -p "$ROOTFS/tmp"
-		mount -o mode=0755,nosuid,nodev -t tmpfs tmpfs "$ROOTFS/tmp"
-	fi
+  ! $LBIND || return 0
+  for f in proc sys dev; do
+    local target="$ROOTFS/$f"
+    print_step "Montando pseudo FS: $target"
+    mkdir -p "$target"
+    mount --rbind "/$f" "$target"
+    # ESSENCIAL: evita propagação de desmontagem para o host
+    mount --make-rslave "$target"
+  done
+  LBIND=true
 }
 
 umount_pseudofs() {
-	# This function cleans up the mounts in the chroot.  Failure to
-	# clean up these mounts will prevent the tmpdir from being
-	# deletable instead throwing the error "Device or Resource Busy".
-	# The '-f' option is passed to umount to account for the
-	# contingency where the psuedofs mounts are not present.
-	if [ -d "${ROOTFS}" ]; then
-		for f in dev proc sys; do
-			umount -R -f "$ROOTFS/$f" >/dev/null 2>&1
-		done
-	fi
-	umount -f "$ROOTFS/tmp" >/dev/null 2>&1
+  $LBIND || return 0
+  for f in dev proc sys; do
+    local target="$ROOTFS/$f"
+    mountpoint -q "$target" || continue
+    print_step "Desmontando pseudo FS: $target"
+    umount -R "$target" 2>/dev/null || umount -l "$target"
+  done
+  LBIND=false
 }
 
 run_cmd_target() {
@@ -690,13 +677,6 @@ set_cachedir() {
 	# The package artifacts are cacheable, but they need to be isolated
 	# from the host cache.
 	: "${XBPS_CACHEDIR:=--cachedir=$PWD/xbps-cache/${XBPS_TARGET_ARCH}}"
-}
-
-replicate() {
-	local char="${1:-#}"
-	local nsize="${2:-$(tput cols)}"
-	# Gera linha com substituição direta sem forks extras
-	printf -v _line "%*s" "$nsize" && printf '%b\n' "${blue}${_line// /$char}${reset}"
 }
 
 select_mirrors_dialog() {
