@@ -36,14 +36,18 @@
 # This contains the COMPLETE list of binaries that this script needs
 # to function.  The only exception is the QEMU binary since it is not
 # known in advance which one wil be required.
-export TERM=${TERM:-xterm}
+#export TERM=${TERM:-xterm}
 export TERM=${TERM:-xterm-256color}
-readonly LIBTOOLS="cp echo cat printf which mountpoint mount umount modprobe"
-readonly HOSTARCH=$(xbps-uhelper arch)
+#
+LIBTOOLS="cp echo cat printf which mountpoint mount umount modprobe"
+HOSTARCH=$(xbps-uhelper arch)
+readonly LIBTOOLS
+readonly HOSTARCH
+#
 tput sgr0 # reset colors
 bold=$(tput bold)
 reset=$(tput sgr0)
-rst=$(tput sgr0)
+rst=$reset
 black=$(tput setaf 0)
 red=$(tput bold)$(tput setaf 196)
 green=$(tput setaf 2)
@@ -116,11 +120,11 @@ elevate_to_root() {
 	die "Error: Unable to elevate privileges. Run manually as root."
 }
 
-#msg_info() {  printf "%s\n" "${white}${pink}[INFO] ${rst}${*}${rst}"; }
 msg() { echo -n -e "${INFO} ${*}${reset}"; }
 msg_tab() { echo -e "  ${INFO} ${*}${reset}"; }
 #
-msg_info() { echo -e "${INFO} ${*}${reset}"; }
+msg_info() { msg "$@"; }
+msg_inline() { echo -e "${INFO} ${*}${reset}"; }
 msg_info_tab() { echo -e "  ${INFO} ${*}${reset}"; }
 #
 log_ok() { echo -e "${TICK} ${*}${reset}"; }
@@ -183,11 +187,11 @@ test_repo_online() {
 
 	#	printf 'RET=%s URL=%s\n' "$ret" "$url" >&2
 	if [[ $ret -eq 0 ]]; then
-		msg "Testando $url => $(printf '\033[1;32m[ONLINE]\033[0m')"
+		msg_inline "Testando $url => $(printf '\033[1;32m[ONLINE]\033[0m')"
 	else
-		msg "Testando $url => $(printf '\033[1;31mOFFLINE\033[0m')"
+		msg_inline "Testando $url => $(printf '\033[1;31mOFFLINE\033[0m')"
 	fi
-  echo
+	echo
 	return "$ret"
 }
 export -f test_repo_online
@@ -208,7 +212,7 @@ run_cmd() {
 	# erro real
 	if ((rc != 0)); then
 		log_warn_tab "Falha ao executar: $cmd"
-		. return $rc
+		return $rc
 	fi
 
 	return 0
@@ -278,8 +282,13 @@ msgDot() {
 }
 
 copy_void_keys() {
-	mkdir -p "$1"/var/db/xbps/keys
-	cp keys/*.plist "$1"/var/db/xbps/keys
+	local dest="$1/var/db/xbps/keys"
+
+	mkdir -p "$dest"
+
+	if compgen -G 'keys/*.plist' >/dev/null; then
+		cp keys/*.plist "$dest/"
+	fi
 }
 
 cmd_install() {
@@ -450,27 +459,27 @@ check_tools() {
 }
 
 mount_pseudofs() {
-  ! $LBIND || return 0
-  for f in proc sys dev; do
-    local target="$ROOTFS/$f"
-    print_step "Montando pseudo FS: $target"
-    mkdir -p "$target"
-    mount --rbind "/$f" "$target"
-    # ESSENCIAL: evita propagação de desmontagem para o host
-    mount --make-rslave "$target"
-  done
-  LBIND=true
+	! $LBIND || return 0
+	for f in proc sys dev; do
+		local target="$ROOTFS/$f"
+		print_step "Montando pseudo FS: $target"
+		mkdir -p "$target"
+		mount --rbind "/$f" "$target"
+		# ESSENCIAL: evita propagação de desmontagem para o host
+		mount --make-rslave "$target"
+	done
+	LBIND=true
 }
 
 umount_pseudofs() {
-  $LBIND || return 0
-  for f in dev proc sys; do
-    local target="$ROOTFS/$f"
-    mountpoint -q "$target" || continue
-    print_step "Desmontando pseudo FS: $target"
-    umount -R "$target" 2>/dev/null || umount -l "$target"
-  done
-  LBIND=false
+	$LBIND || return 0
+	for f in dev proc sys; do
+		local target="$ROOTFS/$f"
+		mountpoint -q "$target" || continue
+		print_step "Desmontando pseudo FS: $target"
+		umount -R "$target" 2>/dev/null || umount -l "$target"
+	done
+	LBIND=false
 }
 
 run_cmd_target() {
@@ -728,7 +737,7 @@ select_mirrors_dialog() {
 			continue
 		fi
 
-		public_repos+=($mirror)
+		public_repos+=("$mirror")
 
 		case $mirror in
 		$cgithub)
