@@ -4,7 +4,7 @@
 # vim: set ts=4 sw=4 et:
 #
 # lib.sh
-#  
+#
 # Created: 2023/09/18 - 09:05
 # Updated: sáb 25 jul 2026 16:48:16 -04
 #
@@ -90,7 +90,7 @@ detect_distro() {
 }
 
 sh_version() {
-  cat <<EOF
+	cat <<EOF
     ${bold}${cyan}${0##*/} v${_VERSION_}${reset}
     ${bold}${black}Copyright (C) 2023 vcatafesta@gmail.com
     $(gettext 'Licença GPL v3+: GNU GPL versão 3 ou posterior') <https://gnu.org/licenses/gpl.html>
@@ -100,37 +100,43 @@ EOF
 }
 
 sh_checkroot() {
-  (( EUID != 0 )) && elevate_to_root "$@" || return 0
+	((EUID != 0)) && elevate_to_root "$@" || return 0
 }
 elevate_to_root() {
-  log_ok "This script must be run as root. ${INFO} Elevating privileges..."
-  ccabec+='root [elevated]'
-  # Tenta usar sudo primeiro (caso esteja configurado)
-  if command -v sudo >/dev/null 2>&1; then
-    exec sudo bash "$0" "$@"
-  fi
-  # Se sudo falhar, tenta su
-  if command -v su >/dev/null 2>&1; then
-    exec su -c "$0 $*"
-  fi
-  die "Error: Unable to elevate privileges. Run manually as root."
+	log_ok "This script must be run as root. ${INFO} Elevating privileges..."
+	ccabec+='root [elevated]'
+	# Tenta usar sudo primeiro (caso esteja configurado)
+	if command -v sudo >/dev/null 2>&1; then
+		exec sudo bash "$0" "$@"
+	fi
+	# Se sudo falhar, tenta su
+	if command -v su >/dev/null 2>&1; then
+		exec su -c "$0 $*"
+	fi
+	die "Error: Unable to elevate privileges. Run manually as root."
 }
 
 #msg_info() {  printf "%s\n" "${white}${pink}[INFO] ${rst}${*}${rst}"; }
-msg_info() { echo -e "${INFO} ${*}${reset}"; }
 msg() { echo -n -e "${INFO} ${*}${reset}"; }
-log_ok() { echo -e "${TICK} ${*}${reset}"; }
-log_err() { echo -e "${CROSS} ${*}${reset}"; }
-log_mid() { echo -e "${MID} ${*}${reset}"; }
-log_warn() { echo -e "${WARN} ${*}${reset}"; }
-msg_info_tab() { echo -e "  ${INFO} ${*}${reset}"; }
-msg_ex_tab() { echo -e "  👉   ${*}${reset}"; }
-msg_ex() { echo -e "👉   ${*}${reset}"; }
 msg_tab() { echo -e "  ${INFO} ${*}${reset}"; }
+#
+msg_info() { echo -e "${INFO} ${*}${reset}"; }
+msg_info_tab() { echo -e "  ${INFO} ${*}${reset}"; }
+#
+log_ok() { echo -e "${TICK} ${*}${reset}"; }
 log_ok_tab() { echo -e "  ${TICK} ${*}${reset}"; }
+#
+log_err() { echo -e "${CROSS} ${*}${reset}"; }
 log_err_tab() { echo -e "  ${CROSS} ${*}${reset}"; }
+#
+log_mid() { echo -e "${MID} ${*}${reset}"; }
 log_mid_tab() { echo -e "  ${MID} ${*}${reset}"; }
+#
+log_warn() { echo -e "${WARN} ${*}${reset}"; }
 log_warn_tab() { echo -e "  ${WARN} ${*}${reset}"; }
+#
+msg_ex() { echo -e "👉   ${*}${reset}"; }
+msg_ex_tab() { echo -e "  👉   ${*}${reset}"; }
 die() {
 	echo -e "${CROSS} ${red}${*}${reset}"
 	exit 1
@@ -165,14 +171,14 @@ test_repo_online() {
 		;;
 	esac
 
-#	printf 'RET=%s URL=%s\n' "$ret" "$url" >&2
-  if [[ $ret -eq 0 ]]; then
-    	msg "Testando $url => "
-      printf '\033[1;32mONLINE\033[0m\n'
-  else
-   	msg "Testando $url => "
-	  printf '\033[1;31mOFFLINE\033[0m\n'
-  fi
+	#	printf 'RET=%s URL=%s\n' "$ret" "$url" >&2
+	if [[ $ret -eq 0 ]]; then
+		msg "Testando $url => "
+		printf '\033[1;32mONLINE\033[0m\n'
+	else
+		msg "Testando $url => "
+		printf '\033[1;31mOFFLINE\033[0m\n'
+	fi
 	return "$ret"
 }
 export -f test_repo_online
@@ -205,7 +211,7 @@ run_cmd_new() {
 	if [[ $DRYRUN -eq 1 ]]; then
 		msg "${cyan}[DRY-RUN]${rst} ${cmd}"
 	else
-		$QUIET || echo -e "  [⚙  ] ${cyan}${cmd}${rst}"
+		$QUIET || echo -e "  [⚙] ${cyan}${cmd}${rst}"
 		# Executa o comando, falha se houver erro
 		# Redireciona stderr para /dev/null apenas para mkdir -p e ummount -R
 		if [[ "$cmd" =~ ^mkdir\ -p ]] || [[ "$cmd" =~ ^umount\ -R ]]; then
@@ -413,12 +419,12 @@ info_msg() {
 }
 
 die() {
-  local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
-  local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
-  local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
-  echo -e "${CROSS}${red}ERROR: $*"
-  error_out 1 $LINENO
-  exit 1
+	local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
+	local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
+	local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
+	echo -e "${CROSS}${red}ERROR: $*"
+	error_out 1 $LINENO
+	exit 1
 }
 
 check_tools() {
@@ -736,7 +742,7 @@ select_mirrors_dialog() {
 	fi
 
 	AREPOSITORY=()
-  replicate
+	replicate
 	for mirror in "${repos[@]}"; do
 		if ! test_repo_online "$mirror/current"; then
 			continue
