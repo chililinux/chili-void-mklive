@@ -120,11 +120,11 @@ elevate_to_root() {
 	die "Error: Unable to elevate privileges. Run manually as root."
 }
 
-msg() { echo -n -e "${INFO} ${*}${reset}"; }
+msg() { echo -e "${INFO} ${*}${reset}"; }
 msg_tab() { echo -e "  ${INFO} ${*}${reset}"; }
 #
 msg_info() { msg "$@"; }
-msg_inline() { echo -e "${INFO} ${*}${reset}"; }
+msg_inline() { echo -n "${INFO} ${*}${reset}"; }
 msg_info_tab() { echo -e "  ${INFO} ${*}${reset}"; }
 #
 log_ok() { echo -e "${TICK} ${*}${reset}"; }
@@ -388,7 +388,7 @@ msg_err() {
 replicate() {
 	local char=${1:-'#'}
 	local nsize=${2:-$(tput cols)}
-	local ccolor=${3:-$green}
+	local ccolor=${3:-$black}
 	local line
 	printf -v line "%*s" "$nsize" && echo -e "${ccolor}${line// /$char}${rst}"
 }

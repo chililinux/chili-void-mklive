@@ -60,6 +60,7 @@ ${yellow}Examples:${reset}
     $0 base
     $0 install
     $0 xfce
+    $0 fluxbox
     $0 gnome
     $0 plasma
     $0 cinnamon
@@ -74,6 +75,7 @@ ${yellow}Available flavors:${reset}
     ${green}all${reset}             Build all images
     ${green}base${reset}            Build Base ISO
     ${green}cinnamon${reset}        Build Cinnamon ISO
+    ${green}fluxbox${reset}         Build FLUXBOX ISO
     ${green}gnome${reset}           Build GNOME ISO
     ${green}hyprland/hypr${reset}   Build Hyprland ISO
     ${green}install${reset}         Build Installer ISO
@@ -99,6 +101,7 @@ for arg in "$@"; do
 		FLAVORS=(
 			base
 			cinnamon
+			fluxbox
 			gnome
 			hyprland
 			install
@@ -111,7 +114,7 @@ for arg in "$@"; do
 		)
 		break
 		;;
-	base|install|xfce|gnome|plasma|cinnamon|mate|mango|sway|hypr|hyprland|fullx)
+	base|install|xfce|fluxbox|gnome|plasma|cinnamon|mate|mango|sway|hypr|hyprland|fullx)
 		[[ "$flavor" == "hypr" ]] && flavor="hyprland"
 		FLAVORS+=("$flavor")
 		;;
