@@ -41,7 +41,7 @@ cyan="$(printf '\033[1;36m')"
 reset="$(printf '\033[0m')"
 rst="$(printf '\033[0m')"
 
-VERSION="linux7.0"
+VERSION="linux7.1"
 
 msg() {
 	echo -e "[rmake]$*"

@@ -235,23 +235,13 @@ sh_choose_voidbr_X_packages() {
 
 sh_choose_packages_common_X_base() {
 	print_step "Selecionando pacotes X Common Base"
-	COMMON_PKGS+=" xorg"
-	COMMON_PKGS+=" xorg-apps"
-	COMMON_PKGS+=" xorg-fonts"
-	COMMON_PKGS+=" xauth"
-	COMMON_PKGS+=" xterm"
+	COMMON_PKGS+=" xorg xorg-apps xorg-fonts xorg-server-xwayland"
+	COMMON_PKGS+=" xauth xterm"
 	COMMON_PKGS+=" dbus-x11"
-	COMMON_PKGS+=" dbus-elogind"
-	COMMON_PKGS+=" elogind"
-	COMMON_PKGS+=" polkit-elogind"
-	COMMON_PKGS+=" xdg-user-dirs"
-	COMMON_PKGS+=" xdg-user-dirs-gtk"
+	COMMON_PKGS+=" dbus-elogind elogind polkit-elogind"
+	COMMON_PKGS+=" xdg-user-dirs xdg-user-dirs-gtk"
 	COMMON_PKGS+=" xfce4-terminal"
-	COMMON_PKGS+=" libavif"
-	COMMON_PKGS+=" libheif"
-	COMMON_PKGS+=" gdk-pixbuf"
-	COMMON_PKGS+=" libheif-pixbuf-loader"
-	COMMON_PKGS+=" xorg-server-xwayland"
+	COMMON_PKGS+=" libavif libheif gdk-pixbuf libheif-pixbuf-loader"
 	#
 
 	if $MAKE_GNOME; then
@@ -268,9 +258,8 @@ sh_choose_packages_common_X_base() {
 
 sh_choose_packages_common_X_advanced() {
 	print_step "Selecionando pacotes X Common Advanced"
-	COMMON_PKGS+=" cool-retro-term"
-	COMMON_PKGS+=" terminus-font"
 	COMMON_PKGS+=" firefox firefox-i18n-pt-BR"
+	COMMON_PKGS+=" terminus-font"
 	COMMON_PKGS+=" noto-fonts-emoji"
 	COMMON_PKGS+=" ttf-ubuntu-font-family"
 	COMMON_PKGS+=" font-iosevka"
