@@ -225,36 +225,27 @@ sh_choose_voidbr_base_packages() {
 sh_choose_voidbr_X_packages() {
 	AEXTRA_COMMON_PKGS+=" voidbr-wallpapers"
 	AEXTRA_COMMON_PKGS+=" voidbr-tokyo-theme"
+	AEXTRA_COMMON_PKGS+=" voidbr-professional-theme"
+	AEXTRA_COMMON_PKGS+=" voidbr-beauty-icons"
+	AEXTRA_COMMON_PKGS+=" voidbr-dracula-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-webapps"
 	AEXTRA_COMMON_PKGS+=" chili-iso2usb"
 	AEXTRA_COMMON_PKGS+=" voidbr-iso-writer"
 }
 
-##############################################################################
-# Temas extras que só fazem sentido em DEs X11 tradicionais (XFCE, Plasma,
-# GNOME, MATE, Cinnamon, Awesome, Enlightenment, Fluxbox, --xorg, --fullx).
-# Hyprland/Mango/Sway NÃO chamam esta função — já usam o tema próprio que
-# vem embutido no respectivo meta-pacote (voidbr-hyprland etc.).
-##############################################################################
-sh_choose_voidbr_x11_themes() {
-	AEXTRA_COMMON_PKGS+=" voidbr-professional-theme"
-	AEXTRA_COMMON_PKGS+=" voidbr-beauty-icons"
-	AEXTRA_COMMON_PKGS+=" voidbr-dracula-theme"
-}
+sh_choose_packages_common_X_base() {
+	print_step "Selecionando pacotes X Common Base"
+	COMMON_PKGS+=" xorg xorg-apps xorg-fonts xorg-server-xwayland"
+	COMMON_PKGS+=" xauth xterm"
+	COMMON_PKGS+=" dbus-x11"
+	COMMON_PKGS+=" dbus-elogind elogind polkit-elogind"
+	COMMON_PKGS+=" xdg-user-dirs xdg-user-dirs-gtk"
+	COMMON_PKGS+=" xfce4-terminal"
+	COMMON_PKGS+=" libavif libheif gdk-pixbuf libheif-pixbuf-loader"
+	#
 
-##############################################################################
-# Escolha do display manager, unificada num único lugar (antes estava
-# metade em common_x11, metade em common_wayland — GNOME sempre usa gdm;
-# Hyprland/Mango/Sway (Wayland puro) usam sddm; os demais DEs X11 (XFCE,
-# Plasma, MATE, Cinnamon, Awesome, Enlightenment, Fluxbox) usam lightdm.
-##############################################################################
-sh_choose_packages_display_manager() {
-	print_step "Selecionando display manager"
 	if $MAKE_GNOME; then
 		COMMON_PKGS+=" gdm"
-	elif $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY; then
-		COMMON_PKGS+=" sddm"
-		AEXTRA_COMMON_PKGS+=" voidbr-sddm-themes"
 	else
 		COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings"
 		COMMON_PKGS+=" arc-theme"
@@ -262,55 +253,11 @@ sh_choose_packages_display_manager() {
 		COMMON_PKGS+=" dejavu-fonts-ttf"
 		AEXTRA_COMMON_PKGS+=" voidbr-lightdm-themes"
 	fi
+	#  COMMON_PKGS+=" sddm"
 }
 
-##############################################################################
-# Pacotes comuns a QUALQUER ISO com ambiente gráfico, seja ela X11 ou
-# Wayland puro (Hyprland/Mango/Sway). Nada aqui é específico de servidor
-# gráfico — é a base de sessão (dbus/elogind/polkit), gerência de pastas
-# XDG e suporte a imagens usado por qualquer toolkit gráfico.
-##############################################################################
-sh_choose_packages_common_gui_base() {
-	print_step "Selecionando pacotes comuns de GUI (X11 + Wayland)"
-	COMMON_PKGS+=" dbus-elogind elogind polkit-elogind"
-	COMMON_PKGS+=" xdg-user-dirs xdg-user-dirs-gtk"
-	COMMON_PKGS+=" libavif libheif gdk-pixbuf libheif-pixbuf-loader"
-}
-
-##############################################################################
-# Pacotes exclusivos de ambientes que rodam sobre Xorg de verdade:
-# XFCE, Plasma, GNOME, MATE, Cinnamon, Awesome, Enlightenment, Fluxbox e o
-# modo --xorg/install (sessão X pura, sem DE). Hyprland, Mango e Sway NÃO
-# chamam esta função (exceto no modo --fullx, que precisa das duas pilhas).
-##############################################################################
-sh_choose_packages_common_x11() {
-	print_step "Selecionando pacotes X11 (Xorg)"
-	COMMON_PKGS+=" xorg xorg-apps xorg-fonts xorg-server-xwayland"
-	COMMON_PKGS+=" xauth xterm"
-	COMMON_PKGS+=" dbus-x11"
-	COMMON_PKGS+=" xfce4-terminal"
-}
-
-##############################################################################
-# Pacotes exclusivos de compositores Wayland puros: Hyprland, Mango, Sway.
-# Não instalam o Xorg completo (xorg/xorg-apps/xorg-fonts/xterm/dbus-x11),
-# apenas o Xwayland para compatibilidade com apps legados de X11.
-# OBS: ajuste a lista de pacotes abaixo caso voidbr-hyprland, voidbr-mango
-# ou voidbr-sway já tragam suas próprias dependências.
-##############################################################################
-sh_choose_packages_common_wayland() {
-	print_step "Selecionando pacotes Wayland (Hyprland/Mango/Sway)"
-	COMMON_PKGS+=" xorg-server-xwayland xauth"
-}
-
-##############################################################################
-# Pacotes "avançados" comuns: navegador, fontes, applet de rede, pilha de
-# áudio, utilitários (gparted/octoxbps/arquivadores/gvfs). Não dependem de
-# Xorg — servem tanto para sessões X11 quanto Wayland — por isso não têm
-# mais "_X_" no nome. Pulado no modo --xorg/install (sessão mínima).
-##############################################################################
-sh_choose_packages_common_advanced() {
-	print_step "Selecionando pacotes Common Advanced"
+sh_choose_packages_common_X_advanced() {
+	print_step "Selecionando pacotes X Common Advanced"
 	COMMON_PKGS+=" firefox firefox-i18n-pt-BR"
 	COMMON_PKGS+=" terminus-font"
 	COMMON_PKGS+=" noto-fonts-emoji"
@@ -325,6 +272,7 @@ sh_choose_packages_common_advanced() {
 	COMMON_PKGS+=" network-manager-applet"
 	COMMON_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1 alsa-plugins-pulseaudio alsa-utils"
 	COMMON_PKGS+=" pipewire wireplumber alsa-pipewire pulseaudio-utils pavucontrol libspa-bluetooth libjack-pipewire alsa-plugins-pulseaudio alsa-utils"
+	COMMON_PKGS+=" xfce4-pulseaudio-plugin"
 	COMMON_PKGS+=" gparted"
 	COMMON_PKGS+=" octoxbps"
 	COMMON_PKGS+=" mate-calc"
@@ -429,8 +377,6 @@ sh_choose_packages_xfce() {
 	ADISTRO_PKGS+=" thunar-archive-plugin"
 	ADISTRO_PKGS+=" thunar-volman"
 	ADISTRO_PKGS+=" plank"
-	ADISTRO_PKGS+=" xfce4-pulseaudio-plugin"
-  ADISTRO_PKGS+=" labwc"
 	#	ADISTRO_PKGS+=" brother-brlaser"
 	#	ADISTRO_PKGS+=" cups-pdf"
 
@@ -1301,29 +1247,10 @@ sh_configure_packages() {
 	sh_choose_packages_base
 
 	if $MAKE_X; then
-		sh_choose_packages_common_gui_base
+		sh_choose_packages_common_X_base
 		sh_choose_voidbr_X_packages
-
-		if $MAKE_FULL_X; then
-			# Imagem "tudo em um": inclui DEs X11 e compositores Wayland,
-			# então precisa das duas pilhas de pacotes.
-			sh_choose_packages_common_x11
-			sh_choose_packages_common_wayland
-			sh_choose_voidbr_x11_themes
-		elif $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY; then
-			# Compositores Wayland puros dispensam a pilha X11 completa
-			# e os temas X11 (já usam o tema embutido no meta-pacote).
-			sh_choose_packages_common_wayland
-		else
-			# XFCE, Plasma, GNOME, MATE, Cinnamon, Awesome, Enlightenment,
-			# Fluxbox e o modo --xorg/install seguem precisando do X11.
-			sh_choose_packages_common_x11
-			sh_choose_voidbr_x11_themes
-		fi
-		sh_choose_packages_display_manager
-
 		if ! $MAKE_ONLY_XORG; then
-			sh_choose_packages_common_advanced
+			sh_choose_packages_common_X_advanced
 		fi
 		if $MAKE_FULL_X; then
 			STEP_COUNT=72
@@ -1599,8 +1526,6 @@ sh_make_iso() {
 	if $MAKE_X; then
 		if $MAKE_GNOME; then
 			: ${ADDITIONAL_SERVICE_LIST:=gdm}
-		elif $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY; then
-			: ${ADDITIONAL_SERVICE_LIST:=sddm}
 		else
 			: ${ADDITIONAL_SERVICE_LIST:=lightdm}
 		fi
@@ -1636,9 +1561,7 @@ sh_make_iso() {
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
 	sh_remove_etc_xbps_00_repository_main_conf "$conf"
 	sh_activating_pipewire
-	if $MAKE_X && ! $MAKE_GNOME && ! $MAKE_HYPRLAND && ! $MAKE_MANGO && ! $MAKE_SWAY; then
-		sh_configure_lightdm_default_session
-	fi
+	sh_configure_lightdm_default_session
 	# generate_squashfs
 	#	generate_iso_image
 }
@@ -1858,4 +1781,3 @@ generate_squashfs
 generate_iso_image
 umount_pseudofs
 exit 0
-
