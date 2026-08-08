@@ -228,7 +228,7 @@ main() {
 	# This sets up files that are important for XBPS to work on the new
 	# filesystem.  It does not actually install anything.
 	run_cmd '
-        run_cmd_target "xbps-install -Sy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS"
+        run_cmd_target "xbps-install -Sy --ignore-file-conflicts $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS"
     '
 
 	# Later scripts expect the permissions on / to be the canonical 755,
@@ -247,8 +247,8 @@ main() {
 	# bootable system but will instead produce a base component that can
 	# be quickly expanded to perform other actions on.
 	run_cmd '
-		run_cmd_target "xbps-install -Uy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS -y $SYSPKG $ADDITIONAL_PKGS"
-		run_cmd_target "xbps-install -Uy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS -y $SYSPKG $AEXTRA_PKGS"
+		run_cmd_target "xbps-install -Uy --ignore-file-conflicts $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS -y $SYSPKG $ADDITIONAL_PKGS"
+		run_cmd_target "xbps-install -Uy --ignore-file-conflicts $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS -y $SYSPKG $AEXTRA_PKGS"
 	'
 	# Enable en_US.UTF-8 locale and generate it into the target ROOTFS.
 	# This is a bit of a hack since some glibc stuff doesn't really work

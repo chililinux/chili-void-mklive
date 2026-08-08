@@ -250,7 +250,9 @@ sh_choose_voidbr_x11_themes() {
 ##############################################################################
 sh_choose_packages_display_manager() {
 	print_step "Selecionando display manager"
-	if $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_GNOME; then
+	if $MAKE_GNOME; then
+		COMMON_PKGS+=" gdm"
+	elif $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY; then
 		COMMON_PKGS+=" sddm"
 		AEXTRA_COMMON_PKGS+=" voidbr-sddm-themes"
 	else
@@ -290,9 +292,11 @@ sh_choose_packages_common_x11() {
 }
 
 ##############################################################################
-# CÓDIGO MORTO — mantido só como referência, não é mais chamada por
-# sh_configure_packages(). Hyprland/Sway/Mango já recebem isso via
-# depends="voidbr-gui-common voidbr-wayland-common" do próprio meta-pacote.
+# Pacotes exclusivos de compositores Wayland puros: Hyprland, Mango, Sway.
+# Não instalam o Xorg completo (xorg/xorg-apps/xorg-fonts/xterm/dbus-x11),
+# apenas o Xwayland para compatibilidade com apps legados de X11.
+# OBS: ajuste a lista de pacotes abaixo caso voidbr-hyprland, voidbr-mango
+# ou voidbr-sway já tragam suas próprias dependências.
 ##############################################################################
 sh_choose_packages_common_wayland() {
 	print_step "Selecionando pacotes Wayland (Hyprland/Mango/Sway)"
@@ -304,10 +308,6 @@ sh_choose_packages_common_wayland() {
 # áudio, utilitários (gparted/octoxbps/arquivadores/gvfs). Não dependem de
 # Xorg — servem tanto para sessões X11 quanto Wayland — por isso não têm
 # mais "_X_" no nome. Pulado no modo --xorg/install (sessão mínima).
-# OBS: função mantida só pro pipeline legado (GNOME/Cinnamon/MATE/Awesome/
-# Enlightenment), que ainda não tem meta-pacote próprio. As outras 6 DEs
-# (Hyprland/Sway/Mango/Fluxbox/Plasma/XFCE) já recebem isso via
-# depends="voidbr-gui-common ..." do próprio meta-pacote.
 ##############################################################################
 sh_choose_packages_common_advanced() {
 	print_step "Selecionando pacotes Common Advanced"
@@ -375,11 +375,13 @@ sh_choose_packages_common_advanced() {
 	#	COMMON_PKGS+=" remmina remmina-kwallet"
 }
 
-##############################################################################
-# CÓDIGO MORTO daqui até sh_choose_packages_enlightenment (exclusive) —
-# mantido só como referência. Plasma, XFCE e GNOME já têm meta-pacote
-# próprio (voidbr-plasma, voidbr-xfce, voidbr-gnome).
-##############################################################################
+sh_choose_packages_awesome() {
+	print_step "Selecionando pacotes Awesome"
+	ADDITIONAL_PKGS+=" awesome"
+	ADDITIONAL_PKGS+=" polybar"
+	ADDITIONAL_PKGS+=" pcmanfm"
+}
+
 sh_choose_packages_plasma() {
 	print_step "Selecionando pacotes KDE Plasma"
 	ADDITIONAL_PKGS+=" kde5"
@@ -388,6 +390,28 @@ sh_choose_packages_plasma() {
 	ADDITIONAL_PKGS+=" dolphin"
 	#
 	ASKEL_PKGS+=(voidbr-plasma-config)
+}
+
+sh_choose_packages_gnome() {
+	print_step "Selecionando pacotes GNOME"
+	ADISTRO_PKGS+=" gnome"
+	ADISTRO_PKGS+=" gnome-keyring"
+	ADISTRO_PKGS+=" accountsservice"
+	ADISTRO_PKGS+=" voidbr-change-gnome-wallpaper"
+	#
+	ASKEL_PKGS+=(voidbr-gnome-config)
+}
+
+sh_choose_packages_enlightenment() {
+	print_step "Selecionando pacotes Enlightenment"
+	ADISTRO_PKGS+=" enlightenment"
+	ADISTRO_PKGS+=" efl"
+	ADISTRO_PKGS+=" rage"
+	ADISTRO_PKGS+=" terminology"
+	ADISTRO_PKGS+=" exquisite"
+	ADISTRO_PKGS+=" connman"
+	#
+	ASKEL_PKGS+=(voidbr-enlightenment-config)
 }
 
 sh_choose_packages_xfce_base() {
@@ -402,47 +426,19 @@ sh_choose_packages_xfce_base() {
 
 sh_choose_packages_xfce() {
 	print_step "Selecionando pacotes XFCE"
+	ADISTRO_PKGS+=" voidbr-xfce"
+	return
+
 	ADISTRO_PKGS+=" thunar-archive-plugin"
 	ADISTRO_PKGS+=" thunar-volman"
 	ADISTRO_PKGS+=" plank"
 	ADISTRO_PKGS+=" xfce4-pulseaudio-plugin"
-	ADISTRO_PKGS+=" labwc"
-	#	ADISTRO_PKGS+=" brother-brlaser"
-	#	ADISTRO_PKGS+=" cups-pdf"
-
+  ADISTRO_PKGS+=" labwc"
+  #
 	AEXTRA_PKGS+=" voidbr-xfwm-axiom-theme"
 	ACONFIG_PKGS+=(voidbr-dracula-theme)
 	ASKEL_PKGS+=(voidbr-xfce-config)
 
-}
-
-sh_choose_packages_gnome() {
-	print_step "Selecionando pacotes GNOME"
-	ADISTRO_PKGS+=" gnome"
-	ADISTRO_PKGS+=" gnome-keyring"
-	ADISTRO_PKGS+=" accountsservice"
-	ADISTRO_PKGS+=" voidbr-change-gnome-wallpaper"
-	#
-	ASKEL_PKGS+=(voidbr-gnome-config)
-}
-
-sh_choose_packages_awesome() {
-	print_step "Selecionando pacotes Awesome"
-	ADDITIONAL_PKGS+=" awesome"
-	ADDITIONAL_PKGS+=" polybar"
-	ADDITIONAL_PKGS+=" pcmanfm"
-}
-
-sh_choose_packages_enlightenment() {
-	print_step "Selecionando pacotes Enlightenment"
-	ADISTRO_PKGS+=" enlightenment"
-	ADISTRO_PKGS+=" efl"
-	ADISTRO_PKGS+=" rage"
-	ADISTRO_PKGS+=" terminology"
-	ADISTRO_PKGS+=" exquisite"
-	ADISTRO_PKGS+=" connman"
-	#
-	ASKEL_PKGS+=(voidbr-enlightenment-config)
 }
 
 sh_choose_packages_cinnamon() {
@@ -473,22 +469,17 @@ sh_choose_packages_mate() {
 	ASKEL_PKGS+=(voidbr-mate-config)
 }
 
-##############################################################################
-# CÓDIGO MORTO — mantido só como referência. Sway, Mango, Fluxbox e
-# Hyprland já têm meta-pacote próprio (voidbr-sway, voidbr-mango,
-# voidbr-fluxbox, voidbr-hyprland).
-##############################################################################
-sh_choose_packages_sway() {
-	print_step "Selecionando pacotes SWAY"
-	ADISTRO_PKGS+=" voidbr-sway"
-	ASKEL_PKGS+=(voidbr-sway-config)
-}
-
 sh_choose_packages_mango() {
 	print_step "Selecionando pacotes MANGO"
 	ADISTRO_PKGS+=" voidbr-mango"
 	ASKEL_PKGS+=(voidbr-mango-config)
 	return
+}
+
+sh_choose_packages_sway() {
+	print_step "Selecionando pacotes SWAY"
+	ADISTRO_PKGS+=" voidbr-sway"
+	ASKEL_PKGS+=(voidbr-sway-config)
 }
 
 sh_choose_packages_fluxbox() {
@@ -1311,67 +1302,69 @@ sh_configure_packages() {
 	sh_choose_packages_base
 
 	if $MAKE_X; then
-		##########################################################################
-		# Hyprland, Sway, Mango, Fluxbox, Plasma e XFCE já têm meta-pacote próprio
-		# (voidbr-<de>), que já declara depends="voidbr-gui-common voidbr-xorg-common"
-		# ou depends="voidbr-gui-common voidbr-wayland-common" — e voidbr-gui-common
-		# por sua vez depende de voidbr-base-common. O xbps-install resolve essa
-		# cadeia inteira sozinho a partir de UM nome só; não precisa mais listar
-		# pacote solto nem chamar as funções common_* pra essas 6 DEs.
-		##########################################################################
-		if $MAKE_FULL_X; then
-			# Imagem "tudo em um": inclui todo mundo.
-			STEP_COUNT=72
-			ADISTRO_PKGS+=" voidbr-xfce voidbr-plasma voidbr-fluxbox voidbr-sway voidbr-mango voidbr-hyprland voidbr-gnome"
+		sh_choose_packages_common_gui_base
+		sh_choose_voidbr_X_packages
 
-			# Cinnamon, MATE, Awesome e Enlightenment ainda não têm
-			# meta-pacote — usa a seleção manual (legado) até serem criados.
-			sh_choose_packages_common_gui_base
+		if $MAKE_FULL_X; then
+			# Imagem "tudo em um": inclui DEs X11 e compositores Wayland,
+			# então precisa das duas pilhas de pacotes.
+			sh_choose_packages_common_x11
+			sh_choose_packages_common_wayland
+			sh_choose_voidbr_x11_themes
+		elif $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY; then
+			# Compositores Wayland puros dispensam a pilha X11 completa
+			# e os temas X11 (já usam o tema embutido no meta-pacote).
+			sh_choose_packages_common_wayland
+		else
+			# XFCE, Plasma, GNOME, MATE, Cinnamon, Awesome, Enlightenment,
+			# Fluxbox e o modo --xorg/install seguem precisando do X11.
 			sh_choose_packages_common_x11
 			sh_choose_voidbr_x11_themes
-			sh_choose_packages_display_manager
+		fi
+		sh_choose_packages_display_manager
+
+		if ! $MAKE_ONLY_XORG; then
 			sh_choose_packages_common_advanced
+		fi
+		if $MAKE_FULL_X; then
+			STEP_COUNT=72
+			sh_choose_packages_xfce_base
+			sh_choose_packages_xfce
+			sh_choose_packages_gnome
+			sh_choose_packages_plasma
 			sh_choose_packages_cinnamon
 			sh_choose_packages_mate
 			sh_choose_packages_awesome
 			sh_choose_packages_enlightenment
-		elif $MAKE_HYPRLAND; then
-			ADISTRO_PKGS+=" voidbr-hyprland"
-		elif $MAKE_SWAY; then
-			ADISTRO_PKGS+=" voidbr-sway"
-		elif $MAKE_MANGO; then
-			ADISTRO_PKGS+=" voidbr-mango"
+			sh_choose_packages_fluxbox
+			sh_choose_packages_sway
+			sh_choose_packages_mango
+			sh_choose_packages_hyprland
+		elif $MAKE_ENLIGHTENMENT; then
+			sh_choose_packages_enlightenment
+		elif $MAKE_AWESOME; then
+			sh_choose_packages_awesome
 		elif $MAKE_FLUXBOX; then
-			ADISTRO_PKGS+=" voidbr-fluxbox"
+			sh_choose_packages_fluxbox
 		elif $MAKE_PLASMA; then
-			ADISTRO_PKGS+=" voidbr-plasma"
-		elif $MAKE_XFCE_BASE || $MAKE_XFCE; then
-			ADISTRO_PKGS+=" voidbr-xfce"
+			sh_choose_packages_plasma
 		elif $MAKE_GNOME; then
-			ADISTRO_PKGS+=" voidbr-gnome"
-		elif $MAKE_ONLY_XORG; then
-			# Sessão X mínima, sem DE (--xorg/install): só a base Xorg
-			# + infra comum, sem nenhum meta-pacote de DE.
-			ADISTRO_PKGS+=" voidbr-base-common voidbr-xorg-common"
-		else
-			##########################################################################
-			# Cinnamon, MATE, Awesome, Enlightenment: ainda sem meta-pacote
-			# próprio, mantém o pipeline antigo (legado) até serem criados.
-			##########################################################################
-			sh_choose_packages_common_gui_base
-			sh_choose_packages_common_x11
-			sh_choose_voidbr_x11_themes
-			sh_choose_packages_display_manager
-			sh_choose_packages_common_advanced
-			if $MAKE_ENLIGHTENMENT; then
-				sh_choose_packages_enlightenment
-			elif $MAKE_AWESOME; then
-				sh_choose_packages_awesome
-			elif $MAKE_CINNAMON; then
-				sh_choose_packages_cinnamon
-			elif $MAKE_MATE; then
-				sh_choose_packages_mate
-			fi
+			sh_choose_packages_gnome
+		elif $MAKE_XFCE_BASE; then
+			sh_choose_packages_xfce_base
+		elif $MAKE_XFCE; then
+			sh_choose_packages_xfce_base
+			sh_choose_packages_xfce
+		elif $MAKE_CINNAMON; then
+			sh_choose_packages_cinnamon
+		elif $MAKE_MATE; then
+			sh_choose_packages_mate
+		elif $MAKE_SWAY; then
+			sh_choose_packages_sway
+		elif $MAKE_MANGO; then
+			sh_choose_packages_mango
+		elif $MAKE_HYPRLAND; then
+			sh_choose_packages_hyprland
 		fi
 	fi
 }
@@ -1605,7 +1598,9 @@ sh_make_iso() {
 	#      Você não precisa ativar os serviços deles no runit.
 	: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 dbus socklog-unix nanoklogd udevd sshd NetworkManager dhcpcd chronyd}
 	if $MAKE_X; then
-		if $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_GNOME; then
+		if $MAKE_GNOME; then
+			: ${ADDITIONAL_SERVICE_LIST:=gdm}
+		elif $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY; then
 			: ${ADDITIONAL_SERVICE_LIST:=sddm}
 		else
 			: ${ADDITIONAL_SERVICE_LIST:=lightdm}
@@ -1864,3 +1859,4 @@ generate_squashfs
 generate_iso_image
 umount_pseudofs
 exit 0
+
