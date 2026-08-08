@@ -11,6 +11,9 @@
 #  Created: seg 23 fev 2026 13:26:23 -04
 #  Updated: sáb 08 ago 2026 11:38:01 -04
 #
+#  NOTA: script único — antes dividido em mkrootfs + lib.mkrootfs.sh,
+#  agora mesclado num arquivo só (mesma ordem de execução de antes).
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
 # are met:
@@ -31,21 +34,35 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##############################################################################
-export TERM=${TERM:-xterm}
-export TERM=${TERM:-xterm-256color}
+# Em CI/CD (ex.: container Docker do Void, sem TTY e possivelmente sem
+# o terminfo completo) forçar xterm-256color pode deixar tput falhando
+# silenciosamente e as variáveis de cor vazias. Só usamos 256 cores
+# quando há um terminal de verdade que sabe suportá-las; caso contrário
+# caímos em "dumb", que é seguro em qualquer ambiente.
+if [ -t 1 ] && command -v tput >/dev/null 2>&1 && tput colors >/dev/null 2>&1; then
+	export TERM="${TERM:-xterm-256color}"
+else
+	export TERM="${TERM:-dumb}"
+fi
 
 #debug
 export PS4='${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset}'
 #set -x
 #set -e
+# pipefail (mas não -e): garante que uma falha em qualquer parte de um
+# pipeline (ex.: "tar | xz > $FILENAME") seja detectada, não só a do
+# último comando do pipe.
+set -o pipefail
 shopt -s extglob
 
 declare -g quiet=false
 declare -i njobs=12
 declare -i ncontador=0
-readonly PROGNAME=$(basename "$0")
+declare APP="${0##*/}"
+declare _VERSION_="0.08.08-20260808"
+declare APPDESC="$APP - Cria rootfs VoidBR "
 readonly ARCH=$(uname -m)
-readonly REQTOOLS="xbps-install xbps-reconfigure tar xz"
+readonly REQTOOLS="xbps-install xbps-reconfigure tar xz chroot dialog curl sed gettext"
 readonly aSysPkg=(base-minimal base-voidstrap base-system base-custom)
 readonly XBPS_CMD='xbps-install'
 
@@ -54,7 +71,7 @@ LCUSTOM=false
 #SYSPKG="base-system"
 SYSPKG="base-voidstrap voidbr-vinstall voidbr-xbps"
 
-# MINIMAL
+# MÍNIMO
 declare -a ADDITIONAL_PKGS=(
 	bash-completion
 	dracut
@@ -84,29 +101,650 @@ done
 # substitui os argumentos atuais
 set -- "${new_args[@]}"
 
-# This source pulls in all the functions from lib.sh.  This set of
-# functions makes it much easier to work with chroots and abstracts
-# away all the problems with running binaries with QEMU.
-# shellcheck source=./lib.sh
-#source ./lib.sh
-source ./lib.mkrootfs.sh
+# ##############################################################################
+#  INÍCIO — funções da antiga lib.mkrootfs.sh (agora mescladas neste arquivo)
+# ##############################################################################
 
-# Die is a function provided in lib.sh which handles the cleanup of
-# the mounts and removal of temporary directories if the running
-# program exists unexpectedly.
-trap 'umount_pseudofs; die "Interrupted! exiting..."' INT TERM HUP
-#trap 'umount_pseudofs' EXIT
+# Contém a lista COMPLETA de binários que este script precisa para
+# funcionar. A única exceção é o binário do QEMU, já que não se sabe
+# de antemão qual deles será necessário.
+readonly LIBTOOLS="cp echo cat printf which mountpoint mount umount modprobe"
+readonly HOSTARCH=$(xbps-uhelper arch)
+tput sgr0 # reseta as cores
+bold=$(tput bold)
+reset=$(tput sgr0)
+rst=$(tput sgr0)
+black=$(tput setaf 0)
+red=$(tput bold)$(tput setaf 196)
+green=$(tput setaf 2)
+yellow=$(tput bold)$(tput setaf 3)
+blue=$(tput setaf 4)
+pink=$(tput setaf 5)
+cyan=$(tput setaf 6)
+white=$(tput setaf 7)
+orange=$(tput setaf 3)
+purple=$(tput setaf 125)
+violet=$(tput setaf 61)
 
-# Even though we only support really one target for most of these
-# architectures this lets us refer to these quickly and easily by
-# XBPS_ARCH.  This makes it a lot more obvious what is happening later
-# in the script, and it makes it easier to consume the contents of
-# these down the road in later scripts.
+COL_NC='\e[0m' # Sem cor
+COL_LIGHT_GREEN='\e[1;32m'
+COL_LIGHT_RED='\e[1;31m'
+: "${clrkey=${rst}${black}}"
+: "${TICK="${clrkey}[${green}✓ ${clrkey}]${rst}"}"
+: "${CROSS="${clrkey}[${red}✗ ${clrkey}]${rst}"}"
+: "${MID="${clrkey}[${red}✗${green}✓${clrkey}]${rst}"}"
+: "${WARN="${clrkey}[${yellow}⚠${clrkey}]${yellow}"}"
+: "${INFO="${clrkey}[${yellow}➜${clrkey}]${rst}"}"
+# shellcheck disable=SC2034
+DONE="${COL_LIGHT_GREEN} concluído!${COL_NC}"
+OVER="\\r\\033[K"
+DOTPREFIX="  ${black}::${reset} "
+declare -a public_repos=()
+
+#msg_info() {  printf "%s\n" "${white}${pink}[INFO] ${rst}${*}${rst}"; }
+msg_info() { echo -e "${INFO} ${*}${reset}"; }
+msg() { echo -n -e "${INFO} ${*}${reset}"; }
+log_ok() { echo -e "${TICK} ${*}${reset}"; }
+log_err() { echo -e "${CROSS} ${*}${reset}"; }
+log_mid() { echo -e "${MID} ${*}${reset}"; }
+log_warn() { echo -e "${WARN} ${*}${reset}"; }
+msg_info_tab() { echo -e "  ${INFO} ${*}${reset}"; }
+msg_ex_tab() { echo -e "  👉   ${*}${reset}"; }
+msg_ex() { echo -e "👉   ${*}${reset}"; }
+msg_tab() { echo -e "  ${INFO} ${*}${reset}"; }
+log_ok_tab() { echo -e "  ${TICK} ${*}${reset}"; }
+log_err_tab() { echo -e "  ${CROSS} ${*}${reset}"; }
+log_mid_tab() { echo -e "  ${MID} ${*}${reset}"; }
+log_warn_tab() { echo -e "  ${WARN} ${*}${reset}"; }
+die() {
+	echo -e "${CROSS} ${red}${*}${reset}"
+	exit 1
+}
+
+# Retorno: 0 = online, 1 = offline
+# Retorno:
+#   0 = online/existe
+#   1 = offline/inexistente
+test_repo_online() {
+	[ $# -eq 1 ] || return 1
+
+	local repo="$1"
+	local url="${repo%/}/x86_64-repodata"
+	local ret=1
+
+	case "$repo" in
+	http://* | https://*)
+		timeout 20 curl \
+			--fail \
+			--silent \
+			--show-error \
+			--location \
+			--output /dev/null \
+			"$url"
+		ret=$?
+		;;
+
+	*)
+		[ -e "$url" ]
+		ret=$?
+		;;
+	esac
+
+	#	printf 'RET=%s URL=%s\n' "$ret" "$url" >&2
+	if [[ $ret -eq 0 ]]; then
+		msg "Testando $url => "
+		printf '\033[1;32mONLINE\033[0m\n'
+	else
+		msg "Testando $url => "
+		printf '\033[1;31mOFFLINE\033[0m\n'
+	fi
+	return "$ret"
+}
+export -f test_repo_online
+
+run_cmd_eval() {
+	local cmd="$1"
+	local rc
+
+	if ! $quiet; then
+		msg_tab "${cyan}[⚙ ] [executando] : ${rst} $cmd"
+	fi
+
+	eval "$cmd"
+	rc=$?
+
+	# ignora erro para mkdir -p e umount -R
+	if [[ "$cmd" =~ ^mkdir[[:space:]]+-p ]] || [[ "$cmd" =~ ^umount[[:space:]]+-R ]]; then
+		return 0
+	fi
+
+	if ((rc)); then
+		log_warn_tab "Falha ao executar: $cmd"
+		return "$rc"
+	fi
+	return 0
+}
+
+run_cmd() {
+	local cmd="$1"
+	local rc
+
+	if ! $quiet; then
+		msg_tab "${cyan}[⚙ ] [executando] : ${rst} $cmd"
+	fi
+
+	eval "$cmd"
+	rc=$?
+
+	# ignora erro para mkdir -p e umount -R
+	if [[ "$cmd" =~ ^mkdir[[:space:]]+-p ]] || [[ "$cmd" =~ ^umount[[:space:]]+-R ]]; then
+		return 0
+	fi
+
+	if ((rc)); then
+		#    log_warn_tab "Falha ao executar: $cmd"
+		return "$rc"
+	fi
+	return 0
+}
+
+debug() {
+	whiptail \
+		--fb \
+		--clear \
+		--backtitle "[debug]$0" \
+		--title "[debug]$0" \
+		--yesno "${*}\n" \
+		0 40
+	result=$?
+	if ((result)); then
+		exit
+	fi
+	return $result
+}
+
+sh_diahora() {
+	DIAHORA=$(date +"%Y%m%d-%H%M")
+	printf "%s\n" "$DIAHORA"
+}
+
+sh_copyright() {
+	cat <<-EOF-COPY
+	${bold}${cyan}${0##*/} v${_VERSION_}${rst}
+	${bold}${cyan}${APPDESC}${rst}
+	${bold}${orange}Copyright (c) 2019-2026, ${reset}ChiliLinux Development Team <https://chililinux.com> <https://github.com/chililinux>
+	${bold}${orange}Copyright (c) 2019-2026, ${reset}Vilmar Catafesta <vcatafesta@gmail.com>${black}
+	EOF-COPY
+}
+
+sh_version() {
+	cat <<-EOF-VERSION
+	$(sh_copyright)
+	      $(gettext "Este é um software livre: você é livre para alterá-lo e redistribuí-lo.")
+	      $(gettext "O $APP é disponibilizado para você sob a ${yellow}Licença MIT${black}, e")
+	      $(gettext "inclui software de código aberto sob uma variedade de outras licenças.")
+	      $(gettext "Você pode ler instruções sobre como baixar e criar para você mesmo")
+	      $(gettext "o código fonte específico usado para criar esta cópia.")
+	      ${red}$(gettext "Este programa vem com absolutamente NENHUMA garantia.")${reset}
+	EOF-VERSION
+}
+
+msg_warning() {
+	local msg="$*"
+	#	echo -e "  =>${yellow}aviso: ${cyan}${msg}${reset}"
+	echo -e "${WARN} ${*}${reset}"
+}
+export -f msg_warning
+
+msg_warn() {
+	local msg="$1"
+	#	printf "%s\n" "${yellow}[AVISO] ${cyan}$msg${rst}"
+	echo -e "${WARN} ${*}${reset}"
+}
+export -f msg_warn
+
+# Função para exibir mensagens informativas
+msg_err() {
+	#	printf "%s\n" "${red}[ERRO] ${cyan}$1${rst}"
+	echo -e "${CROSS} ${*}${reset}"
+}
+
+replicate() {
+	local char=${1:-'#'}
+	local nsize=${2:-$(tput cols)}
+	local ccolor=${3:-$green}
+	local line
+	printf -v line "%*s" "$nsize" && echo -e "${ccolor}${line// /$char}${rst}"
+}
+
+maxcol() {
+	COLUMNS=$(stty size)
+	COLUMNS=${COLUMNS##* }
+	((COLUMNS <= 0)) && COLUMNS=80
+	echo "$COLUMNS"
+}
+
+is_target_native() {
+	# Como verificar se o alvo é executável nativamente é complicado,
+	# isolamos isso numa única função. Assim fica fácil checar em
+	# qualquer lugar.
+	local target_arch
+
+	target_arch="$1"
+	# isso cobre a maioria dos casos
+	if [ "${target_arch%-musl}" = "${HOSTARCH%-musl}" ]; then
+		return 0
+	fi
+
+	case "$HOSTARCH" in
+	# ppc64le não tem variante de 32 bits, só roda o que é dele mesmo
+	ppc64le*) return 1 ;;
+	# x86_64 também roda i686
+	x86_64*) test -z "${target_arch##*86*}" ;;
+	# aarch64 também roda armv*
+	aarch64*) test -z "${target_arch##armv*}" ;;
+	# ppc64 big-endian também roda ppc
+	ppc64*) test "${target_arch%-musl}" = "ppc" ;;
+	# qualquer outro caso só roda o que é dele mesmo
+	*) return 1 ;;
+	esac
+
+	return $?
+}
+
+info_msg() {
+	((++ncontador))
+	# Esta função centraliza a impressão em negrito usada em todos os
+	# scripts. É uma função de conveniência para que os códigos de
+	# escape ASCII, um tanto feios, fiquem concentrados num único lugar.
+	#   printf "\033[1m%s\n\033[m" "$@"
+	printf "↑ ${cyan}%03d/%03d => ${yellow}%s\n\033[m" "$ncontador" "$njobs" "$@"
+}
+
+check_tools() {
+	# Todos os scripts do mklive declaram as ferramentas que vão usar
+	# numa variável chamada "REQTOOLS". Esta função checa se essas
+	# ferramentas estão disponíveis e imprime o caminho de cada uma
+	# que será usada. Isso pode ajudar a descobrir o que está quebrado
+	# caso uma versão diferente de alguma ferramenta esteja sendo usada.
+	local tool_path
+	info_msg "As seguintes ferramentas serão usadas:"
+	for tool in $LIBTOOLS $REQTOOLS; do
+		tool_path=$(command -v "$tool") || die "A ferramenta obrigatória $tool não está disponível neste sistema!"
+		$quiet || echo "$tool_path"
+	done
+}
+
+mount_pseudofs() {
+	# Esta função garante que os pontos de montagem do pseudofs estejam
+	# presentes no chroot. A rigor, eles não são necessários para muitos
+	# comandos, mas bind-mounts são baratos e não custa nada montá-los
+	# sempre.
+	for f in dev proc sys; do
+		# Num chroot "nu" não existe nada para servir de destino do
+		# bind-mount, então primeiro é preciso criar os diretórios.
+		[ ! -d "$ROOTFS/$f" ] && mkdir -p "$ROOTFS/$f"
+		if ! mountpoint -q "$ROOTFS/$f"; then
+			# É MUITO importante que isso só aconteça se o pseudofs
+			# ainda não estiver montado. Se já estiver, isso se torna
+			# praticamente impossível de depurar, porque parece que o
+			# umount seguinte simplesmente não está funcionando.
+			mount -r --rbind /$f "$ROOTFS/$f" --make-rslave
+		fi
+	done
+	if ! mountpoint -q "$ROOTFS/tmp"; then
+		mkdir -p "$ROOTFS/tmp"
+		mount -o mode=0755,nosuid,nodev -t tmpfs tmpfs "$ROOTFS/tmp"
+	fi
+}
+
+umount_pseudofs() {
+	info_msg "Desmontando chroot"
+	run_cmd '
+    if [ -d "${ROOTFS}" ]; then
+      for f in dev proc sys; do
+        umount -R -f "$ROOTFS/$f" >/dev/null 2>&1
+      done
+    fi
+    umount -f "$ROOTFS/tmp" >/dev/null 2>&1
+  '
+}
+
+run_cmd_target() {
+	info_msg "Executando $* para o alvo $XBPS_TARGET_ARCH ..."
+
+	if is_target_native "$XBPS_TARGET_ARCH"; then
+		# Está rodando na mesma arquitetura do host, então devemos
+		# definir XBPS_ARCH.
+		if ! eval XBPS_ARCH="$XBPS_TARGET_ARCH" "$@"; then
+			die "Não foi possível executar o comando $*"
+		fi
+	else
+		# Está rodando numa arquitetura estrangeira, então devemos
+		# definir XBPS_TARGET_ARCH. Nesse caso o XBPS não vai tentar
+		# certas ações e vai exigir reconfiguração depois.
+		if ! eval XBPS_TARGET_ARCH="$XBPS_TARGET_ARCH" "$@"; then
+			die "Não foi possível executar o comando $*"
+		fi
+	fi
+}
+
+run_cmd_chroot() {
+	# register_binfmt e mount_pseudofs são idempotentes, mas já são
+	# garantidos pelo fluxo de main() antes da primeira chamada aqui —
+	# não precisam ser refeitos a cada uma das ~6 chamadas de
+	# run_cmd_chroot por build.
+	if $quiet; then
+		chroot "$1" sh -c "$2" >/dev/null 2>&1
+	else
+		chroot "$1" sh -c "$2"
+	fi
+}
+
+cleanup_chroot() {
+	umount_pseudofs
+}
+
+register_binfmt() {
+	# Esta função prepara tudo que é necessário para conseguir dar
+	# chroot numa ROOTFS e rodar comandos lá dentro. Isso importa muito
+	# em plataformas onde a arquitetura do host é diferente da do alvo,
+	# e onde não seria possível rodar coisas como xbps-reconfigure -a.
+	# Esta função é idempotente (pode ser executada várias vezes sem
+	# alterar o estado). Ela não recebe argumentos, mas espera que a
+	# variável global $XBPS_TARGET_ARCH esteja definida.
+
+	# Este select configura os bytes "mágicos" em /proc que permitem ao
+	# kernel selecionar um interpretador alternativo. Mais valores para
+	# esse mapa podem ser obtidos aqui:
+	# https://github.com/qemu/qemu/blob/master/scripts/qemu-binfmt-conf.sh
+
+	# Se XBPS_TARGET_ARCH não estiver definida mas PLATFORM for
+	# conhecida, pode ser possível definir a arquitetura a partir do
+	# mapa estático de plataformas.
+	if [ -z "$XBPS_TARGET_ARCH" ] && [ ! -z "$PLATFORM" ]; then
+		set_target_arch_from_platform
+	fi
+
+	# No caso especial em que o build é nativo, podemos retornar sem
+	# fazer mais nada.
+	# Esta é apenas uma checagem básica para arquiteturas idênticas,
+	# com checagens mais cuidadosas abaixo para casos como
+	# ppc64 -> ppc e x86_64 -> i686.
+	_hostarch="${HOSTARCH%-musl}"
+	_targetarch="${XBPS_TARGET_ARCH%-musl}"
+	if [ "$_hostarch" = "$_targetarch" ]; then
+		return
+	fi
+
+	case "${_targetarch}" in
+	armv*)
+		# TODO: detectar hosts aarch64 que rodam ARM de 32 bits sem qemu (alguns não conseguem)
+		if ([ "${_targetarch}" = "armv6l" ] && [ "${_hostarch}" = "armv7l" ]); then
+			return
+		fi
+		if [ "${_targetarch}" = "armv5tel" -a \
+			\( "${_hostarch}" = "armv6l" -o "${_hostarch}" = "armv7l" \) ]; then
+			return
+		fi
+		_cpu=arm
+		_magic="\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00"
+		_mask="\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff"
+		;;
+	aarch64)
+		_cpu=aarch64
+		_magic="\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7"
+		_mask="\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff"
+		;;
+	ppc64le)
+		_cpu=ppc64le
+		_magic="\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x15\x00"
+		_mask="\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\x00"
+		;;
+	ppc64)
+		_cpu=ppc64
+		_magic="\x7fELF\x02\x02\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x15"
+		_mask="\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff"
+		;;
+	ppc)
+		if [ "$_hostarch" = "ppc64" ]; then
+			return
+		fi
+		_cpu=ppc
+		_magic="\x7fELF\x01\x02\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x14"
+		_mask="\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff"
+		;;
+	mipsel)
+		if [ "$_hostarch" = "mips64el" ]; then
+			return
+		fi
+		_cpu=mipsel
+		_magic="\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x08\x00"
+		_mask="\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff"
+		;;
+	x86_64)
+		_cpu=x86_64
+		_magic="\x7f\x45\x4c\x46\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x3e\x00"
+		_mask="\xff\xff\xff\xff\xff\xfe\xfe\xfc\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff"
+		;;
+	i686)
+		if [ "$_hostarch" = "x86_64" ]; then
+			return
+		fi
+		_cpu=i386
+		_magic="\x7f\x45\x4c\x46\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x03\x00"
+		_mask="\xff\xff\xff\xff\xff\xfe\xfe\xff\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff"
+		;;
+	*)
+		die "Arquitetura alvo desconhecida!"
+		;;
+	esac
+
+	# Para builds que não correspondem à arquitetura do host, será
+	# necessário o binário correto do qemu.
+	QEMU_BIN="qemu-${_cpu}-static"
+	if ! $QEMU_BIN -version >/dev/null 2>&1; then
+		die "o binário $QEMU_BIN não está presente no sistema, saindo."
+	fi
+
+	# Para usar o sistema binfmt, o ponto de montagem binfmt_misc precisa
+	# existir dentro de /proc
+	if ! mountpoint -q /proc/sys/fs/binfmt_misc; then
+		modprobe -q binfmt_misc
+		mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc 2>/dev/null
+	fi
+
+	# Só registra se o mapa estiver incompleto
+	if [ ! -f /proc/sys/fs/binfmt_misc/qemu-$_cpu ]; then
+		echo ":qemu-$_cpu:M::$_magic:$_mask:/usr/bin/$QEMU_BIN:F" >/proc/sys/fs/binfmt_misc/register 2>/dev/null
+	fi
+}
+
+set_target_arch_from_platform() {
+	# Esta função mantém uma tabela de correspondência entre plataforma
+	# e arquitetura alvo. Isso é necessário para scripts que precisam
+	# saber a arquitetura alvo, mas não necessariamente precisam saber
+	# disso internamente (i.e. só run_cmd_chroot).
+	case "$PLATFORM" in
+	bananapi*) XBPS_TARGET_ARCH="armv7l" ;;
+	beaglebone*) XBPS_TARGET_ARCH="armv7l" ;;
+	cubieboard2* | cubietruck*) XBPS_TARGET_ARCH="armv7l" ;;
+	odroid-u2*) XBPS_TARGET_ARCH="armv7l" ;;
+	odroid-c2*) XBPS_TARGET_ARCH="aarch64" ;;
+	rpi-aarch64*) XBPS_TARGET_ARCH="aarch64" ;;
+	rpi-armv7l*) XBPS_TARGET_ARCH="armv7l" ;;
+	rpi-armv6l*) XBPS_TARGET_ARCH="armv6l" ;;
+	ci20*) XBPS_TARGET_ARCH="mipsel" ;;
+	i686*) XBPS_TARGET_ARCH="i686" ;;
+	x86_64*) XBPS_TARGET_ARCH="x86_64" ;;
+	GCP*) XBPS_TARGET_ARCH="x86_64" ;;
+	pinebookpro*) XBPS_TARGET_ARCH="aarch64" ;;
+	pinephone*) XBPS_TARGET_ARCH="aarch64" ;;
+	rock64*) XBPS_TARGET_ARCH="aarch64" ;;
+	*) die "$APP: Não foi possível calcular a arquitetura alvo a partir da plataforma" ;;
+	esac
+
+	if [ -z "${PLATFORM##*-musl}" ]; then
+		XBPS_TARGET_ARCH="${XBPS_TARGET_ARCH}-musl"
+	fi
+}
+
+set_dracut_args_from_platform() {
+	# Em casos raros é necessário definir argumentos do dracut
+	# específicos da plataforma. Isso ocorre principalmente em
+	# plataformas ARM.
+	case "$PLATFORM" in
+	*) ;;
+	esac
+}
+
+set_cachedir() {
+	# Os artefatos de pacotes são cacheáveis, mas precisam ficar
+	# isolados do cache do host.
+	: "${XBPS_CACHEDIR:=--cachedir=$PWD/xbps-cache/${XBPS_TARGET_ARCH}}"
+}
+
+select_mirrors_dialog() {
+	local cgithub='/vg/void-mirror/extra'
+	local cvc='/vg/void-mirror'
+	local cfastly='https://repo-fastly.voidlinux.org'
+	local cvoidbr='https://void.voidbr.org/voidlinux'
+	local cvoidlinux='https://void.voidlinux.com.br/voidlinux'
+	local cchili='https://void.chililinux.com/voidlinux'
+	local repo
+	declare -a repos=()
+
+	if ! $automatic; then
+		repo=$(
+			dialog \
+				--stdout \
+				--clear \
+				--backtitle "Seleção de Mirror do Void Linux" \
+				--title "Selecione um ou mais mirrors" \
+				--checklist "Use ESPAÇO para marcar e ENTER para confirmar:" \
+				00 00 00 \
+				$cgithub "Mirror Brasil VoidLinux" on \
+				$cvc "Mirror Brasil VoidLinux" on \
+				$cvoidbr "Mirror Brasil VoidBR" off \
+				$cvoidlinux "Mirror Brasil VoidLinux" off \
+				$cchili "Mirror Brasil ChiliLinux" off \
+				$cfastly "Mirror Oficial Fastly" on
+		)
+
+		status=$?
+		if ((status != 0)); then
+			echo "Cancelado."
+			return 1
+		fi
+		repos+=("$repo")
+	else
+		repos+=("$cfastly")
+		repos+=("$cgithub")
+		repos+=("$cvc")
+		repos+=("$cvoidbr")
+		repos+=("$cchili")
+		repos+=("$cvoidlinux")
+	fi
+
+	AREPOSITORY=()
+	replicate
+	for mirror in "${repos[@]}"; do
+		if ! test_repo_online "$mirror/current"; then
+			continue
+		fi
+
+		public_repos+=($mirror)
+
+		case $mirror in
+		$cgithub)
+			AREPOSITORY+=("repository=$mirror/current")
+			;;
+		$cvc)
+			AREPOSITORY+=("repository=$mirror/voidlinux/current")
+			AREPOSITORY+=("repository=$mirror/extra")
+			AREPOSITORY+=("repository=$mirror/voidlinux/current/nonfree")
+			AREPOSITORY+=("repository=$mirror/voidlinux/current/multilib")
+			AREPOSITORY+=("repository=$mirror/voidlinux/current/multilib/nonfree")
+			;;
+		$cchili)
+			AREPOSITORY+=("repository=$mirror/extra")
+			;;
+		$cvoidbr | $cvoidlinux | $cchili)
+			AREPOSITORY+=("repository=$mirror/current")
+			AREPOSITORY+=("repository=$mirror/extra")
+			AREPOSITORY+=("repository=$mirror/current/nonfree")
+			AREPOSITORY+=("repository=$mirror/current/multilib")
+			AREPOSITORY+=("repository=$mirror/current/multilib/nonfree")
+			;;
+		*)
+			AREPOSITORY+=("repository=$mirror/current")
+			AREPOSITORY+=("repository=$mirror/current/nonfree")
+			AREPOSITORY+=("repository=$mirror/current/multilib")
+			AREPOSITORY+=("repository=$mirror/current/multilib/nonfree")
+			;;
+		esac
+	done
+
+	XBPS_REPOSITORY="$(
+		printf '%s\n' "${AREPOSITORY[@]}" |
+			sed 's/^repository=/--repository=/' |
+			tr '\n' ' '
+	)"
+
+	#echo "${AREPOSITORY[@]}"
+	#echo
+	#echo "${XBPS_REPOSITORY[@]}"
+	replicate
+
+}
+
+sh_create_etc_xbps_d_conf_00_repository_main_conf() {
+	local conf="$1"
+	#	debug "$conf"
+	mkdir -pv "${conf%/*}"
+	rm -f "$conf"
+	printf '%s\n' "${AREPOSITORY[@]}" >"$conf"
+}
+
+rk33xx_flash_uboot() {
+	local dir="$1"
+	local dev="$2"
+	dd if="${dir}/idbloader.img" of="${dev}" seek=64 conv=notrunc,fsync >/dev/null 2>&1
+	dd if="${dir}/u-boot.itb" of="${dev}" seek=16384 conv=notrunc,fsync >/dev/null 2>&1
+}
+
+# Esta biblioteca é a fonte autoritativa do mapa de plataformas; por
+# causa disso pode ser necessário obter essa informação pela linha de
+# comando. Esta função permite obter essa informação.
+# NOTA: antes rodava automaticamente ao dar `source` no arquivo separado
+# (via `case $1 in ...`), o que disparava select_mirrors_dialog (rede/
+# diálogo) antes de qualquer checagem de permissão. Agora só executa se
+# for chamada explicitamente.
+platform2arch() {
+	PLATFORM="$1"
+	set_target_arch_from_platform
+	echo "$XBPS_TARGET_ARCH"
+}
+
+# ##############################################################################
+#  FIM — funções da antiga lib.mkrootfs.sh
+# ##############################################################################
+
+# die é a função definida acima, que lida com o cleanup dos mounts e a
+# remoção de diretórios temporários caso o programa saia inesperadamente.
+trap 'umount_pseudofs; die "Interrompido! saindo..."' INT TERM HUP
+trap '[ -n "${ROOTFS:-}" ] && umount_pseudofs' EXIT
+
+# Embora, na prática, a gente só suporte um único alvo na maioria destas
+# arquiteturas, isso nos permite referenciá-las de forma rápida e fácil
+# através de XBPS_ARCH. Isso deixa bem mais claro o que está acontecendo
+# mais adiante no script, e facilita consumir o conteúdo delas mais
+# à frente em outros scripts.
 usage() {
 	cat <<_EOF
-Usage: $PROGNAME [options] <arch>
+Uso: $APP [opções] <arch>
 
-Supported architectures: i686, i686-musl, x86_64, x86_64-musl,
+Arquiteturas suportadas: i686, i686-musl, x86_64, x86_64-musl,
                          armv5tel, armv5tel-musl, armv6l, armv6l-musl, armv7l, armv7l-musl
                          aarch64, aarch64-musl,
                          mipsel, mipsel-musl
@@ -114,45 +752,64 @@ Supported architectures: i686, i686-musl, x86_64, x86_64-musl,
                          ppc64le, ppc64le-musl, ppc64, ppc64-musl
 
 
-Options
-    -b <syspkg>   Set an alternative base-system package (defaults to base-voidstrap)
-    -c <dir>      Set XBPS cache directory (defaults to \$PWD/xbps-cachedir-<arch>)
-    -C <file>     Full path to the XBPS configuration file
-    -h            Show this help
-    -r <repo>     Set XBPS repository (may be set multiple times)
-    -x <num>      Use <num> threads to compress the image (dynamic if unset)
-    -o <file>     Filename to write the ROOTFS archive to
-    -V            Show version
-    -q            Quiet (default)
-    -v            Mode verbose
+Opções
+    -b <syspkg>   Define um pacote base-system alternativo (padrão: base-voidstrap)
+    -c <dir>      Define o diretório de cache do XBPS (padrão: \$PWD/xbps-cachedir-<arch>)
+    -C <file>     Caminho completo para o arquivo de configuração do XBPS
+    -h            Mostra esta ajuda
+    -r <repo>     Define um repositório XBPS (pode ser usado múltiplas vezes)
+    -x <num>      Usa <num> threads para comprimir a imagem (dinâmico se não definido)
+    -o <file>     Nome do arquivo onde o pacote ROOTFS será gravado
+    -V            Mostra a versão
+    -q            Modo silencioso (padrão)
+    -v            Modo verboso
 _EOF
 }
 
 # ########################################
-#      SCRIPT EXECUTION STARTS HERE
+#      INÍCIO DA EXECUÇÃO DO SCRIPT
 # ########################################
 
-# Set the default system package.
+# Define o pacote de sistema padrão.
 #SYSPKG="base-minimal"
 #SYSPKG="base-voidstrap"
 #SYSPKG="base-system"
 
-# Boilerplate option parsing.  This script supports the bare minimum
-# needed to build an image.
-while getopts "b:C:c:hr:x:o:vV:qQ" opt; do
+# Parse de opções básico. Este script suporta o mínimo necessário para
+# construir uma imagem.
+declare -a EXTRA_REPOSITORY=()
+while getopts "b:C:c:hr:x:o:vVqQ" opt; do
 	case $opt in
-	b) SYSPKG="$OPTARG" ;;
-	C) XBPS_CONFFILE="-C $OPTARG" ;;
-	c) XBPS_CACHEDIR="--cachedir=$OPTARG" ;;
+	b)
+		[[ "$OPTARG" =~ ^[A-Za-z0-9_.-][A-Za-z0-9_.\ -]*$ ]] || die "Valor inválido para -b: $OPTARG"
+		SYSPKG="$OPTARG"
+		;;
+	C)
+		[[ "$OPTARG" =~ ^[A-Za-z0-9_./-]+$ ]] || die "Valor inválido para -C: $OPTARG"
+		XBPS_CONFFILE="-C $OPTARG"
+		;;
+	c)
+		[[ "$OPTARG" =~ ^[A-Za-z0-9_./-]+$ ]] || die "Valor inválido para -c: $OPTARG"
+		XBPS_CACHEDIR="--cachedir=$OPTARG"
+		;;
 	h)
 		usage
 		exit 0
 		;;
-	r) XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=$OPTARG" ;;
-	x) COMPRESSOR_THREADS="$OPTARG" ;;
-	o) FILENAME="$OPTARG" ;;
+	r)
+		[[ "$OPTARG" =~ ^[A-Za-z0-9_:./-]+$ ]] || die "Valor inválido para -r: $OPTARG"
+		EXTRA_REPOSITORY+=("--repository=$OPTARG")
+		;;
+	x)
+		[[ "$OPTARG" =~ ^[0-9]+$ ]] || die "Valor inválido para -x (esperado número): $OPTARG"
+		COMPRESSOR_THREADS="$OPTARG"
+		;;
+	o)
+		[[ "$OPTARG" =~ ^[A-Za-z0-9_./-]+$ ]] || die "Valor inválido para -o: $OPTARG"
+		FILENAME="$OPTARG"
+		;;
 	V)
-		echo "$PROGNAME @@MKLIVE_VERSION@@"
+		sh_version
 		exit 0
 		;;
 	q | Q) quiet=true ;;
@@ -160,46 +817,78 @@ while getopts "b:C:c:hr:x:o:vV:qQ" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-#XBPS_TARGET_ARCH="$1"
-XBPS_TARGET_ARCH="x86_64"
 
-# Set the XBPS cache
+readonly VALID_ARCHES="i686 i686-musl x86_64 x86_64-musl armv5tel armv5tel-musl armv6l armv6l-musl armv7l armv7l-musl aarch64 aarch64-musl mipsel mipsel-musl ppc ppc-musl ppc64le ppc64le-musl ppc64 ppc64-musl"
+
+XBPS_TARGET_ARCH="${1:-x86_64}"
+
+_valid_arch=false
+for _a in $VALID_ARCHES; do
+	[[ "$XBPS_TARGET_ARCH" == "$_a" ]] && _valid_arch=true && break
+done
+$_valid_arch || die "Arquitetura inválida: $XBPS_TARGET_ARCH (veja -h para a lista suportada)"
+unset _valid_arch _a
+
+# Define o cache do XBPS
 set_cachedir
 
-# This is an aweful hack since the script isn't using privesc
-# mechanisms selectively.  This is a TODO item.
+# Isso é uma gambiarra horrível, já que o script não usa mecanismos de
+# elevação de privilégio de forma seletiva. Isso é um item pendente (TODO).
 if [ "$(id -u)" -ne 0 ]; then
-	die "need root perms to continue, exiting."
+	die "são necessárias permissões de root para continuar, saindo."
+fi
+
+# Checa as ferramentas obrigatórias cedo — antes de select_mirrors_dialog
+# (que já depende de dialog/curl) e antes de qualquer trabalho pesado em
+# main() (download/descompactação de pacotes). Evita gastar tempo e rede
+# só para descobrir depois que falta uma ferramenta essencial.
+check_tools
+
+# Escolha de mirrors (respeita --automatic) só roda aqui, depois de já termos
+# confirmado root e processado -h/-V (que não devem exigir privilégio nem
+# disparar rede/diálogo).
+select_mirrors_dialog
+
+# Soma os repositórios extras pedidos via -r por cima da base escolhida
+# pelos mirrors, preservando o comportamento original (mirrors primeiro,
+# -r complementa).
+if ((${#EXTRA_REPOSITORY[@]})); then
+	XBPS_REPOSITORY="$XBPS_REPOSITORY ${EXTRA_REPOSITORY[*]}"
 fi
 
 main() {
-	# Before going any further, check that the tools that are needed are
-	# present.  If we delayed this we could check for the QEMU binary, but
-	# its a reasonable tradeoff to just bail out now.
-	check_tools
+	# check_tools já rodou antes de main() ser chamada (logo após a
+	# checagem de root) — não precisa ser refeita aqui.
 
-	# If the arch wasn't set let's bail out now, nothing else in this
-	# script will work without knowing what we're trying to build for.
+	# Se a arquitetura não foi definida, aborta agora — nada mais neste
+	# script vai funcionar sem saber para o que estamos construindo.
 	if [ -z "$XBPS_TARGET_ARCH" ]; then
-		echo "$PROGNAME: arch was not set!"
+		echo "$APP: arquitetura não definida!"
 		usage
 		exit 1
 	fi
 
-	# We need to operate on a tempdir, if this fails to create, it is
-	# absolutely crucial to bail out so that we don't hose the system that
-	# is running the script.
+	# Precisamos operar num diretório temporário; se isso falhar ao
+	# criar, é absolutamente crucial abortar para não estragar o
+	# sistema que está rodando o script.
 	info_msg "Setando diretorio de trabalho"
 	run_cmd_eval '
     ROOTFS="base-custom"
     mkdir -p "$ROOTFS" >/dev/null
     sh_create_etc_xbps_d_conf_00_repository_main_conf "$ROOTFS/etc/xbps.d/00-repository-main.conf"
     mkdir -p "$ROOTFS"/var/db/xbps/keys/ >/dev/null
-    cp keys/*.plist "$ROOTFS"/var/db/xbps/keys/ >/dev/null
-  '
+    shopt -s nullglob
+    _keys=(keys/*.plist)
+    shopt -u nullglob
+    if ((${#_keys[@]} == 0)); then
+      msg_info "Nenhuma chave .plist local em ./keys/ — serão obtidas automaticamente na sincronização do repositório (-Sy)"
+    else
+      cp "${_keys[@]}" "$ROOTFS"/var/db/xbps/keys/ >/dev/null
+    fi
+  ' || die "Falha ao preparar o diretório de trabalho da ROOTFS"
 
-	# This sets up files that are important for XBPS to work on the new
-	# filesystem.  It does not actually install anything.
+	# Isso prepara os arquivos importantes para o XBPS funcionar no novo
+	# sistema de arquivos. Não instala nada de fato.
 	run_cmd_target '
     ${XBPS_CMD} \
       -Sy \
@@ -207,23 +896,23 @@ main() {
       $XBPS_CONFFILE $XBPS_CACHEDIR \
       $XBPS_REPOSITORY \
       -r $ROOTFS
-  '
+  ' || die "Falha ao sincronizar/registrar o repositório XBPS na ROOTFS"
 
-	info_msg "Later scripts expect the permissions on / to be the canonical 755, so we set this here."
+	info_msg "Scripts posteriores esperam que as permissões de / sejam o canônico 755, então definimos isso aqui."
 	run_cmd_eval '
     chmod 755 "$ROOTFS"
-  '
+  ' || die "Falha ao ajustar permissões de $ROOTFS"
 
-	# The binfmt setup and pseudofs mountpoints are needed for the qemu
-	# support in cases where we are running things that aren't natively
-	# executable.
+	# A configuração do binfmt e os pontos de montagem do pseudofs são
+	# necessários para o suporte a qemu nos casos em que rodamos coisas
+	# que não são executáveis nativamente.
 	register_binfmt
 	mount_pseudofs
 
-	# With everything setup, we can now run the install to load the
-	# system package into the rootfs.  This will not produce a
-	# bootable system but will instead produce a base component that can
-	# be quickly expanded to perform other actions on.
+	# Com tudo configurado, agora podemos rodar a instalação para
+	# carregar o pacote de sistema na rootfs. Isso não vai produzir um
+	# sistema inicializável, mas sim um componente base que pode ser
+	# rapidamente expandido para realizar outras ações.
 	run_cmd_eval '
     run_cmd_target ${XBPS_CMD} \
       --unpack-only \
@@ -234,15 +923,13 @@ main() {
       $XBPS_REPOSITORY \
       --rootdir $ROOTFS \
       $SYSPKG ${ADDITIONAL_PKGS[*]} ${AEXTRA_PKGS[*]}
-  '
+  ' || die "Falha ao instalar os pacotes do sistema na ROOTFS"
 
-	# Enable en_US.UTF-8 locale and generate it into the target ROOTFS.
-	# This is a bit of a hack since some glibc stuff doesn't really work
-	# correctly without a locale being generated.  While some could argue
-	# that this is an arbitrary or naive choice to enable the en_US
-	# locale, most people using Void are able to work with the English
-	# language at least enough to enable thier preferred locale.  If this
-	# truly becomes an issue in the future this hack can be revisited.
+	# Habilita e gera o locale pt_BR.UTF-8 na ROOTFS alvo. Isso é meio
+	# que uma gambiarra, já que algumas coisas do glibc não funcionam
+	# direito sem um locale gerado. Esse locale foi escolhido por ser o
+	# padrão deste projeto (VoidBR); se isso vier a se tornar um problema
+	# no futuro, essa gambiarra pode ser revisada.
 	if [ -e "$ROOTFS/etc/default/libc-locales" ]; then
 		run_cmd_eval '
       LOCALE=pt_BR.UTF-8
@@ -250,50 +937,50 @@ main() {
     '
 	fi
 
-	# The reconfigure step needs to execute code that's been compiled for
-	# the target architecture.  Since the target isn't garanteed to be the
-	# same as the host, this needs to be done via qemu.
-	info_msg "Reconfiguring packages for ${XBPS_TARGET_ARCH} ..."
+	# A etapa de reconfigure precisa executar código compilado para a
+	# arquitetura alvo. Como o alvo não é necessariamente igual ao do
+	# host, isso precisa ser feito via qemu.
+	info_msg "Reconfigurando pacotes para ${XBPS_TARGET_ARCH} ..."
 
-	# This step sets up enough of the base-files that the chroot will work
-	# and they can be reconfigured natively.  Without this step there
-	# isn't enough configured for ld to work.  This step runs as the host
-	# architecture, but we may need to set up XBPS_ARCH for the target
-	# architecture (but only when compatible).
+	# Esta etapa prepara o suficiente do base-files para que o chroot
+	# funcione e possa ser reconfigurado nativamente. Sem essa etapa não
+	# há configuração suficiente para o ld funcionar. Esta etapa roda
+	# como a arquitetura do host, mas talvez seja preciso definir
+	# XBPS_ARCH para a arquitetura alvo (só quando compatível).
 	run_cmd_eval '
     if is_target_native $XBPS_TARGET_ARCH; then
 	    run_cmd_target xbps-reconfigure --rootdir $ROOTFS base-files
     else
 	    run_cmd_eval xbps-reconfigure --rootdir $ROOTFS base-files
     fi
-  '
-	# Now running as the target system, this step reconfigures the \
-	# base-files completely.  Certain things just won't work in the first
-	# pass, so this cleans up any issues that linger.
-	info_msg "Now running as the target system, this step reconfigures the base-files completely."
+  ' || die "Falha na primeira passada de reconfigure do base-files"
+	# Agora rodando como o sistema alvo, esta etapa reconfigura o
+	# base-files por completo. Certas coisas simplesmente não funcionam
+	# na primeira passada, então isso limpa qualquer problema que reste.
+	info_msg "Agora rodando como o sistema alvo, esta etapa reconfigura o base-files por completo."
 	run_cmd_eval '
     run_cmd_chroot "$ROOTFS" 'env -i xbps-reconfigure -f base-files'
-  '
+  ' || die "Falha na segunda passada de reconfigure do base-files (chroot)"
 
-	info_msg "Once base-files is configured and functional its possible to configure the rest of the"
-	run_cmd_chroot "$ROOTFS" 'xbps-reconfigure -a'
+	info_msg "Com o base-files configurado e funcional, é possível configurar o restante do"
+	run_cmd_chroot "$ROOTFS" 'xbps-reconfigure -a' || die "Falha ao reconfigurar todos os pacotes (xbps-reconfigure -a)"
 
-	# Set the default password.  Previous versions of this script used a
-	# chroot to do this, but that is unnecessary since chpasswd
-	# understands how to operate on chroots without actually needing to be
-	# chrooted.  We also remove the lock file in this step to clean up the
-	# lock on the passwd database, lest it be left in the system and
-	# propogated to other points.
-	info_msg "Setting the default root password ('voidlinux')"
+	# Define a senha padrão. Versões anteriores deste script usavam um
+	# chroot para fazer isso, mas isso é desnecessário já que o chpasswd
+	# sabe operar em chroots sem realmente precisar estar em chroot.
+	# Também removemos o arquivo de lock nesta etapa para limpar o lock
+	# no banco de dados de senhas, evitando que ele fique no sistema e
+	# se propague para outros pontos.
+	info_msg "Definindo a senha padrão do root ('voidlinux')"
 	run_cmd_eval '
     if [ ! -f $ROOTFS/etc/shadow ]; then
       run_cmd_chroot "$ROOTFS" "pwconv"
     fi
-    run_cmd_chroot "$ROOTFS" "echo root:voidlinux | chpasswd -c SHA512" || die "Could not set default credentials"
-    rm -f $ROOTFS/etc/.pwd.lock
+    run_cmd_chroot "$ROOTFS" "echo root:voidlinux | chpasswd -c SHA512" || die "Não foi possível definir as credenciais padrão"
+    rm -f "${ROOTFS:?}"/etc/.pwd.lock
   '
 
-	#perfumery BR
+	#toque BR
 	info_msg "Ativando bash para o usuario root"
 	run_cmd_eval '
     run_cmd_chroot "$ROOTFS" "chsh -s /bin/bash root"
@@ -313,15 +1000,15 @@ main() {
     echo "GRUB_THEME=/boot/grub/themes/void/theme.txt" >>"$ROOTFS/etc/default/grub"
     echo "GRUB_DISABLE_OS_PROBER=true" >>"$ROOTFS/etc/default/grub"
   '
-	# At this point we're done running things in the chroot and we can
-	# clean up the shims.  Failure to do this can result in things hanging
-	# when we try to delete the tmpdir.
+	# Neste ponto já terminamos de rodar coisas no chroot e podemos
+	# limpar os shims. Deixar de fazer isso pode fazer as coisas
+	# travarem quando tentarmos apagar o diretório temporário.
 
 	umount_pseudofs
 
-	# The cache isn't that useful since by the time the ROOTFS will be
-	# used it is likely to be out of date.  Rather than shipping it around
-	# only for it to be out of date, we remove it now.
+	# O cache não é lá muito útil, já que quando a ROOTFS for usada ele
+	# provavelmente já estará desatualizado. Em vez de carregar isso por
+	# aí só para ficar obsoleto, removemos agora.
 	info_msg "Limpando cache"
 	run_cmd_eval '
     : "${ROOTFS:?ROOTFS não definido — abortando para não afetar o host}"
@@ -330,8 +1017,8 @@ main() {
     rm -f "${ROOTFS:?}"/etc/.pwd.lock
   '
 
-	# Finally we can compress the tarball, the name will include the
-	# architecture and the date on which the tarball was built.
+	# Por fim podemos comprimir o tarball; o nome vai incluir a
+	# arquitetura e a data em que o tarball foi criado.
 	#: "${FILENAME:=void-${XBPS_TARGET_ARCH}-ROOTFS-$(date '+%Y%m%d').tar.xz}"
 	#: "${FILENAME:=void-${XBPS_TARGET_ARCH}-${SYSPKG}-$(date '+%Y%m%d').tar.xz}"
 	#: "${FILENAME:=void-${XBPS_TARGET_ARCH}-${SYSPKG}-$(date '+%Y%m%d').tar.zst}"
@@ -349,17 +1036,17 @@ main() {
     #tar -cp --posix --xattrs -C "$ROOTFS" . | xz -T${COMPRESSOR_THREADS:-0} -6 > $FILENAME
     tar -cp --posix --xattrs -C "$ROOTFS" . | xz -T${COMPRESSOR_THREADS:-0} -9 > $FILENAME
     :
-  '
+  ' || die "Falha ao gerar o tarball final"
 
-	# Now that we have the tarball we don't need the rootfs anymore, so we
-	# can get rid of it.
+	# Agora que temos o tarball, não precisamos mais da rootfs, então
+	# podemos nos livrar dela.
 	#	rm -rf "$ROOTFS"
 
-	# Last thing to do before closing out is to let the user know that
-	# this succeeded.  This also ensures that there's something visible
-	# that the user can look for at the end of the script, which can make
-	# it easier to see what's going on if something above failed.
-	info_msg "Successfully created ${green}$FILENAME ${rst}($XBPS_TARGET_ARCH)"
+	# A última coisa a fazer antes de encerrar é avisar o usuário que
+	# deu certo. Isso também garante que haja algo visível para o
+	# usuário procurar no final do script, o que facilita ver o que
+	# está acontecendo caso algo acima tenha falhado.
+	info_msg "Criado com sucesso ${green}$FILENAME ${rst}($XBPS_TARGET_ARCH)"
 }
 
 umount_pseudofs
@@ -370,4 +1057,3 @@ umount_pseudofs
 
 main
 exit
-
