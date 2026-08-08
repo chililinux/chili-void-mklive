@@ -289,7 +289,7 @@ main() {
     if [ ! -f $ROOTFS/etc/shadow ]; then
       run_cmd_chroot "$ROOTFS" "pwconv"
     fi
-    echo root:voidlinux | run_cmd_chroot $ROOTFS chpasswd -c SHA512 || die 'Could not set default credentials'
+    run_cmd_chroot "$ROOTFS" "echo root:voidlinux | chpasswd -c SHA512" || die "Could not set default credentials"
     rm -f $ROOTFS/etc/.pwd.lock
   '
 
@@ -324,12 +324,10 @@ main() {
 	# only for it to be out of date, we remove it now.
 	info_msg "Limpando cache"
 	run_cmd_eval '
-    rm -rf $ROOTFS/var/cache/*
-    rm -fv $ROOTFS/var/cache/xbps/*.xbps
-    rm -fv $ROOTFS/var/cache/xbps/*.sig*
-
-    find $ROOTFS -name '*.a' -delete    # bibliotecas estáticas
-    find $ROOTFS -name '*.la' -delete   # libtool
+    : "${ROOTFS:?ROOTFS não definido — abortando para não afetar o host}"
+    rm -rf "${ROOTFS:?}"/var/cache/*
+    find "${ROOTFS:?}" -name '*.a' -delete
+    rm -f "${ROOTFS:?}"/etc/.pwd.lock
   '
 
 	# Finally we can compress the tarball, the name will include the
@@ -365,10 +363,11 @@ main() {
 }
 
 umount_pseudofs
+#for i in "${aSysPkg[@]}"; do
+#	SYSPKG="$i"
+#	main
+#done
+
 main
 exit
 
-for i in "${aSysPkg[@]}"; do
-	SYSPKG="$i"
-	main
-done
