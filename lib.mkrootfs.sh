@@ -26,16 +26,12 @@ violet=$(tput setaf 61)
 COL_NC='\e[0m' # No Color
 COL_LIGHT_GREEN='\e[1;32m'
 COL_LIGHT_RED='\e[1;31m'
-#  TICK="${white}[${COL_LIGHT_GREEN}✓ OK${COL_NC}${white}]"
-#   CROSS="${white}[${COL_LIGHT_RED}✗ERR${COL_NC}${white}]"
-#   INFO="[i]"
-#   : "${clrkey=${rst}${light_white}}"
 : "${clrkey=${rst}${black}}"
-: "${TICK="${clrkey}[${green} ✓ ${clrkey}]${rst}"}"
-: "${CROSS="${clrkey}[${red} ✗ ${clrkey}]${rst}"}"
-: "${MID="${clrkey}[${red}✗✗${green}✓${clrkey}]${rst}"}"
-: "${WARN="${clrkey}[${yellow}⚠  ${clrkey}]${yellow}"}"
-: "${INFO="${clrkey}[${yellow}➡  ${clrkey}]${rst}"}"
+: "${TICK="${clrkey}[${green}✓ ${clrkey}]${rst}"}"
+: "${CROSS="${clrkey}[${red}✗ ${clrkey}]${rst}"}"
+: "${MID="${clrkey}[${red}✗${green}✓${clrkey}]${rst}"}"
+: "${WARN="${clrkey}[${yellow}⚠${clrkey}]${yellow}"}"
+: "${INFO="${clrkey}[${yellow}➜${clrkey}]${rst}"}"
 # shellcheck disable=SC2034
 DONE="${COL_LIGHT_GREEN} done!${COL_NC}"
 OVER="\\r\\033[K"
@@ -91,37 +87,61 @@ test_repo_online() {
 		;;
 	esac
 
-#	printf 'RET=%s URL=%s\n' "$ret" "$url" >&2
-  if [[ $ret -eq 0 ]]; then
-    	msg "Testando $url => "
-      printf '\033[1;32mONLINE\033[0m\n'
-  else
-   	msg "Testando $url => "
-	  printf '\033[1;31mOFFLINE\033[0m\n'
-  fi
+	#	printf 'RET=%s URL=%s\n' "$ret" "$url" >&2
+	if [[ $ret -eq 0 ]]; then
+		msg "Testando $url => "
+		printf '\033[1;32mONLINE\033[0m\n'
+	else
+		msg "Testando $url => "
+		printf '\033[1;31mOFFLINE\033[0m\n'
+	fi
 	return "$ret"
 }
 export -f test_repo_online
 
-run_cmd() {
-	local cmd="$*"
+run_cmd_eval() {
+	local cmd="$1"
+	local rc
 
-	msg_tab "${cyan}[⚙   ] [running] : ${reset} $cmd"
-	# executa comando
-	$quiet && eval "$@" >/dev/null 2>&1 || eval "$@"
-	local rc=$?
+	if ! $quiet; then
+		msg_tab "${cyan}[⚙ ] [running] : ${rst} $cmd"
+	fi
+
+	eval "$cmd"
+	rc=$?
 
 	# ignora erro para mkdir -p e umount -R
 	if [[ "$cmd" =~ ^mkdir[[:space:]]+-p ]] || [[ "$cmd" =~ ^umount[[:space:]]+-R ]]; then
 		return 0
 	fi
 
-	# erro real
-	if ((rc != 0)); then
+	if ((rc)); then
 		log_warn_tab "Falha ao executar: $cmd"
-		. return $rc
+		return "$rc"
+	fi
+	return 0
+}
+
+run_cmd() {
+	local cmd="$1"
+	local rc
+
+	if ! $quiet; then
+		msg_tab "${cyan}[⚙ ] [running] : ${rst} $cmd"
 	fi
 
+	eval "$cmd"
+	rc=$?
+
+	# ignora erro para mkdir -p e umount -R
+	if [[ "$cmd" =~ ^mkdir[[:space:]]+-p ]] || [[ "$cmd" =~ ^umount[[:space:]]+-R ]]; then
+		return 0
+	fi
+
+	if ((rc)); then
+		#    log_warn_tab "Falha ao executar: $cmd"
+		return "$rc"
+	fi
 	return 0
 }
 
@@ -217,12 +237,12 @@ info_msg() {
 }
 
 die() {
-  local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
-  local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
-  local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
-  echo -e "${CROSS}${red}ERROR: $*"
-  error_out 1 $LINENO
-  exit 1
+	local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
+	local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
+	local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
+	echo -e "${CROSS}${red}ERROR: $*"
+	error_out 1 $LINENO
+	exit 1
 }
 
 check_tools() {
@@ -271,21 +291,20 @@ mount_pseudofs() {
 }
 
 umount_pseudofs() {
-	# This function cleans up the mounts in the chroot.  Failure to
-	# clean up these mounts will prevent the tmpdir from being
-	# deletable instead throwing the error "Device or Resource Busy".
-	# The '-f' option is passed to umount to account for the
-	# contingency where the psuedofs mounts are not present.
-	if [ -d "${ROOTFS}" ]; then
-		for f in dev proc sys; do
-			umount -R -f "$ROOTFS/$f" >/dev/null 2>&1
-		done
-	fi
-	umount -f "$ROOTFS/tmp" >/dev/null 2>&1
+	info_msg "Desmontando chroot"
+	run_cmd '
+    if [ -d "${ROOTFS}" ]; then
+      for f in dev proc sys; do
+        umount -R -f "$ROOTFS/$f" >/dev/null 2>&1
+      done
+    fi
+    umount -f "$ROOTFS/tmp" >/dev/null 2>&1
+  '
 }
 
 run_cmd_target() {
 	info_msg "Running $* for target $XBPS_TARGET_ARCH ..."
+
 	if is_target_native "$XBPS_TARGET_ARCH"; then
 		# This is being run on the same architecture as the host,
 		# therefore we should set XBPS_ARCH.
@@ -303,32 +322,12 @@ run_cmd_target() {
 }
 
 run_cmd_chroot() {
-	# General purpose chroot function which makes sure the chroot is
-	# prepared.  This function takes 2 arguments, the location to
-	# chroot to and the command to run.
-
-	# This is an idempotent function, it is safe to call every time
-	# before entering the chroot.  This has the advantage of making
-	# execution in the chroot appear as though it "Just Works(tm)".
 	register_binfmt
-
-	# Before we step into the chroot we need to make sure the
-	# pseudo-filesystems are ready to go.  Not all commands will need
-	# this, but its still a good idea to call it here anyway.
 	mount_pseudofs
-
-	# With assurance that things will run now we can jump into the
-	# chroot and run stuff!
-	chroot "$1" sh -c "$2"
-	#	chroot "$1" bash -c "$2"
+	$quiet chroot "$1" sh -c "$2" >/dev/null 2>&1 || chroot "$1" sh -c "$2"
 }
 
 cleanup_chroot() {
-	# This function cleans up the chroot shims that are used by QEMU
-	# to allow builds on alien platforms.  It takes no arguments but
-	# expects the global $ROOTFS variable to be set.
-
-	# Un-Mount the pseudofs mounts if they were mounted
 	umount_pseudofs
 }
 
@@ -540,7 +539,7 @@ select_mirrors_dialog() {
 	fi
 
 	AREPOSITORY=()
-  replicate
+	replicate
 	for mirror in "${repos[@]}"; do
 		if ! test_repo_online "$mirror/current"; then
 			continue
