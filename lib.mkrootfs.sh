@@ -236,15 +236,6 @@ info_msg() {
 	printf "↑ ${cyan}%03d/%03d => ${yellow}%s\n\033[m" "$ncontador" "$njobs" "$@"
 }
 
-die() {
-	local script_name0="${0##*/}[${FUNCNAME[0]}]:${BASH_LINENO[0]}"
-	local script_name1="${0##*/}[${FUNCNAME[1]}]:${BASH_LINENO[1]}"
-	local script_name2="${0##*/}[${FUNCNAME[2]}]:${BASH_LINENO[2]}"
-	echo -e "${CROSS}${red}ERROR: $*"
-	error_out 1 $LINENO
-	exit 1
-}
-
 check_tools() {
 	# All scripts within mklive declare the tools they will use in a
 	# variable called "REQTOOLS".  This function checks that these
@@ -324,7 +315,11 @@ run_cmd_target() {
 run_cmd_chroot() {
 	register_binfmt
 	mount_pseudofs
-	$quiet chroot "$1" sh -c "$2" >/dev/null 2>&1 || chroot "$1" sh -c "$2"
+	if $quiet; then
+		chroot "$1" sh -c "$2" >/dev/null 2>&1
+	else
+		chroot "$1" sh -c "$2"
+	fi
 }
 
 cleanup_chroot() {
@@ -487,13 +482,6 @@ set_cachedir() {
 	# The package artifacts are cacheable, but they need to be isolated
 	# from the host cache.
 	: "${XBPS_CACHEDIR:=--cachedir=$PWD/xbps-cache/${XBPS_TARGET_ARCH}}"
-}
-
-replicate() {
-	local char="${1:-#}"
-	local nsize="${2:-$(tput cols)}"
-	# Gera linha com substituição direta sem forks extras
-	printf -v _line "%*s" "$nsize" && printf '%b\n' "${blue}${_line// /$char}${reset}"
 }
 
 select_mirrors_dialog() {
