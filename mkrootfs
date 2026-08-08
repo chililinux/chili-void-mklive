@@ -9,8 +9,7 @@
 #
 #  mkrootfs
 #  Created: seg 23 fev 2026 13:26:23 -04
-#  Altered: seg 23 fev 2026 13:26:23 -04
-#  Updated: seg 23 fev 2026 13:26:23 -04
+#  Updated: sáb 08 ago 2026 11:38:01 -04
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -41,67 +40,49 @@ export PS4='${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset}'
 #set -e
 shopt -s extglob
 
-declare quiet=false
+declare -g quiet=false
 declare -i njobs=12
 declare -i ncontador=0
 readonly PROGNAME=$(basename "$0")
 readonly ARCH=$(uname -m)
 readonly REQTOOLS="xbps-install xbps-reconfigure tar xz"
 readonly aSysPkg=(base-minimal base-voidstrap base-system base-custom)
+readonly XBPS_CMD='xbps-install'
 
 LCUSTOM=false
 #SYSPKG="base-minimal"
 #SYSPKG="base-system"
-SYSPKG="base-voidstrap"
+SYSPKG="base-voidstrap voidbr-vinstall voidbr-xbps"
 
 # MINIMAL
-declare ADDITIONAL_PKGS="bash bash-completion dhcpcd dracut iw"
-declare AEXTRA_PKGS="voidbr-base-config voidbr-vinstall fzf"
-
-# SOMENTE ROOTFS
-#declare ADDITIONAL_PKGS="dbus e2fsprogs glibc-locales grub xz zstd"
-#ADDITIONAL_PKGS+=" os-prober grub-x86_64-efi grub-terminus"
-#ADDITIONAL_PKGS+=" bash-completion nano wget curl"
-#ADDITIONAL_PKGS+=" cpio dracut ncurses parted"
-#ADDITIONAL_PKGS+=" voidbr-utils"
-#ADDITIONAL_PKGS+=" chili-utils"
-#ADDITIONAL_PKGS+=" chili-void-grub-theme" # repository=https://chililinux.com/void/current
-#ADDITIONAL_PKGS+=" nano-syntax-highlighting"
-#ADDITIONAL_PKGS+=" pv gettext dialog"
-
-#         ADDITIONAL_PKGS+=" grc"
-#         ADDITIONAL_PKGS+=" socklog-void"
-#         ADDITIONAL_PKGS+=" xtools"
-#         ADDITIONAL_PKGS+=" tree"
-#         ADDITIONAL_PKGS+=" voidbr-pkgmake"                        # repository=https://chililinux.com/void/current
-#         ADDITIONAL_PKGS+=" git"
-#         ADDITIONAL_PKGS+=" rsync"
-#         ADDITIONAL_PKGS+=" vpm"
-# Repositório ChiliLinux
-#         ADDITIONAL_PKGS+=" kpartx"
-#         ADDITIONAL_PKGS+=" net-tools"
-#         ADDITIONAL_PKGS+=" tmate"
-#         ADDITIONAL_PKGS+=" linux"
-#         ADDITIONAL_PKGS+=" linux-headers"
-#         ADDITIONAL_PKGS+=" linux-firmware"
-#         ADDITIONAL_PKGS+=" linux-firmware-network"
-#         ADDITIONAL_PKGS+=" ipw2100-firmware ipw2200-firmware zd1211-firmware"
-#         ADDITIONAL_PKGS+=" wifi-firmware linux-firmware-broadcom"
+declare -a ADDITIONAL_PKGS=(
+	bash-completion
+	dracut
+	voidbr-base-config
+	voidbr-vinstall
+	fzf
+	eza
+)
+declare -a AEXTRA_PKGS=(
+	dialog
+	pv
+	gettext
+	parted
+	gptfdisk
+)
 
 automatic=false
 new_args=()
 for arg in "$@"; do
-  if [[ "$arg" == "--automatic" ]]; then
-    automatic=true
-    continue
-  fi
-  new_args+=("$arg")
+	if [[ "$arg" == "--automatic" ]]; then
+		automatic=true
+		continue
+	fi
+	new_args+=("$arg")
 done
 
 # substitui os argumentos atuais
 set -- "${new_args[@]}"
-
-
 
 # This source pulls in all the functions from lib.sh.  This set of
 # functions makes it much easier to work with chroots and abstracts
@@ -113,7 +94,8 @@ source ./lib.mkrootfs.sh
 # Die is a function provided in lib.sh which handles the cleanup of
 # the mounts and removal of temporary directories if the running
 # program exists unexpectedly.
-trap 'die "Interrupted! exiting..."' INT TERM HUP
+trap 'umount_pseudofs; die "Interrupted! exiting..."' INT TERM HUP
+#trap 'umount_pseudofs' EXIT
 
 # Even though we only support really one target for most of these
 # architectures this lets us refer to these quickly and easily by
@@ -207,35 +189,31 @@ main() {
 	# We need to operate on a tempdir, if this fails to create, it is
 	# absolutely crucial to bail out so that we don't hose the system that
 	# is running the script.
-	run_cmd  '
-        ROOTFS="base-custom"
-        mkdir -p "$ROOTFS"
-        sh_create_etc_xbps_d_conf_00_repository_main_conf
-    '
-
-	# This maintains the chain of trust, the keys in the repo are known to
-	# be good and so we copy those.  Why don't we just use the ones on the
-	# host system?  That's a good point, but there's no promise that the
-	# system running the script is Void, or that those keys haven't been
-	# tampered with.  Its much easier to use these since the will always
-	# exist.
-
-	run_cmd  '
-        mkdir -p "$ROOTFS/var/db/xbps/keys"
-        cp keys/*.plist "$ROOTFS/var/db/xbps/keys"
-	'
+	info_msg "Setando diretorio de trabalho"
+	run_cmd_eval '
+    ROOTFS="base-custom"
+    mkdir -p "$ROOTFS" >/dev/null
+    sh_create_etc_xbps_d_conf_00_repository_main_conf "$ROOTFS/etc/xbps.d/00-repository-main.conf"
+    mkdir -p "$ROOTFS"/var/db/xbps/keys/ >/dev/null
+    cp keys/*.plist "$ROOTFS"/var/db/xbps/keys/ >/dev/null
+  '
 
 	# This sets up files that are important for XBPS to work on the new
 	# filesystem.  It does not actually install anything.
-	run_cmd '
-        run_cmd_target "xbps-install -Sy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS"
-    '
+	run_cmd_target '
+    ${XBPS_CMD} \
+      -Sy \
+      --ignore-file-conflicts \
+      $XBPS_CONFFILE $XBPS_CACHEDIR \
+      $XBPS_REPOSITORY \
+      -r $ROOTFS
+  '
 
-	# Later scripts expect the permissions on / to be the canonical 755,
-	# so we set this here.
-	run_cmd '
-        chmod 755 "$ROOTFS"
-    '
+	info_msg "Later scripts expect the permissions on / to be the canonical 755, so we set this here."
+	run_cmd_eval '
+    chmod 755 "$ROOTFS"
+  '
+
 	# The binfmt setup and pseudofs mountpoints are needed for the qemu
 	# support in cases where we are running things that aren't natively
 	# executable.
@@ -246,10 +224,18 @@ main() {
 	# system package into the rootfs.  This will not produce a
 	# bootable system but will instead produce a base component that can
 	# be quickly expanded to perform other actions on.
-	run_cmd '
-		run_cmd_target "xbps-install -Uy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS -y $SYSPKG $ADDITIONAL_PKGS"
-		run_cmd_target "xbps-install -Uy $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS -y $SYSPKG $AEXTRA_PKGS"
-	'
+	run_cmd_eval '
+    run_cmd_target ${XBPS_CMD} \
+      --unpack-only \
+      --yes \
+      --ignore-file-conflicts \
+      $XBPS_CONFFILE \
+      $XBPS_CACHEDIR \
+      $XBPS_REPOSITORY \
+      --rootdir $ROOTFS \
+      $SYSPKG ${ADDITIONAL_PKGS[*]} ${AEXTRA_PKGS[*]}
+  '
+
 	# Enable en_US.UTF-8 locale and generate it into the target ROOTFS.
 	# This is a bit of a hack since some glibc stuff doesn't really work
 	# correctly without a locale being generated.  While some could argue
@@ -258,10 +244,10 @@ main() {
 	# language at least enough to enable thier preferred locale.  If this
 	# truly becomes an issue in the future this hack can be revisited.
 	if [ -e "$ROOTFS/etc/default/libc-locales" ]; then
-		run_cmd '
-            LOCALE=pt_BR.UTF-8
-            sed -e "s/\#\(${LOCALE}.*\)/\1/g" -i "$ROOTFS/etc/default/libc-locales"
-        '
+		run_cmd_eval '
+      LOCALE=pt_BR.UTF-8
+      sed -e "s/\#\(${LOCALE}.*\)/\1/g" -i "$ROOTFS/etc/default/libc-locales"
+    '
 	fi
 
 	# The reconfigure step needs to execute code that's been compiled for
@@ -274,26 +260,23 @@ main() {
 	# isn't enough configured for ld to work.  This step runs as the host
 	# architecture, but we may need to set up XBPS_ARCH for the target
 	# architecture (but only when compatible).
-	run_cmd '
-    	if is_target_native "$XBPS_TARGET_ARCH"; then
-	    	run_cmd_target "xbps-reconfigure --rootdir $ROOTFS base-files"
-    	else
-	    	run_cmd "xbps-reconfigure --rootdir $ROOTFS base-files"
-    	fi
-    '
-
-	# Now running as the target system, this step reconfigures the
+	run_cmd_eval '
+    if is_target_native $XBPS_TARGET_ARCH; then
+	    run_cmd_target xbps-reconfigure --rootdir $ROOTFS base-files
+    else
+	    run_cmd_eval xbps-reconfigure --rootdir $ROOTFS base-files
+    fi
+  '
+	# Now running as the target system, this step reconfigures the \
 	# base-files completely.  Certain things just won't work in the first
 	# pass, so this cleans up any issues that linger.
-	run_cmd '
-        run_cmd_chroot "$ROOTFS" "env -i xbps-reconfigure -f base-files"
-    '
+	info_msg "Now running as the target system, this step reconfigures the base-files completely."
+	run_cmd_eval '
+    run_cmd_chroot "$ROOTFS" 'env -i xbps-reconfigure -f base-files'
+  '
 
-	# Once base-files is configured and functional its possible to
-	# configure the rest of the system.
-	run_cmd '
-        run_cmd_chroot "$ROOTFS" "xbps-reconfigure -a"
-    '
+	info_msg "Once base-files is configured and functional its possible to configure the rest of the"
+	run_cmd_chroot "$ROOTFS" 'xbps-reconfigure -a'
 
 	# Set the default password.  Previous versions of this script used a
 	# chroot to do this, but that is unnecessary since chpasswd
@@ -301,53 +284,53 @@ main() {
 	# chrooted.  We also remove the lock file in this step to clean up the
 	# lock on the passwd database, lest it be left in the system and
 	# propogated to other points.
-	run_cmd '
-    	info_msg "Setting the default root password ('voidlinux')"
-    	if [ ! -f "$ROOTFS/etc/shadow" ]; then
-            run_cmd_chroot "$ROOTFS" pwconv
-        fi
-        echo root:voidlinux | run_cmd_chroot "$ROOTFS" "chpasswd -c SHA512" || die "Could not set default credentials"
-        rm -f "$ROOTFS/etc/.pwd.lock"
-        run_cmd_chroot "$ROOTFS" "cp -Rpva /etc/skel/. /root/"
-    '
+	info_msg "Setting the default root password ('voidlinux')"
+	run_cmd_eval '
+    if [ ! -f $ROOTFS/etc/shadow ]; then
+      run_cmd_chroot "$ROOTFS" "pwconv"
+    fi
+    echo root:voidlinux | run_cmd_chroot $ROOTFS chpasswd -c SHA512 || die 'Could not set default credentials'
+    rm -f $ROOTFS/etc/.pwd.lock
+  '
 
 	#perfumery BR
-	run_cmd '
-        info_msg "Ativando bash para o usuario root"
-        run_cmd_chroot "$ROOTFS" "chsh -s /bin/bash root"
-    '
+	info_msg "Ativando bash para o usuario root"
+	run_cmd_eval '
+    run_cmd_chroot "$ROOTFS" "chsh -s /bin/bash root"
+  	run_cmd_chroot "$ROOTFS" "cp -Rpa /etc/skel/. /root/"
+  '
 
-	run_cmd '
-    	info_msg "Configurando teclado para br-abnt2"
-        _KEYMAP=br-abnt2
-    	[[ ! -e "$ROOTFS/etc/rc.conf" ]] && >|"$ROOTFS/etc/rc.conf"
-    	sed -i -e "s|KEYMAP=.*|KEYMAP=$_KEYMAP|g" "$ROOTFS/etc/rc.conf"
-	    sed -i -e "s|#\?KEYMAP=.*|KEYMAP=$_KEYMAP|g" "$ROOTFS/etc/rc.conf"
-    '
+	info_msg "Configurando teclado para br-abnt2"
+	run_cmd_eval '
+    _KEYMAP=br-abnt2
+    [[ ! -e "$ROOTFS/etc/rc.conf" ]] && >|"$ROOTFS/etc/rc.conf"
+    sed -i -e "s|KEYMAP=.*|KEYMAP=$_KEYMAP|g" "$ROOTFS/etc/rc.conf"
+	  sed -i -e "s|#\?KEYMAP=.*|KEYMAP=$_KEYMAP|g" "$ROOTFS/etc/rc.conf"
+  '
 
-	run_cmd '
-        info_msg "Configurando grub"
-        echo "GRUB_THEME=/boot/grub/themes/void/theme.txt" >>"$ROOTFS/etc/default/grub"
-        echo "GRUB_DISABLE_OS_PROBER=true" >>"$ROOTFS/etc/default/grub"
-    '
+	info_msg "Configurando grub"
+	run_cmd_eval '
+    echo "GRUB_THEME=/boot/grub/themes/void/theme.txt" >>"$ROOTFS/etc/default/grub"
+    echo "GRUB_DISABLE_OS_PROBER=true" >>"$ROOTFS/etc/default/grub"
+  '
 	# At this point we're done running things in the chroot and we can
 	# clean up the shims.  Failure to do this can result in things hanging
 	# when we try to delete the tmpdir.
-	run_cmd '
-        cleanup_chroot
-    '
+
+	umount_pseudofs
 
 	# The cache isn't that useful since by the time the ROOTFS will be
 	# used it is likely to be out of date.  Rather than shipping it around
 	# only for it to be out of date, we remove it now.
-	run_cmd '
-        rm -rf "$ROOTFS/var/cache/*"
-        rm -fv $ROOTFS/var/cache/xbps/*.xbps
-        rm -fv $ROOTFS/var/cache/xbps/*.sig*
+	info_msg "Limpando cache"
+	run_cmd_eval '
+    rm -rf $ROOTFS/var/cache/*
+    rm -fv $ROOTFS/var/cache/xbps/*.xbps
+    rm -fv $ROOTFS/var/cache/xbps/*.sig*
 
-        find "$ROOTFS" -name '*.a' -delete    # bibliotecas estáticas
-        find "$ROOTFS" -name '*.la' -delete   # libtool
-    '
+    find $ROOTFS -name '*.a' -delete    # bibliotecas estáticas
+    find $ROOTFS -name '*.la' -delete   # libtool
+  '
 
 	# Finally we can compress the tarball, the name will include the
 	# architecture and the date on which the tarball was built.
@@ -360,12 +343,15 @@ main() {
 	#run_cmd "tar -cp --posix --xattrs -C $ROOTFS . | gzip -9 > $FILENAME "
 	#FILENAME=void-"${XBPS_TARGET_ARCH}-${SYSPKG}"-$(date '+%Y%m%d').tar.xz
 	#tar -cp --posix --xattrs -C $ROOTFS . | xz -T${COMPRESSOR_THREADS:-0} -9 > $FILENAME
-	run_cmd '
-        FILENAME=void-"${XBPS_TARGET_ARCH}-base-custom"-$(date +%Y%m%d)-$(date +%H%M).tar.xz
-#        tar -cp --posix --xattrs -C "$ROOTFS" . | xz -T0 -9e --check=crc32 > "$FILENAME"
-#        tar -cp --posix --xattrs -C "$ROOTFS" . | xz -T${COMPRESSOR_THREADS:-0} -6 > $FILENAME
-        tar -cp --posix --xattrs -C "$ROOTFS" . | xz -T${COMPRESSOR_THREADS:-0} -9 > $FILENAME
-    '
+
+	run_cmd_eval '
+    FILENAME=void-${XBPS_TARGET_ARCH}-base-custom-$(date +%Y%m%d)-$(date +%H%M).tar.xz
+    info_msg "Gerando tarball : ${pink}${FILENAME}${rst}"
+    #tar -cp --posix --xattrs -C "$ROOTFS" . | xz -T0 -9e --check=crc32 > "$FILENAME"
+    #tar -cp --posix --xattrs -C "$ROOTFS" . | xz -T${COMPRESSOR_THREADS:-0} -6 > $FILENAME
+    tar -cp --posix --xattrs -C "$ROOTFS" . | xz -T${COMPRESSOR_THREADS:-0} -9 > $FILENAME
+    :
+  '
 
 	# Now that we have the tarball we don't need the rootfs anymore, so we
 	# can get rid of it.
@@ -375,9 +361,10 @@ main() {
 	# this succeeded.  This also ensures that there's something visible
 	# that the user can look for at the end of the script, which can make
 	# it easier to see what's going on if something above failed.
-	info_msg "Successfully created $FILENAME ($XBPS_TARGET_ARCH)"
+	info_msg "Successfully created ${green}$FILENAME ${rst}($XBPS_TARGET_ARCH)"
 }
 
+umount_pseudofs
 main
 exit
 
