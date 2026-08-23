@@ -1590,13 +1590,16 @@ enable_services() {
 			continue
 		fi
 
-		run_cmd_new ln -snf "/etc/sv/$service" "$link"
+    run_cmd_new ln -snf "/etc/sv/$service" "$link"
 		if [[ ! -L "$link" && ! -e "$link" ]] &&
 			[[ ! "$(readlink "$link")" == "/etc/sv/$service" ]]; then
 			info_msg "failed to enable service $service (broken symlink)"
 		fi
 	done
 }
+
+
+
 
 sh_make_iso() {
 	mount_pseudofs

@@ -601,7 +601,7 @@ set_dracut_args_from_platform() {
 set_cachedir() {
 	# Os artefatos de pacotes são cacheáveis, mas precisam ficar
 	# isolados do cache do host.
-	: "${XBPS_CACHEDIR:=--cachedir=$PWD/xbps-cachedir-x86_64/${XBPS_TARGET_ARCH}}"
+	: "${XBPS_CACHEDIR:=--cachedir=$PWD/xbps-cachedir-${XBPS_TARGET_ARCH}}"
 }
 
 select_mirrors_dialog() {
