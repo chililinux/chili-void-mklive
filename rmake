@@ -58,16 +58,17 @@ ${yellow}Usage:${reset}
 ${yellow}Examples:${reset}
     $0 all
     $0 base
-    $0 install
-    $0 xfce
+    $0 cinnamon
     $0 fluxbox
     $0 gnome
+    $0 hypr
+    $0 install
     $0 plasma
-    $0 cinnamon
+    $0 mango
     $0 mate
     $0 sway
-    $0 mango
-    $0 hypr
+    $0 xfce
+    #
     $0 hypr plasma
     $0 sway plasma xfce
 

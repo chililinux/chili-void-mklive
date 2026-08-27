@@ -1343,8 +1343,6 @@ sh_configure_packages() {
 			ADISTRO_PKGS+=" voidbr-mango"
 		elif $MAKE_FLUXBOX; then
 			ADISTRO_PKGS+=" voidbr-fluxbox"
-		elif $MAKE_PLASMA; then
-			ADISTRO_PKGS+=" voidbr-plasma"
 		elif $MAKE_XFCE_BASE || $MAKE_XFCE; then
 			ADISTRO_PKGS+=" voidbr-xfce"
 		elif $MAKE_GNOME; then
@@ -1371,6 +1369,9 @@ sh_configure_packages() {
 				sh_choose_packages_cinnamon
 			elif $MAKE_MATE; then
 				sh_choose_packages_mate
+		elif $MAKE_PLASMA; then
+#			ADISTRO_PKGS+=" voidbr-plasma"
+      sh_choose_packages_plasma
 			fi
 		fi
 	fi
@@ -1633,7 +1634,7 @@ sh_make_iso() {
 		sudo sed -i "s/CDLABEL=[^ ]*/CDLABEL=${VOL_ID}/g" "$file"
 	done
 
-	configure_plymouth
+#	configure_plymouth
 	#configure_service_boot_logger
 	#configure_service_plymouth_log
 	#configure_service_plymouth_stop
