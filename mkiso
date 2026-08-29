@@ -651,9 +651,9 @@ copy_autoinstaller_files() {
 }
 
 install_packages() {
-#	cmd_logger "Instalando pacote voidbr-xbps" '
-#    cmd_install -yu voidbr-xbps
-#  '
+	#	cmd_logger "Instalando pacote voidbr-xbps" '
+	#    cmd_install -yu voidbr-xbps
+	#  '
 
 	mount_pseudofs
 
@@ -737,7 +737,7 @@ sh_reconfigure_pass2() {
 }
 
 finish_clean() {
-  local rootfs="${ROOTFS:?ROOTFS não definido}"
+	local rootfs="${ROOTFS:?ROOTFS não definido}"
 	# Cleanup and remove useless stuff.
 	xbps-remove -r "$rootfs" -Ooy >/dev/null 2>&1
 	rm -rf "$rootfs"/var/cache/* "$rootfs"/run/* "$rootfs"/var/run/*
@@ -1160,7 +1160,7 @@ generate_iso_image() {
 	}
 	#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	hsize=$(du -sh "$OUTPUT_FILE" | awk '{print $1}')
-  chili-make-md5-iso "$OUTPUT_FILE"
+	chili-make-md5-iso "$OUTPUT_FILE"
 	info_msg "Iso file created: ${green}$(readlink -f "$OUTPUT_FILE") ($hsize) successfully.${reset}"
 }
 
@@ -1369,9 +1369,9 @@ sh_configure_packages() {
 				sh_choose_packages_cinnamon
 			elif $MAKE_MATE; then
 				sh_choose_packages_mate
-		elif $MAKE_PLASMA; then
-#			ADISTRO_PKGS+=" voidbr-plasma"
-      sh_choose_packages_plasma
+			elif $MAKE_PLASMA; then
+				#			ADISTRO_PKGS+=" voidbr-plasma"
+				sh_choose_packages_plasma
 			fi
 		fi
 	fi
@@ -1391,7 +1391,8 @@ sh_configure_rootfs() {
 	: ${LOCALE:=pt_BR.UTF-8}
 	: ${INITRAMFS_COMPRESSION:=xz}
 	: ${SQUASHFS_COMPRESSION:=zstd}
-	: ${BASE_SYSTEM_PKG:=base-system}
+	#	: ${BASE_SYSTEM_PKG:=base-system}
+	: ${BASE_SYSTEM_PKG:=base-container-full}
 	: ${BOOT_TITLE:="$title"}
 
 	# Required packages in the image for a working system.
@@ -1591,16 +1592,13 @@ enable_services() {
 			continue
 		fi
 
-    run_cmd_new ln -snf "/etc/sv/$service" "$link"
+		run_cmd_new ln -snf "/etc/sv/$service" "$link"
 		if [[ ! -L "$link" && ! -e "$link" ]] &&
 			[[ ! "$(readlink "$link")" == "/etc/sv/$service" ]]; then
 			info_msg "failed to enable service $service (broken symlink)"
 		fi
 	done
 }
-
-
-
 
 sh_make_iso() {
 	mount_pseudofs
@@ -1639,22 +1637,22 @@ sh_make_iso() {
 	print_step "Configurando autoexec do void-install (tty1) : $ROOTFS/etc/skel/.bash_profile"
 	mkdir -p "$ROOTFS/etc/skel"
 	cat >"$ROOTFS/etc/skel/.bash_profile" <<-'EOF'
-    #
-    # ~/.bash_profile
-    #
+		    #
+		    # ~/.bash_profile
+		    #
 
-    [[ -f ~/.bashrc ]] && . ~/.bashrc
+		    [[ -f ~/.bashrc ]] && . ~/.bashrc
 
-		# Instalado pelo mkiso — dispara o void-install SOMENTE quando o
-		# boot veio da entrada "Instalar" do menu (isolinux/GRUB), marcada
-		# pelo parâmetro voidbr.autoinstall no cmdline do kernel. Qualquer
-		# outra entrada de boot cai num shell normal, como sempre foi.
-		if [ "$(tty)" = "/dev/tty1" ] && grep -qw 'voidbr.autoinstall' /proc/cmdline; then
-			sudo /usr/bin/void-install
-			echo
-			echo "Instalador encerrado. Você está num shell bash normal agora."
-			echo "Para rodar o instalador de novo: sudo void-install"
-		fi
+				# Instalado pelo mkiso — dispara o void-install SOMENTE quando o
+				# boot veio da entrada "Instalar" do menu (isolinux/GRUB), marcada
+				# pelo parâmetro voidbr.autoinstall no cmdline do kernel. Qualquer
+				# outra entrada de boot cai num shell normal, como sempre foi.
+				if [ "$(tty)" = "/dev/tty1" ] && grep -qw 'voidbr.autoinstall' /proc/cmdline; then
+					sudo /usr/bin/void-install
+					echo
+					echo "Instalador encerrado. Você está num shell bash normal agora."
+					echo "Para rodar o instalador de novo: sudo void-install"
+				fi
 	EOF
 	chmod 644 "$ROOTFS/etc/skel/.bash_profile"
 
@@ -1663,7 +1661,7 @@ sh_make_iso() {
 		sudo sed -i "s/CDLABEL=[^ ]*/CDLABEL=${VOL_ID}/g" "$file"
 	done
 
-#	configure_plymouth
+	#	configure_plymouth
 	#configure_service_boot_logger
 	#configure_service_plymouth_log
 	#configure_service_plymouth_stop

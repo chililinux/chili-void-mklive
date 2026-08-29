@@ -9,7 +9,7 @@
 #
 #  mkrootfs
 #  Created: seg 23 fev 2026 13:26:23 -04
-#  Updated: sáb 08 ago 2026 11:38:01 -04
+#  Updated: sáb 29 ago 2026 01:05:54 -04
 #
 #  NOTA: script único — antes dividido em mkrootfs + lib.mkrootfs.sh,
 #  agora mesclado num arquivo só (mesma ordem de execução de antes).
@@ -59,16 +59,17 @@ declare -g quiet=false
 declare -i njobs=12
 declare -i ncontador=0
 declare APP="${0##*/}"
-declare _VERSION_="0.08.08-20260808"
+declare _VERSION_="0.08.28-20260828"
 declare APPDESC="$APP - Builds a tarball rootfs image for VoidBR"
 readonly ARCH=$(uname -m)
 readonly REQTOOLS="xbps-install xbps-reconfigure tar xz chroot dialog curl sed gettext"
-readonly aSysPkg=(base-minimal base-voidstrap base-system base-custom)
+readonly aSysPkg=(base-minimal base-voidstrap base-system base-custom base-container-full)
 readonly XBPS_CMD='xbps-install'
 
 LCUSTOM=false
 #SYSPKG="base-minimal"
 #SYSPKG="base-system"
+#SYSPKG="base-container-full"
 SYSPKG="base-voidstrap voidbr-vinstall voidbr-xbps"
 
 # MÍNIMO
@@ -773,6 +774,7 @@ _EOF
 #SYSPKG="base-minimal"
 #SYSPKG="base-voidstrap"
 #SYSPKG="base-system"
+#SYSPKG="base-container-full"
 
 # Parse de opções básico. Este script suporta o mínimo necessário para
 # construir uma imagem.
