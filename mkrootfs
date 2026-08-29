@@ -60,7 +60,7 @@ declare -i njobs=12
 declare -i ncontador=0
 declare APP="${0##*/}"
 declare _VERSION_="0.08.08-20260808"
-declare APPDESC="$APP - Cria rootfs VoidBR "
+declare APPDESC="$APP - Builds a tarball rootfs image for VoidBR"
 readonly ARCH=$(uname -m)
 readonly REQTOOLS="xbps-install xbps-reconfigure tar xz chroot dialog curl sed gettext"
 readonly aSysPkg=(base-minimal base-voidstrap base-system base-custom)
@@ -601,7 +601,7 @@ set_dracut_args_from_platform() {
 set_cachedir() {
 	# Os artefatos de pacotes são cacheáveis, mas precisam ficar
 	# isolados do cache do host.
-	: "${XBPS_CACHEDIR:=--cachedir=$PWD/xbps-cache/${XBPS_TARGET_ARCH}}"
+	: "${XBPS_CACHEDIR:=--cachedir=$PWD/xbps-cachedir-${XBPS_TARGET_ARCH}}"
 }
 
 select_mirrors_dialog() {
@@ -633,8 +633,7 @@ select_mirrors_dialog() {
 
 		status=$?
 		if ((status != 0)); then
-			echo "Cancelado."
-			return 1
+			die "Cancelado."
 		fi
 		repos+=("$repo")
 	else
