@@ -1,7 +1,7 @@
 UI vesamenu.c32
 PROMPT 0
 TIMEOUT 150
-ONTIMEOUT install
+ONTIMEOUT linux
 
 MENU TABMSG Press ENTER to boot or TAB to edit a menu entry
 MENU AUTOBOOT BIOS default device boot in # second{,s}...
@@ -20,14 +20,8 @@ MENU COLOR title        * #FF5255FF *
 MENU COLOR border       * #00000000 #00000000 none
 MENU COLOR sel          * #ffffffff #FF5255FF *
 
-LABEL install
-MENU LABEL ^Instalar VoidBR @@KERNVER@@ @@ARCH@@
-MENU DEFAULT
-KERNEL /boot/vmlinuz
-APPEND initrd=/boot/initrd root=live:CDLABEL=VOIDBR_LIVE_BASE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin
-
 LABEL linux
-MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (live, sem instalador)
+MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOIDBR_LIVE_BASE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
 
