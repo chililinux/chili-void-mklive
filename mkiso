@@ -1391,8 +1391,8 @@ sh_configure_rootfs() {
 	: ${LOCALE:=pt_BR.UTF-8}
 	: ${INITRAMFS_COMPRESSION:=xz}
 	: ${SQUASHFS_COMPRESSION:=zstd}
-	#	: ${BASE_SYSTEM_PKG:=base-system}
 	: ${BASE_SYSTEM_PKG:=base-container-full}
+	# : ${BASE_SYSTEM_PKG:=base-system}
 	: ${BOOT_TITLE:="$title"}
 
 	# Required packages in the image for a working system.

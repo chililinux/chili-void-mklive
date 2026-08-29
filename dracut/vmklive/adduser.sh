@@ -28,9 +28,9 @@ chroot ${NEWROOT} passwd -d $USERNAME >/dev/null 2>&1
 # Setup default root/user password (voidlinux).
 chroot ${NEWROOT} sh -c 'echo "root:voidlinux" | chpasswd -c SHA512'
 chroot ${NEWROOT} sh -c "echo "$USERNAME:voidlinux" | chpasswd -c SHA512"
-chroot ${NEWROOT} sh -c "chsh -s /bin/bash root"
+chroot ${NEWROOT} sh -c "chsh -s /bin/bash root" >/dev/null 2>&1 || true
 
-# Enable sudo permission by default.
+# Enable sudo permission by default.cdk
 if [ -f ${NEWROOT}/etc/sudoers ]; then
     echo "${USERNAME} ALL=(ALL:ALL) NOPASSWD: ALL" > "${NEWROOT}/etc/sudoers.d/99-void-live"
 fi
