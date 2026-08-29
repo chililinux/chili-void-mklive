@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: sex 28 ago 2026 23:40:11 -04
+# Updated: sáb 25 jul 2026 16:48:16 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.08.28-20260828'
+readonly _VERSION_='0.06.28-20260628'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -721,7 +721,7 @@ EOF
 sh_reconfigure_pass1() {
 	cmd_logger "Reconfigurando o ambiente - pass 1" '
 		xbps-reconfigure -r "$ROOTFS" -f base-files >/dev/null 2>&1
-		chroot "$ROOTFS" env -i PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" xbps-reconfigure -f base-files
+		chroot "$ROOTFS" env -i xbps-reconfigure -f base-files
 
 		# Enable choosen UTF-8 locale and generate it into the target rootfs.
 		if [ -f "$ROOTFS"/etc/default/libc-locales ]; then
@@ -732,7 +732,7 @@ sh_reconfigure_pass1() {
 
 sh_reconfigure_pass2() {
 	cmd_logger "Reconfigurando o ambiente - pass 2" '
-    chroot "$ROOTFS" env -i PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" MKISO_BUILD=1 xbps-reconfigure -a
+    chroot "$ROOTFS" env -i xbps-reconfigure -a
 	'
 }
 
@@ -757,7 +757,7 @@ configure_plymouth() {
 	print_step "Configurando tema plymouth : voidbr"
 	#chroot "$ROOTFS" env -i plymouth-set-default-theme fade-in
 	#chroot "$ROOTFS" env -i plymouth-set-default-theme voidx
-	chroot "$ROOTFS" env -i PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" plymouth-set-default-theme voidbr
+	chroot "$ROOTFS" env -i plymouth-set-default-theme voidbr
 	result="${PIPESTATUS[0]}"
 	[ $result -ne 0 ] && die "Falha ao configurar tema"
 
@@ -1628,35 +1628,6 @@ sh_make_iso() {
 		print_step "Copying directory structures into the rootfs ..."
 		copy_include_directories
 	fi
-
-	# Dispara o void-install sozinho, mas SOMENTE quando a entrada
-	# "Instalar" do menu de boot foi escolhida (identificada pelo
-	# parâmetro exclusivo voidbr.autoinstall no cmdline — não usar
-	# live.autologin sozinho aqui, pois a entrada de acessibilidade
-	# (linuxa11y) também usa live.autologin e NÃO deve abrir o instalador).
-	# Qualquer outra entrada de boot (linux, linuxram, linuxa11y, sessão
-	# gráfica normal) continua se comportando exatamente como antes.
-	print_step "Configurando autoexec do void-install (tty1) : $ROOTFS/etc/skel/.bash_profile"
-	mkdir -p "$ROOTFS/etc/skel"
-	cat >"$ROOTFS/etc/skel/.bash_profile" <<-'EOF'
-    #
-    # ~/.bash_profile
-    #
-
-    [[ -f ~/.bashrc ]] && . ~/.bashrc
-
-		# Instalado pelo mkiso — dispara o void-install SOMENTE quando o
-		# boot veio da entrada "Instalar" do menu (isolinux/GRUB), marcada
-		# pelo parâmetro voidbr.autoinstall no cmdline do kernel. Qualquer
-		# outra entrada de boot cai num shell normal, como sempre foi.
-		if [ "$(tty)" = "/dev/tty1" ] && grep -qw 'voidbr.autoinstall' /proc/cmdline; then
-			sudo /usr/bin/void-install
-			echo
-			echo "Instalador encerrado. Você está num shell bash normal agora."
-			echo "Para rodar o instalador de novo: sudo void-install"
-		fi
-	EOF
-	chmod 644 "$ROOTFS/etc/skel/.bash_profile"
 
 	for file in ./grub/grub_void.cfg.in ./isolinux/isolinux.cfg.in; do
 		print_step "Ajustando CDLABEL=$VOL_ID : ${file}"

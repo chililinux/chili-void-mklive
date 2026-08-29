@@ -24,7 +24,7 @@ LABEL install
 MENU LABEL ^Instalar VoidBR @@KERNVER@@ @@ARCH@@
 MENU DEFAULT
 KERNEL /boot/vmlinuz
-APPEND initrd=/boot/initrd root=live:CDLABEL=VOIDBR_LIVE_BASE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin
+APPEND initrd=/boot/initrd root=live:CDLABEL=VOIDBR_LIVE_BASE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin=anon voidbr.autoinstall
 
 LABEL linux
 MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (live, sem instalador)
