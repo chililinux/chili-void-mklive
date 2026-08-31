@@ -60,19 +60,33 @@ readonly _VERSION_='0.08.28-20260828'
 # o que o usuário digitou, incluindo --automatic.
 ORIGINAL_ARGS=("$@")
 
-# Pre-parse de --automatic: precisa acontecer ANTES do source ./lib.sh, pois
-# select_mirrors_dialog() (chamada automaticamente ao carregar lib.sh) usa
-# a variável $automatic internamente.
+# Pre-parse de --automatic e --bootloader: precisa acontecer ANTES do
+# source ./lib.sh, pois select_mirrors_dialog() (chamada automaticamente
+# ao carregar lib.sh) usa a variável $automatic internamente, e getopts
+# não lida com opções longas (por isso o filtro manual aqui).
 automatic=false
+declare -g BOOTLOADER="grub"
 new_args=()
 for arg in "$@"; do
 	if [[ "$arg" == "--automatic" ]]; then
 		automatic=true
 		continue
 	fi
+	if [[ "$arg" == --bootloader=* ]]; then
+		BOOTLOADER="${arg#--bootloader=}"
+		continue
+	fi
 	new_args+=("$arg")
 done
 set -- "${new_args[@]}"
+
+case "$BOOTLOADER" in
+grub | limine) ;;
+*)
+	echo "ERRO: --bootloader inválido: '$BOOTLOADER' (use 'grub' ou 'limine')" >&2
+	exit 1
+	;;
+esac
 
 # shellcheck source=./lib.sh
 source ./lib.sh
@@ -143,6 +157,9 @@ sh_choose_required_packages() {
 	REQUIRED_PKGS+=" syslinux"
 	REQUIRED_PKGS+=" grub-i386-efi"
 	REQUIRED_PKGS+=" grub-x86_64-efi"
+	if [ "$BOOTLOADER" = "limine" ]; then
+		REQUIRED_PKGS+=" limine"
+	fi
 	REQUIRED_PKGS+=" memtest86+"
 	REQUIRED_PKGS+=" squashfs-tools"
 	REQUIRED_PKGS+=" xorriso"
@@ -206,6 +223,8 @@ sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" fastfetch"
 	ADDITIONAL_PKGS+=" grub"
 	ADDITIONAL_PKGS+=" inxi"
+	ADDITIONAL_PKGS+=" terminus-font"
+	ADDITIONAL_PKGS+=" voidbr-limine-config"
 	#
 	ASKEL_PKGS+=(voidbr-base-config)
 	ASKEL_PKGS+=(voidbr-nano-config)
@@ -823,10 +842,24 @@ EOF
 configure_service_plymouth_stop() {
 	print_step "Configurando serviço plymouth-stop : $ROOTFS/etc/sv"
 	mkdir -p "$ROOTFS/etc/sv/plymouth-stop"
-	tee "$ROOTFS/etc/sv/plymouth-stop/run" >/dev/null <<EOF
+  tee "$ROOTFS/etc/sv/plymouth-stop/run" >/dev/null <<'EOF'
 #!/bin/sh
 [ -r ./conf ] && . ./conf
-exec /usr/bin/plymouth --quit
+/usr/bin/plymouth --quit
+# "plymouth --quit" às vezes retorna antes do daemon (plymouthd) ter
+# terminado de verdade -- e ao morrer, ele reseta a fonte/console,
+# sobrescrevendo qualquer coisa que a gente aplique logo em seguida.
+# Espera o processo sumir de fato antes de mexer na fonte.
+for i in $(seq 1 20); do
+    pgrep -x plymouthd >/dev/null 2>&1 || break
+    sleep 0.1
+done
+# O plymouth, ao sair do modo gráfico, costuma resetar a fonte do
+# console pro padrão embutido do kernel -- reaplica a fonte configurada
+# no rc.conf (ex: terminus via vconsole.font=/locale.sh) depois dele.
+. /etc/rc.conf 2>/dev/null
+[ -n "$FONT" ] && setfont "$FONT" 2>/dev/null
+exit 0
 EOF
 	chmod +x "$ROOTFS/etc/sv/plymouth-stop/run"
 	ln -sf "/etc/sv/plymouth-stop" "$ROOTFS/etc/runit/runsvdir/default/"
@@ -834,11 +867,24 @@ EOF
 
 configure_etc_runit_core_services_quit_plymouth() {
 	print_step "Configurando script plymouth-stop : $ROOTFS/etc/runit/core-services/"
-	tee "$ROOTFS/etc/runit/core-services/99-voidbr-plymouth-quit.sh" >/dev/null <<EOF
+	tee "$ROOTFS/etc/runit/core-services/99-voidbr-plymouth-quit.sh" >/dev/null <<'EOF'
 #!/bin/sh
 if command -v plymouth >/dev/null; then
     plymouth quit
+    # "plymouth quit" às vezes retorna antes do daemon (plymouthd) ter
+    # terminado de verdade -- e ao morrer, ele reseta a fonte/console,
+    # sobrescrevendo qualquer coisa que a gente aplique logo em seguida.
+    # Espera o processo sumir de fato antes de mexer na fonte.
+    for i in $(seq 1 20); do
+        pgrep -x plymouthd >/dev/null 2>&1 || break
+        sleep 0.1
+    done
 fi
+# O plymouth, ao sair do modo gráfico, costuma resetar a fonte do
+# console pro padrão embutido do kernel -- reaplica a fonte configurada
+# no rc.conf (ex: terminus via vconsole.font=/locale.sh) depois dele.
+. /etc/rc.conf 2>/dev/null
+[ -n "$FONT" ] && setfont "$FONT" 2>/dev/null
 EOF
 	chmod +x "$ROOTFS/etc/runit/core-services/99-voidbr-plymouth-quit.sh"
 }
@@ -999,6 +1045,45 @@ generate_isolinux_boot() {
 	run_cmd_new cp -f "$HOSTDIR"/boot/memtest86+/memtest.bin "$BOOT_DIR"
 }
 
+generate_limine_boot() {
+	print_step "Gerando suporte Limine para sistema : BIOS + UEFI"
+	{
+		run_cmd_new cp -f limine/limine.conf.in "$LIMINE_DIR"/limine.conf
+		run_cmd_new sed -i -e "s|@@KERNVER@@|${KERNELVERSION}|" \
+			-e "s|@@KEYMAP@@|${KEYMAP}|" \
+			-e "s|@@ARCH@@|$BASE_ARCH|" \
+			-e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
+			-e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
+			-e "s|@@LOCALE@@|${LOCALE}|" "$LIMINE_DIR"/limine.conf
+
+		# Wallpaper do tema (referenciado no limine.conf via
+		# "boot():/boot/limine/voidbr-tokyonight.png"). O pacote
+		# voidbr-limine-config já instala esse arquivo no ROOTFS, em
+		# /boot/efi/limine/ (pensado pro sistema instalado) -- aqui só
+		# copiamos ele de lá pro lugar novo, dentro da própria ISO.
+		if [ -f "$ROOTFS/boot/efi/limine/voidbr-tokyonight.png" ]; then
+			run_cmd_new cp -f "$ROOTFS/boot/efi/limine/voidbr-tokyonight.png" "$LIMINE_DIR"/
+		else
+			info_msg "AVISO: $ROOTFS/boot/efi/limine/voidbr-tokyonight.png não encontrado (voidbr-limine-config instalado?) -- Limine vai usar fundo padrão."
+		fi
+
+		# Binários do bootloader em si (ambos os modos, BIOS e UEFI, num
+		# único conjunto de arquivos -- Limine não separa isolinux/grub).
+		run_cmd_new cp -f "$LIMINE_DATADIR"/limine-bios.sys "$LIMINE_DIR"
+		run_cmd_new cp -f "$LIMINE_DATADIR"/limine-bios-cd.bin "$LIMINE_DIR"
+		run_cmd_new cp -f "$LIMINE_DATADIR"/limine-uefi-cd.bin "$LIMINE_DIR"
+
+		# EFI/BOOT/ pra permitir boot direto de pendrive/HD gravado cru
+		# (fora do El Torito, útil se a mídia for regravada como disco raw).
+		run_cmd_new mkdir -p "$IMAGEDIR"/EFI/BOOT
+		run_cmd_new cp -f "$LIMINE_DATADIR"/BOOTX64.EFI "$IMAGEDIR"/EFI/BOOT/
+		run_cmd_new cp -f "$LIMINE_DATADIR"/BOOTIA32.EFI "$IMAGEDIR"/EFI/BOOT/
+
+		# include memtest86+ (multiboot1, referenciado no limine.conf)
+		run_cmd_new cp -f "$HOSTDIR"/boot/memtest86+/memtest.bin "$BOOT_DIR"
+	}
+}
+
 generate_grub_efi_boot() {
 	print_step "Gerando suporte GRUB para sistema : EFI"
 	{
@@ -1120,11 +1205,6 @@ generate_squashfs() {
 		run_cmd_new mkfs.ext3 -F -q -O ^has_journal -d "$ROOTFS" -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 		run_cmd_new mkdir -p "$IMAGEDIR/LiveOS"
 
-		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
-		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img "$options" || die "Failed to generate squashfs image"
-		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp xz -Xbcj x86 -Xdict-size 100% || die "Failed to generate squashfs image"
-		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp lz4 || die "Failed to generate squashfs image"
-		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 3 || die "Failed to generate squashfs image"
 		run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 1 -processors "$(nproc)" || die "Failed to generate squashfs image"
 
 		run_cmd_new chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
@@ -1137,26 +1217,50 @@ generate_squashfs() {
 generate_iso_image() {
 	print_step "Gerando imagem ISO : ${yellow}$OUTPUT_FILE"
 	{
-		run_cmd_new "$HOSTDIR"/usr/bin/xorriso \
-			-as mkisofs \
-			-iso-level 3 \
-			-rock \
-			-joliet \
-			-max-iso9660-filenames \
-			-omit-period \
-			-omit-version-number \
-			-relaxed-filenames \
-			-allow-lowercase \
-			-volid "$VOL_ID" \
-			-eltorito-boot boot/isolinux/isolinux.bin \
-			-eltorito-catalog boot/isolinux/boot.cat \
-			-no-emul-boot \
-			-boot-load-size 4 -boot-info-table \
-			-eltorito-alt-boot -e boot/grub/efiboot.img \
-			-isohybrid-gpt-basdat \
-			-no-emul-boot \
-			-isohybrid-mbr "$SYSLINUX_DATADIR"/isohdpfx.bin \
-			-output "$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
+		if [ "$BOOTLOADER" = "limine" ]; then
+			run_cmd_new "$HOSTDIR"/usr/bin/xorriso \
+				-as mkisofs \
+				-iso-level 3 \
+				-rock \
+				-joliet \
+				-max-iso9660-filenames \
+				-omit-period \
+				-omit-version-number \
+				-relaxed-filenames \
+				-allow-lowercase \
+				-volid "$VOL_ID" \
+				-b boot/limine/limine-bios-cd.bin \
+				-no-emul-boot -boot-load-size 4 -boot-info-table \
+				--efi-boot boot/limine/limine-uefi-cd.bin \
+				-efi-boot-part --efi-boot-image --protective-msdos-label \
+				-output "$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
+
+			# Grava o stage BIOS/MBR direto no arquivo da ISO -- necessário
+			# pro boot funcionar de verdade quando a ISO for regravada crua
+			# num pendrive (dd/Rufus/etc), não só em CD/DVD virtual.
+			run_cmd_new "$HOSTDIR"/usr/bin/limine bios-install "$OUTPUT_FILE" || die "Failed to install Limine BIOS stage"
+		else
+			run_cmd_new "$HOSTDIR"/usr/bin/xorriso \
+				-as mkisofs \
+				-iso-level 3 \
+				-rock \
+				-joliet \
+				-max-iso9660-filenames \
+				-omit-period \
+				-omit-version-number \
+				-relaxed-filenames \
+				-allow-lowercase \
+				-volid "$VOL_ID" \
+				-eltorito-boot boot/isolinux/isolinux.bin \
+				-eltorito-catalog boot/isolinux/boot.cat \
+				-no-emul-boot \
+				-boot-load-size 4 -boot-info-table \
+				-eltorito-alt-boot -e boot/grub/efiboot.img \
+				-isohybrid-gpt-basdat \
+				-no-emul-boot \
+				-isohybrid-mbr "$SYSLINUX_DATADIR"/isohdpfx.bin \
+				-output "$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
+		fi
 	}
 	#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	hsize=$(du -sh "$OUTPUT_FILE" | awk '{print $1}')
@@ -1194,6 +1298,7 @@ ${bold}OPTIONS${rst}
   -C "<arg> ..."     ${cyan}Extra kernel cmdline args${rst}
   -T <title>         ${cyan}Bootloader title${rst} (default: Void Linux)
   -v linux<ver>      ${cyan}Custom kernel version${rst}
+  --bootloader=<x>    ${cyan}Bootloader${rst} (grub|limine, default: grub)
 
   -K                 ${yellow}Do not remove builddir${rst}
   -n                 ${yellow}Reuse existing squashfs${rst}
@@ -1294,6 +1399,7 @@ sh_print_resume() {
 	print_step "Building ISO     => ${yellow}${title}${reset}"
 	print_step "Versao app       => ${yellow}${APP} v${_VERSION_}${reset}"
 	print_step "Profile         => ${yellow}${name}${reset}"
+	print_step "Bootloader      => ${yellow}${BOOTLOADER}${reset}"
 	print_step "ROOTDIR         => ${yellow}${ROOTDIR}${reset}"
 	print_step "ROOTFS          => ${yellow}${ROOTFS}${reset}"
 	print_step "HOSTDIR         => ${yellow}${HOSTDIR}${reset}"
@@ -1421,6 +1527,7 @@ sh_configure_rootfs() {
 	BOOT_DIR="$IMAGEDIR/boot"
 	ISOLINUX_DIR="$BOOT_DIR/isolinux"
 	GRUB_DIR="$BOOT_DIR/grub"
+	LIMINE_DIR="$BOOT_DIR/limine"
 	ISOLINUX_CFG="$ISOLINUX_DIR/isolinux.cfg"
 
 	sh_create_etc_xbps_d_conf_00_repository_main_conf "$ROOTFS/etc/xbps.d/00-repository-main.conf"
@@ -1430,6 +1537,7 @@ sh_configure_rootfs() {
 
 	: ${SYSLINUX_DATADIR:="$HOSTDIR"/usr/lib/syslinux}
 	: ${GRUB_DATADIR:="$HOSTDIR"/usr/share/grub}
+	: ${LIMINE_DATADIR:="$HOSTDIR"/usr/share/limine}
 	: ${SPLASH_IMAGE:=data/splash.png}
 	: ${XBPS_INSTALL_UNPACK_ONLY:=xbps-install --unpack-only --yes --ignore-file-conflicts}
 	: ${XBPS_INSTALL_CMD:=xbps-install}
@@ -1440,7 +1548,7 @@ sh_configure_rootfs() {
 	: ${XBPS_UHELPER_CMD:=xbps-uhelper}
 	: ${XBPS_RECONFIGURE_CMD:=xbps-reconfigure}
 	: ${OUTPUT_FILE="voidbr-live-$name-${BASE_ARCH}-$(uname -r)-$(sh_diahora).iso"}
-	mkdir -p "$ROOTFS" "$HOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR"
+	mkdir -p "$ROOTFS" "$HOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR" "$LIMINE_DIR"
 
 	# Validação de espaço em disco inserida antes do resumo e do início das instalações
 	verificar_espaco_livre
@@ -1656,7 +1764,7 @@ sh_make_iso() {
 	EOF
 	chmod 644 "$ROOTFS/etc/skel/.bash_profile"
 
-	for file in ./grub/grub_void.cfg.in ./isolinux/isolinux.cfg.in; do
+	for file in ./grub/grub_void.cfg.in ./isolinux/isolinux.cfg.in ./limine/limine.conf.in; do
 		print_step "Ajustando CDLABEL=$VOL_ID : ${file}"
 		sudo sed -i "s/CDLABEL=[^ ]*/CDLABEL=${VOL_ID}/g" "$file"
 	done
@@ -1667,8 +1775,12 @@ sh_make_iso() {
 	#configure_service_plymouth_stop
 	configure_etc_runit_core_services_quit_plymouth
 	generate_initramfs
-	generate_isolinux_boot
-	generate_grub_efi_boot
+	if [ "$BOOTLOADER" = "limine" ]; then
+		generate_limine_boot
+	else
+		generate_isolinux_boot
+		generate_grub_efi_boot
+	fi
 	cleanup_rootfs
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
 	sh_remove_etc_xbps_00_repository_main_conf "$conf"

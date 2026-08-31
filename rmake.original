@@ -53,7 +53,7 @@ usage() {
 ${cyan}VoidBR ISO Builder${reset}
 
 ${yellow}Usage:${reset}
-    $0 ${green}<flavor> [flavor ...] [--flag=valor ...]${reset}
+    $0 ${green}<flavor> [flavor ...]${reset}
 
 ${yellow}Examples:${reset}
     $0 all
@@ -71,9 +71,6 @@ ${yellow}Examples:${reset}
     #
     $0 hypr plasma
     $0 sway plasma xfce
-    #
-    $0 install --bootloader=limine
-    $0 all --bootloader=limine
 
 ${yellow}Available flavors:${reset}
     ${green}all${reset}             Build all images
@@ -89,9 +86,6 @@ ${yellow}Available flavors:${reset}
     ${green}sway${reset}            Build Sway ISO
     ${green}xfce${reset}            Build XFCE ISO
     ${green}fullx${reset}           Build FullX ISO
-
-${yellow}Flags (repassadas direto pro mkiso):${reset}
-    ${green}--bootloader=grub|limine${reset}   Bootloader da ISO (default: grub)
 EOF
 	exit 1
 }
@@ -99,16 +93,8 @@ EOF
 [[ $# -eq 0 ]] && usage
 
 FLAVORS=()
-EXTRA_ARGS=()
 
 for arg in "$@"; do
-	# Qualquer coisa começando com "--" é repassada direto pro mkiso,
-	# sem entrar na validação de flavor (ex: --bootloader=limine).
-	if [[ "$arg" == --* ]]; then
-		EXTRA_ARGS+=("$arg")
-		continue
-	fi
-
 	flavor="${arg,,}"
 
 	case "$flavor" in
@@ -142,16 +128,15 @@ for arg in "$@"; do
 done
 
 msg "${cyan}Kernel   :${rst} ${green}${VERSION}${rst}"
-[[ ${#EXTRA_ARGS[@]} -gt 0 ]] && msg "${cyan}Flags    :${rst} ${green}${EXTRA_ARGS[*]}${rst}"
 
 for flavor in "${FLAVORS[@]}"; do
 	msg "${cyan}Building :${rst} ${green}${flavor}${rst}"
-	msg "${cyan}Running  :${rst} ${green}sudo bash mkiso --automatic ${EXTRA_ARGS[*]} -v ${VERSION} ${flavor}${rst}"
+	msg "${cyan}Running  :${rst} ${green}sudo bash mkiso --automatic -v ${VERSION} ${flavor}${rst}"
 
 	build_flavor="$flavor"
 	[[ "$build_flavor" == "base" ]] && build_flavor=""
 
-	if sudo bash mkiso --automatic "${EXTRA_ARGS[@]}" -v "${VERSION}" "${build_flavor}"; then
+	if sudo bash mkiso --automatic -v "${VERSION}" "${build_flavor}"; then
 		echo
 		msg "${green}✓ ${flavor} completed.${reset}"
 	else

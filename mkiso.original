@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: sáb 25 jul 2026 16:48:16 -04
+# Updated: sex 28 ago 2026 23:40:11 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.06.28-20260628'
+readonly _VERSION_='0.08.28-20260828'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -206,6 +206,7 @@ sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" fastfetch"
 	ADDITIONAL_PKGS+=" grub"
 	ADDITIONAL_PKGS+=" inxi"
+	ADDITIONAL_PKGS+=" terminus-font"
 	#
 	ASKEL_PKGS+=(voidbr-base-config)
 	ASKEL_PKGS+=(voidbr-nano-config)
@@ -651,9 +652,9 @@ copy_autoinstaller_files() {
 }
 
 install_packages() {
-#	cmd_logger "Instalando pacote voidbr-xbps" '
-#    cmd_install -yu voidbr-xbps
-#  '
+	#	cmd_logger "Instalando pacote voidbr-xbps" '
+	#    cmd_install -yu voidbr-xbps
+	#  '
 
 	mount_pseudofs
 
@@ -721,7 +722,7 @@ EOF
 sh_reconfigure_pass1() {
 	cmd_logger "Reconfigurando o ambiente - pass 1" '
 		xbps-reconfigure -r "$ROOTFS" -f base-files >/dev/null 2>&1
-		chroot "$ROOTFS" env -i xbps-reconfigure -f base-files
+		chroot "$ROOTFS" env -i PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" xbps-reconfigure -f base-files
 
 		# Enable choosen UTF-8 locale and generate it into the target rootfs.
 		if [ -f "$ROOTFS"/etc/default/libc-locales ]; then
@@ -732,12 +733,12 @@ sh_reconfigure_pass1() {
 
 sh_reconfigure_pass2() {
 	cmd_logger "Reconfigurando o ambiente - pass 2" '
-    chroot "$ROOTFS" env -i xbps-reconfigure -a
+    chroot "$ROOTFS" env -i PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" MKISO_BUILD=1 xbps-reconfigure -a
 	'
 }
 
 finish_clean() {
-  local rootfs="${ROOTFS:?ROOTFS não definido}"
+	local rootfs="${ROOTFS:?ROOTFS não definido}"
 	# Cleanup and remove useless stuff.
 	xbps-remove -r "$rootfs" -Ooy >/dev/null 2>&1
 	rm -rf "$rootfs"/var/cache/* "$rootfs"/run/* "$rootfs"/var/run/*
@@ -757,7 +758,7 @@ configure_plymouth() {
 	print_step "Configurando tema plymouth : voidbr"
 	#chroot "$ROOTFS" env -i plymouth-set-default-theme fade-in
 	#chroot "$ROOTFS" env -i plymouth-set-default-theme voidx
-	chroot "$ROOTFS" env -i plymouth-set-default-theme voidbr
+	chroot "$ROOTFS" env -i PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" plymouth-set-default-theme voidbr
 	result="${PIPESTATUS[0]}"
 	[ $result -ne 0 ] && die "Falha ao configurar tema"
 
@@ -823,10 +824,16 @@ EOF
 configure_service_plymouth_stop() {
 	print_step "Configurando serviço plymouth-stop : $ROOTFS/etc/sv"
 	mkdir -p "$ROOTFS/etc/sv/plymouth-stop"
-	tee "$ROOTFS/etc/sv/plymouth-stop/run" >/dev/null <<EOF
+  tee "$ROOTFS/etc/sv/plymouth-stop/run" >/dev/null <<'EOF'
 #!/bin/sh
 [ -r ./conf ] && . ./conf
-exec /usr/bin/plymouth --quit
+/usr/bin/plymouth --quit
+# O plymouth, ao sair do modo gráfico, costuma resetar a fonte do
+# console pro padrão embutido do kernel -- reaplica a fonte configurada
+# no rc.conf (ex: terminus via vconsole.font=/locale.sh) depois dele.
+. /etc/rc.conf 2>/dev/null
+[ -n "$FONT" ] && setfont "$FONT" 2>/dev/null
+exit 0
 EOF
 	chmod +x "$ROOTFS/etc/sv/plymouth-stop/run"
 	ln -sf "/etc/sv/plymouth-stop" "$ROOTFS/etc/runit/runsvdir/default/"
@@ -1160,7 +1167,7 @@ generate_iso_image() {
 	}
 	#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	hsize=$(du -sh "$OUTPUT_FILE" | awk '{print $1}')
-  chili-make-md5-iso "$OUTPUT_FILE"
+	chili-make-md5-iso "$OUTPUT_FILE"
 	info_msg "Iso file created: ${green}$(readlink -f "$OUTPUT_FILE") ($hsize) successfully.${reset}"
 }
 
@@ -1369,9 +1376,9 @@ sh_configure_packages() {
 				sh_choose_packages_cinnamon
 			elif $MAKE_MATE; then
 				sh_choose_packages_mate
-		elif $MAKE_PLASMA; then
-#			ADISTRO_PKGS+=" voidbr-plasma"
-      sh_choose_packages_plasma
+			elif $MAKE_PLASMA; then
+				#			ADISTRO_PKGS+=" voidbr-plasma"
+				sh_choose_packages_plasma
 			fi
 		fi
 	fi
@@ -1391,7 +1398,8 @@ sh_configure_rootfs() {
 	: ${LOCALE:=pt_BR.UTF-8}
 	: ${INITRAMFS_COMPRESSION:=xz}
 	: ${SQUASHFS_COMPRESSION:=zstd}
-	: ${BASE_SYSTEM_PKG:=base-system}
+	: ${BASE_SYSTEM_PKG:=base-container-full}
+	# : ${BASE_SYSTEM_PKG:=base-system}
 	: ${BOOT_TITLE:="$title"}
 
 	# Required packages in the image for a working system.
@@ -1591,16 +1599,13 @@ enable_services() {
 			continue
 		fi
 
-    run_cmd_new ln -snf "/etc/sv/$service" "$link"
+		run_cmd_new ln -snf "/etc/sv/$service" "$link"
 		if [[ ! -L "$link" && ! -e "$link" ]] &&
 			[[ ! "$(readlink "$link")" == "/etc/sv/$service" ]]; then
 			info_msg "failed to enable service $service (broken symlink)"
 		fi
 	done
 }
-
-
-
 
 sh_make_iso() {
 	mount_pseudofs
@@ -1629,15 +1634,44 @@ sh_make_iso() {
 		copy_include_directories
 	fi
 
+	# Dispara o void-install sozinho, mas SOMENTE quando a entrada
+	# "Instalar" do menu de boot foi escolhida (identificada pelo
+	# parâmetro exclusivo voidbr.autoinstall no cmdline — não usar
+	# live.autologin sozinho aqui, pois a entrada de acessibilidade
+	# (linuxa11y) também usa live.autologin e NÃO deve abrir o instalador).
+	# Qualquer outra entrada de boot (linux, linuxram, linuxa11y, sessão
+	# gráfica normal) continua se comportando exatamente como antes.
+	print_step "Configurando autoexec do void-install (tty1) : $ROOTFS/etc/skel/.bash_profile"
+	mkdir -p "$ROOTFS/etc/skel"
+	cat >"$ROOTFS/etc/skel/.bash_profile" <<-'EOF'
+		    #
+		    # ~/.bash_profile
+		    #
+
+		    [[ -f ~/.bashrc ]] && . ~/.bashrc
+
+				# Instalado pelo mkiso — dispara o void-install SOMENTE quando o
+				# boot veio da entrada "Instalar" do menu (isolinux/GRUB), marcada
+				# pelo parâmetro voidbr.autoinstall no cmdline do kernel. Qualquer
+				# outra entrada de boot cai num shell normal, como sempre foi.
+				if [ "$(tty)" = "/dev/tty1" ] && grep -qw 'voidbr.autoinstall' /proc/cmdline; then
+					sudo /usr/bin/void-install
+					echo
+					echo "Instalador encerrado. Você está num shell bash normal agora."
+					echo "Para rodar o instalador de novo: sudo void-install"
+				fi
+	EOF
+	chmod 644 "$ROOTFS/etc/skel/.bash_profile"
+
 	for file in ./grub/grub_void.cfg.in ./isolinux/isolinux.cfg.in; do
 		print_step "Ajustando CDLABEL=$VOL_ID : ${file}"
 		sudo sed -i "s/CDLABEL=[^ ]*/CDLABEL=${VOL_ID}/g" "$file"
 	done
 
-#	configure_plymouth
+	#	configure_plymouth
 	#configure_service_boot_logger
 	#configure_service_plymouth_log
-	#configure_service_plymouth_stop
+	configure_service_plymouth_stop
 	configure_etc_runit_core_services_quit_plymouth
 	generate_initramfs
 	generate_isolinux_boot
