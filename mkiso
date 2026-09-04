@@ -225,6 +225,15 @@ sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" inxi"
 	ADDITIONAL_PKGS+=" terminus-font"
 	ADDITIONAL_PKGS+=" voidbr-limine-config"
+	ADDITIONAL_PKGS+=" grub-i386-efi"
+	ADDITIONAL_PKGS+=" grub-x86_64-efi"
+	ADDITIONAL_PKGS+=" grub-utils"
+	ADDITIONAL_PKGS+=" grub-terminus"
+	ADDITIONAL_PKGS+=" grub-btrfs-runit"
+	ADDITIONAL_PKGS+=" efivar"
+	ADDITIONAL_PKGS+=" efibootmgr"
+	ADDITIONAL_PKGS+=" dracut"
+	ADDITIONAL_PKGS+=" voidbr-plymouth-theme"
 	#
 	ASKEL_PKGS+=(voidbr-base-config)
 	ASKEL_PKGS+=(voidbr-nano-config)
