@@ -114,6 +114,7 @@ declare -g MAKE_XFCE=false
 declare -g MAKE_AWESOME=false
 declare -g MAKE_ENLIGHTENMENT=false
 declare -g MAKE_PLASMA=false
+declare -g MAKE_PLASMA_LOUVORJA_PIANO=false
 declare -g MAKE_GNOME=false
 declare -g MAKE_CINNAMON=false
 declare -g MAKE_MATE=false
@@ -1311,6 +1312,7 @@ ${bold}Desktop presets:${rst}
   -F|fluxbox        ${green}FLUXBOX${rst}
   -G|gnome          ${green}GNOME${rst}
   -P|plasma|kde     ${green}KDE PLASMA${rst}
+  -L|plasma-louvorja-piano     ${green}KDE PLASMA LOUVORJA-PIANO${rst}
   -X|xfce-base      ${green}XFCE (base)${rst}
   -Y|xfce           ${green}XFCE${rst}
   -M|mate           ${green}MATE${rst}
@@ -1346,6 +1348,10 @@ sh_config_distroname() {
 		title='VoidBR Linux Live KDE Plasma'
 		VOL_ID='VOIDBR_LIVE_PLASMA'
 		name='plasma'
+	elif $MAKE_PLASMA_LOUVORJA_PIANO; then
+		title='VoidBR Linux Live KDE Plasma LouvorJa-Piano'
+		VOL_ID='VOIDBR_LIVE_LOUVORJA'
+		name='louvorja'
 	elif $MAKE_GNOME; then
 		title='VoidBR Linux Live GNOME'
 		VOL_ID='VOIDBR_LIVE_GNOME'
@@ -1478,6 +1484,8 @@ sh_configure_packages() {
 			elif $MAKE_PLASMA; then
 				#			ADISTRO_PKGS+=" voidbr-plasma"
 				sh_choose_packages_plasma
+			elif $MAKE_PLASMA_LOUVORJA_PIANO; then
+				ADISTRO_PKGS+=" voidbr-plasma"
 			fi
 		fi
 	fi
@@ -1886,6 +1894,10 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:s:o:p:g:v:VhXxYyQqWwNnEeFfAGOHPmMSZ:D:" opt;
 		MAKE_X=true
 		MAKE_PLASMA=true
 		;;
+	L)
+		MAKE_X=true
+		MAKE_PLASMA_LOUVORJA_PIANO=true
+		;;
 	A)
 		MAKE_X=true
 		MAKE_FULL_X=true
@@ -1932,6 +1944,10 @@ for arg in "$@"; do
 	plasma | kde)
 		MAKE_X=true
 		MAKE_PLASMA=true
+		;;
+	plasma-louvorja-piano)
+		MAKE_X=true
+		MAKE_PLASMA_LOUVORJA_PIANO=true
 		;;
 
 	gnome)

@@ -64,6 +64,7 @@ ${yellow}Examples:${reset}
     $0 hypr
     $0 install
     $0 plasma
+    $0 plasma-louvorja-piano
     $0 mango
     $0 mate
     $0 sway
@@ -87,6 +88,7 @@ ${yellow}Available flavors:${reset}
     ${green}mango${reset}           Build Mango ISO
     ${green}mate${reset}            Build MATE ISO
     ${green}plasma${reset}          Build KDE Plasma ISO
+    ${green}plasma-louvorja-piano${reset}          Build KDE Plasma LouvorJa-Piano ISO
     ${green}sway${reset}            Build Sway ISO
     ${green}xfce${reset}            Build XFCE ISO
     ${green}fullx${reset}           Build FullX ISO
@@ -124,13 +126,14 @@ for arg in "$@"; do
 			mango
 			mate
 			plasma
+			plasma-louvorja-piano
 			sway
 			xfce
 			fullx
 		)
 		break
 		;;
-	base|install|xfce|fluxbox|gnome|plasma|cinnamon|mate|mango|sway|hypr|hyprland|fullx)
+	base|install|xfce|fluxbox|gnome|plasma|plasma-louvorja-piano|cinnamon|mate|mango|sway|hypr|hyprland|fullx)
 		[[ "$flavor" == "hypr" ]] && flavor="hyprland"
 		FLAVORS+=("$flavor")
 		;;
