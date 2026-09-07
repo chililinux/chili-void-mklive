@@ -223,9 +223,12 @@ sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" eza"
 	ADDITIONAL_PKGS+=" fastfetch"
 	ADDITIONAL_PKGS+=" grub"
+	ADDITIONAL_PKGS+=" grub-i386-efi"
+	ADDITIONAL_PKGS+=" grub-x86_64-efi"
+	ADDITIONAL_PKGS+=" limine"
+	ADDITIONAL_PKGS+=" voidbr-limine-config"
 	ADDITIONAL_PKGS+=" inxi"
 	ADDITIONAL_PKGS+=" terminus-font"
-	ADDITIONAL_PKGS+=" voidbr-limine-config"
 	#
 	ASKEL_PKGS+=(voidbr-base-config)
 	ASKEL_PKGS+=(voidbr-nano-config)
