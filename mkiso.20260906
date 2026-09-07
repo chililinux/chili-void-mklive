@@ -224,7 +224,16 @@ sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" grub"
 	ADDITIONAL_PKGS+=" inxi"
 	ADDITIONAL_PKGS+=" terminus-font"
-	ADDITIONAL_PKGS+=" voidbr-limine-config"
+  ADDITIONAL_PKGS+=" voidbr-limine-config"
+	ADDITIONAL_PKGS+=" grub-i386-efi"
+	ADDITIONAL_PKGS+=" grub-x86_64-efi"
+	ADDITIONAL_PKGS+=" grub-utils"
+	ADDITIONAL_PKGS+=" grub-terminus"
+	ADDITIONAL_PKGS+=" grub-btrfs-runit"
+	ADDITIONAL_PKGS+=" efivar"
+	ADDITIONAL_PKGS+=" efibootmgr"
+	ADDITIONAL_PKGS+=" dracut"
+	ADDITIONAL_PKGS+=" voidbr-plymouth-theme"
 	#
 	ASKEL_PKGS+=(voidbr-base-config)
 	ASKEL_PKGS+=(voidbr-nano-config)
@@ -1195,14 +1204,14 @@ generate_squashfs() {
 		# Folga reduzida de 2x para ~1.15x + margem fixa de 256M (a imagem antiga
 		# usava o dobro do tamanho do rootfs sem necessidade real).
 		EXT3_IMG_SIZE=$(((ROOTFS_SIZE * 115 / 100) + 256))
-		run_cmd_new truncate -s "${EXT3_IMG_SIZE}M" "$BUILDDIR"/tmp/LiveOS/rootfs.img
+		run_cmd_new truncate -s "${EXT3_IMG_SIZE}M" "$BUILDDIR"/tmp/LiveOS/ext3fs.img
 		# mke2fs -d popula o filesystem DIRETO a partir do ROOTFS, sem precisar
 		# montar via loop + cp -a + umount (evita uma copia inteira do rootfs
 		# passando por I/O de mount de loop device). Journal desabilitado
 		# (^has_journal) porque essa imagem só existe para ser lida uma vez
 		# pelo mksquashfs logo em seguida e depois é apagada -- journaling é
 		# overhead puro aqui.
-		run_cmd_new mkfs.ext3 -F -q -O ^has_journal -d "$ROOTFS" -m1 "$BUILDDIR/tmp/LiveOS/rootfs.img" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		run_cmd_new mkfs.ext3 -F -q -O ^has_journal -d "$ROOTFS" -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 		run_cmd_new mkdir -p "$IMAGEDIR/LiveOS"
 
 		run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 1 -processors "$(nproc)" || die "Failed to generate squashfs image"
@@ -1486,7 +1495,7 @@ sh_configure_packages() {
 sh_configure_rootfs() {
 	# Configure dracut to use overlayfs for the writable overlay.
 	print_step "Configurando rootfs : $ROOTFS"
-	BOOT_CMDLINE="$BOOT_CMDLINE rd.overlay=1 "
+	BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "
 	ARCH=$(xbps-uhelper arch)
 
 	# Set defaults
