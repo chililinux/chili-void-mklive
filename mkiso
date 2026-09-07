@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: sex 28 ago 2026 23:40:11 -04
+# Updated: seg 07 set 2026 06:13:23 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -1266,6 +1266,7 @@ generate_iso_image() {
 	#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	hsize=$(du -sh "$OUTPUT_FILE" | awk '{print $1}')
 	chili-make-md5-iso "$OUTPUT_FILE"
+	rm kernel-${name}.txt
 	info_msg "Iso file created: ${green}$(readlink -f "$OUTPUT_FILE") ($hsize) successfully.${reset}"
 }
 
@@ -1312,7 +1313,7 @@ ${bold}Desktop presets:${rst}
   -F|fluxbox        ${green}FLUXBOX${rst}
   -G|gnome          ${green}GNOME${rst}
   -P|plasma|kde     ${green}KDE PLASMA${rst}
-  -L|plasma-louvorja-piano     ${green}KDE PLASMA LOUVORJA-PIANO${rst}
+  -L|plasma-louvorja-piano     ${green}PLASMA LOUVORJA-PIANO${rst}
   -X|xfce-base      ${green}XFCE (base)${rst}
   -Y|xfce           ${green}XFCE${rst}
   -M|mate           ${green}MATE${rst}
@@ -1349,9 +1350,9 @@ sh_config_distroname() {
 		VOL_ID='VOIDBR_LIVE_PLASMA'
 		name='plasma'
 	elif $MAKE_PLASMA_LOUVORJA_PIANO; then
-		title='VoidBR Linux Live KDE Plasma LouvorJa-Piano'
+		title='VoidBR Linux Live Plasma with LouvorJa-Piano'
 		VOL_ID='VOIDBR_LIVE_LOUVORJA'
-		name='louvorja'
+		name='louvorja-piano'
 	elif $MAKE_GNOME; then
 		title='VoidBR Linux Live GNOME'
 		VOL_ID='VOIDBR_LIVE_GNOME'
@@ -1482,10 +1483,12 @@ sh_configure_packages() {
 			elif $MAKE_MATE; then
 				sh_choose_packages_mate
 			elif $MAKE_PLASMA; then
-				#			ADISTRO_PKGS+=" voidbr-plasma"
-				sh_choose_packages_plasma
+#				sh_choose_packages_plasma
+				ADISTRO_PKGS+=" voidbr-plasma"
+        ASKEL_PKGS+=(voidbr-plasma-config)
 			elif $MAKE_PLASMA_LOUVORJA_PIANO; then
 				ADISTRO_PKGS+=" voidbr-plasma"
+        ASKEL_PKGS+=(voidbr-plasma-config-louvorja-piano)
 			fi
 		fi
 	fi
