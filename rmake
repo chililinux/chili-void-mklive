@@ -133,8 +133,9 @@ for arg in "$@"; do
 		)
 		break
 		;;
-	base|install|xfce|fluxbox|gnome|plasma|plasma-louvorja-piano|cinnamon|mate|mango|sway|hypr|hyprland|fullx)
+	base|install|xfce|fluxbox|gnome|plasma|plasma-louvorja-piano|louvor|cinnamon|mate|mango|sway|hypr|hyprland|fullx)
 		[[ "$flavor" == "hypr" ]] && flavor="hyprland"
+		[[ "$flavor" == "louvor" ]] && flavor="plasma-louvorja-piano"
 		FLAVORS+=("$flavor")
 		;;
 	*)
