@@ -1,7 +1,7 @@
 # VoidBR Limine theme
 # Author: Vilmar Catafesta <vcatafesta@gmail.com>
 
-timeout: 5
+timeout: 10
 default_entry: 1
 verbose: no
 term_palette: 1e1e2e;f38ba8;a6e3a1;f9e2af;89b4fa;f5c2e7;94e2d5;cdd6f4
@@ -18,31 +18,31 @@ wallpaper_style: stretched
     protocol: linux
     path: boot():/boot/vmlinuz
     module_path: boot():/boot/initrd
-    cmdline: root=live:CDLABEL=VOIDBR_LIVE_GNOME init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin=anon voidbr.autoinstall
+    cmdline: root=live:CDLABEL=VOIDBR_LIVE_MATE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin=anon voidbr.autoinstall
 
 /@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@)
     protocol: linux
     path: boot():/boot/vmlinuz
     module_path: boot():/boot/initrd
-    cmdline: root=live:CDLABEL=VOIDBR_LIVE_GNOME init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
+    cmdline: root=live:CDLABEL=VOIDBR_LIVE_MATE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
 
 /@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) (RAM)
     protocol: linux
     path: boot():/boot/vmlinuz
     module_path: boot():/boot/initrd
-    cmdline: root=live:CDLABEL=VOIDBR_LIVE_GNOME init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
+    cmdline: root=live:CDLABEL=VOIDBR_LIVE_MATE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
 
 /@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) com voz
     protocol: linux
     path: boot():/boot/vmlinuz
     module_path: boot():/boot/initrd
-    cmdline: root=live:CDLABEL=VOIDBR_LIVE_GNOME init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin=anon
+    cmdline: root=live:CDLABEL=VOIDBR_LIVE_MATE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin=anon
 
 /@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) com voz (RAM)
     protocol: linux
     path: boot():/boot/vmlinuz
     module_path: boot():/boot/initrd
-    cmdline: root=live:CDLABEL=VOIDBR_LIVE_GNOME init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin=anon rd.live.ram
+    cmdline: root=live:CDLABEL=VOIDBR_LIVE_MATE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin=anon rd.live.ram
 
 /Executar Memtest86+ (teste de RAM)
     protocol: multiboot1
