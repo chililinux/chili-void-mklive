@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: seg 07 set 2026 06:13:23 -04
+# Updated: qua 09 set 2026 18:38:32 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -1468,6 +1468,8 @@ sh_configure_packages() {
 		elif $MAKE_PLASMA_LOUVORJA_PIANO; then
 			ADISTRO_PKGS+=" voidbr-plasma"
       ASKEL_PKGS+=(voidbr-plasma-config-louvorja-piano)
+		elif $MAKE_CINNAMON; then
+			ADISTRO_PKGS+=" voidbr-cinnamon"
 		elif $MAKE_ONLY_XORG; then
 			# Sessão X mínima, sem DE (--xorg/install): só a base Xorg
 			# + infra comum, sem nenhum meta-pacote de DE.
@@ -1486,8 +1488,6 @@ sh_configure_packages() {
 				sh_choose_packages_enlightenment
 			elif $MAKE_AWESOME; then
 				sh_choose_packages_awesome
-			elif $MAKE_CINNAMON; then
-				sh_choose_packages_cinnamon
 			elif $MAKE_MATE; then
 				sh_choose_packages_mate
 			fi
