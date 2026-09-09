@@ -7,15 +7,15 @@ type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
 CONSOLE=$(getarg console)
 case "$CONSOLE" in
 *tty1*)
-        ln -s /etc/sv/agetty-tty1 ${NEWROOT}/etc/runit/runsvdir/default/
-        ;;
+	ln -s /etc/sv/agetty-tty1 ${NEWROOT}/etc/runit/runsvdir/default/
+	;;
 *ttyS0*)
-        ln -s /etc/sv/agetty-ttyS0 ${NEWROOT}/etc/runit/runsvdir/default/
-        ;;
+	ln -s /etc/sv/agetty-ttyS0 ${NEWROOT}/etc/runit/runsvdir/default/
+	;;
 *hvc0*)
-        ln -s /etc/sv/agetty-hvc0 ${NEWROOT}/etc/runit/runsvdir/default/
-        ;;
+	ln -s /etc/sv/agetty-hvc0 ${NEWROOT}/etc/runit/runsvdir/default/
+	;;
 *hvsi0*)
-        ln -s /etc/sv/agetty-hvsi0 ${NEWROOT}/etc/runit/runsvdir/default/
-        ;;
+	ln -s /etc/sv/agetty-hvsi0 ${NEWROOT}/etc/runit/runsvdir/default/
+	;;
 esac

@@ -10,9 +10,9 @@ LOCALE=$(getarg locale.LANG)
 LOCALE="pt_BR.UTF-8"
 
 # also enable this locale in newroot.
-echo "LANG=$LOCALE" > $NEWROOT/etc/locale.conf
-echo "LC_COLLATE=C" >> $NEWROOT/etc/locale.conf
-echo "LC_ALL=$LOCALE" >> $NEWROOT/etc/locale.conf
+echo "LANG=$LOCALE" >$NEWROOT/etc/locale.conf
+echo "LC_COLLATE=C" >>$NEWROOT/etc/locale.conf
+echo "LC_ALL=$LOCALE" >>$NEWROOT/etc/locale.conf
 
 # set keymap too.
 KEYMAP=$(getarg vconsole.keymap)
@@ -20,13 +20,13 @@ KEYMAP=$(getarg vconsole.keymap)
 KEYMAP="br-abnt2"
 
 if [ -f ${NEWROOT}/etc/vconsole.conf ]; then
-    sed -e "s,^KEYMAP=.*,KEYMAP=$KEYMAP," -i $NEWROOT/etc/vconsole.conf
+	sed -e "s,^KEYMAP=.*,KEYMAP=$KEYMAP," -i $NEWROOT/etc/vconsole.conf
 elif [ -f ${NEWROOT}/etc/rc.conf ]; then
-    sed -e "s,^#KEYMAP=.*,KEYMAP=$KEYMAP," -i $NEWROOT/etc/rc.conf
+	sed -e "s,^#KEYMAP=.*,KEYMAP=$KEYMAP," -i $NEWROOT/etc/rc.conf
 fi
 
 sed -e "s|#\?en_US.UTF-8 UTF-8|#en_US.UTF-8 UTF-8|g" -i $NEWROOT/etc/default/libc-locales
-sed -e "/$LOCALE UTF-8/s/^\#//"     -i $NEWROOT/etc/default/libc-locales
+sed -e "/$LOCALE UTF-8/s/^\#//" -i $NEWROOT/etc/default/libc-locales
 
 sed -i -e "s|TIMEZONE=.*|TIMEZONE=$TIMEZONE|g" $NEWROOT/etc/rc.conf
 sed -i -e "s|#\?TIMEZONE=.*|TIMEZONE=$TIMEZONE|g" $NEWROOT/etc/rc.conf
@@ -37,4 +37,3 @@ sed -i -e "s|#\?TIMEZONE=.*|TIMEZONE=$TIMEZONE|g" $NEWROOT/etc/rc.conf
 sed -i -e "s|FONT=.*|FONT=Uni2-Fixed16.psf.gz|g" $NEWROOT/etc/rc.conf
 sed -i -e "s|#\?FONT=.*|FONT=Uni2-Fixed16.psf.gz|g" $NEWROOT/etc/rc.conf
 chroot ${NEWROOT} sh -c "xbps-reconfigure -f glibc-locales"
-
