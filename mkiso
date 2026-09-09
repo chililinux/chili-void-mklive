@@ -1463,6 +1463,8 @@ sh_configure_packages() {
 			ADISTRO_PKGS+=" voidbr-xfce"
 		elif $MAKE_GNOME; then
 			ADISTRO_PKGS+=" voidbr-gnome"
+		elif $MAKE_PLASMA; then
+			ADISTRO_PKGS+=" voidbr-plasma"
 		elif $MAKE_PLASMA_LOUVORJA_PIANO; then
 			ADISTRO_PKGS+=" voidbr-plasma"
       ASKEL_PKGS+=(voidbr-plasma-config-louvorja-piano)
@@ -1488,8 +1490,6 @@ sh_configure_packages() {
 				sh_choose_packages_cinnamon
 			elif $MAKE_MATE; then
 				sh_choose_packages_mate
-	  	elif $MAKE_PLASMA; then
-				sh_choose_packages_plasma
 			fi
 		fi
 	fi
