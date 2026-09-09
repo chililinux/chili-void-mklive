@@ -1802,6 +1802,14 @@ sh_make_iso() {
 	if $MAKE_X && ! $MAKE_GNOME && ! $MAKE_HYPRLAND && ! $MAKE_MANGO && ! $MAKE_SWAY; then
 		sh_configure_lightdm_default_session
 	fi
+
+  sh_set_edition_os_release() {
+    local name="$1"
+    name="${name^}"
+    sed -i "s/^EDITION=.*/EDITION=\"$name\"/" "$ROOTFS"/etc/os-release
+  }
+  sh_set_edition_os_release "$name"
+
 	# generate_squashfs
 	#	generate_iso_image
 }
