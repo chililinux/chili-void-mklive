@@ -57,7 +57,7 @@ if [ cpuid -l ]; then
     menuentry "Instalar VoidBR @@KERNVER@@ (@@ARCH@@)" --class void --class gnu-linux --class gnu --class os  {
         set gfxpayload="keep"
         linux (${voidlive})/boot/vmlinuz \
-		root=live:CDLABEL=VOIDBR_LIVE_XFCE ro init=/sbin/init \
+		root=live:CDLABEL=VOIDBR_LIVE_MANGO ro init=/sbin/init \
 		splash rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
 		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n \
 		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin=anon voidbr.autoinstall
@@ -66,7 +66,7 @@ if [ cpuid -l ]; then
     menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@)" --class void --class gnu-linux --class gnu --class os  {
         set gfxpayload="keep"
         linux (${voidlive})/boot/vmlinuz \
-		root=live:CDLABEL=VOIDBR_LIVE_XFCE ro init=/sbin/init \
+		root=live:CDLABEL=VOIDBR_LIVE_MANGO ro init=/sbin/init \
 		splash rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
 		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n \
 		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
@@ -75,7 +75,7 @@ if [ cpuid -l ]; then
     menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) (RAM)" --class void --class gnu-linux --class gnu --class os {
         set gfxpayload="keep"
         linux (${voidlive})/boot/vmlinuz \
-		root=live:CDLABEL=VOIDBR_LIVE_XFCE ro init=/sbin/init \
+		root=live:CDLABEL=VOIDBR_LIVE_MANGO ro init=/sbin/init \
 		splash rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
 		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n \
 		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram

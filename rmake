@@ -152,12 +152,14 @@ msg "${cyan}Kernel   :${rst} ${green}${VERSION}${rst}"
 
 for flavor in "${FLAVORS[@]}"; do
 	msg "${cyan}Building :${rst} ${green}${flavor}${rst}"
-	msg "${cyan}Running  :${rst} ${green}sudo bash mkiso --automatic ${EXTRA_ARGS[*]} -v ${VERSION} ${flavor}${rst}"
+	EXTRA_ARGS+=('--automatic')
+	EXTRA_ARGS+=('--bootloader=limine')
+	msg "${cyan}Running  :${rst} ${green}sudo bash mkiso ${EXTRA_ARGS[*]} -v ${VERSION} ${flavor}${rst}"
 
 	build_flavor="$flavor"
 	[[ "$build_flavor" == "base" ]] && build_flavor=""
 
-	if sudo bash mkiso --automatic "${EXTRA_ARGS[@]}" -v "${VERSION}" "${build_flavor}"; then
+	if sudo bash mkiso "${EXTRA_ARGS[@]}" -v "${VERSION}" "${build_flavor}"; then
 		echo
 		msg "${green}✓ ${flavor} completed.${reset}"
 	else

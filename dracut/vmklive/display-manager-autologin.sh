@@ -69,14 +69,21 @@ EOF
 		sed -i "s/\[daemon\]/\[daemon\]\n$AutologinParameters/" "$GDMCustomFile"
 	fi
 
-	# lightdm -- drop-in em conf.d, não depende de um lightdm.conf
-	# pré-existente com linhas comentadas específicas (jeito antigo,
-	# quebrava se o pacote não estivesse instalado ainda nesse ponto).
+	# lightdm -- mesmo padrão usado (e já testado) no void-install pro
+	# sistema instalado: autologin-session explícito, em vez de
+	# autologin-user-timeout, e atualiza o state do greeter também.
 	mkdir -p "${NEWROOT}/etc/lightdm/lightdm.conf.d"
-	cat >"${NEWROOT}/etc/lightdm/lightdm.conf.d/50-voidbr-autologin.conf" <<EOF
+	cat >"${NEWROOT}/etc/lightdm/lightdm.conf.d/00-autologin.conf" <<EOF
 [Seat:*]
 autologin-user=${USERNAME}
-autologin-user-timeout=0
+autologin-session=${SESSION_NAME}
+EOF
+
+	mkdir -p "${NEWROOT}/var/lib/lightdm/.cache/lightdm-gtk-greeter"
+	cat >"${NEWROOT}/var/lib/lightdm/.cache/lightdm-gtk-greeter/state" <<EOF
+[greeter]
+last-user=${USERNAME}
+last-session=${SESSION_NAME}
 EOF
 
 	# lxdm -- mesmo raciocínio: cria o arquivo do zero se não existir,
