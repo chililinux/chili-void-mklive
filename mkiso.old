@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: sáb 25 jul 2026 16:48:16 -04
+# Updated: qua 09 set 2026 18:38:32 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,26 +53,40 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.06.28-20260628'
+readonly _VERSION_='0.08.28-20260828'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
 # o que o usuário digitou, incluindo --automatic.
 ORIGINAL_ARGS=("$@")
 
-# Pre-parse de --automatic: precisa acontecer ANTES do source ./lib.sh, pois
-# select_mirrors_dialog() (chamada automaticamente ao carregar lib.sh) usa
-# a variável $automatic internamente.
+# Pre-parse de --automatic e --bootloader: precisa acontecer ANTES do
+# source ./lib.sh, pois select_mirrors_dialog() (chamada automaticamente
+# ao carregar lib.sh) usa a variável $automatic internamente, e getopts
+# não lida com opções longas (por isso o filtro manual aqui).
 automatic=false
+declare -g BOOTLOADER="grub"
 new_args=()
 for arg in "$@"; do
 	if [[ "$arg" == "--automatic" ]]; then
 		automatic=true
 		continue
 	fi
+	if [[ "$arg" == --bootloader=* ]]; then
+		BOOTLOADER="${arg#--bootloader=}"
+		continue
+	fi
 	new_args+=("$arg")
 done
 set -- "${new_args[@]}"
+
+case "$BOOTLOADER" in
+grub | limine) ;;
+*)
+	echo "ERRO: --bootloader inválido: '$BOOTLOADER' (use 'grub' ou 'limine')" >&2
+	exit 1
+	;;
+esac
 
 # shellcheck source=./lib.sh
 source ./lib.sh
@@ -100,6 +114,7 @@ declare -g MAKE_XFCE=false
 declare -g MAKE_AWESOME=false
 declare -g MAKE_ENLIGHTENMENT=false
 declare -g MAKE_PLASMA=false
+declare -g MAKE_PLASMA_LOUVORJA_PIANO=false
 declare -g MAKE_GNOME=false
 declare -g MAKE_CINNAMON=false
 declare -g MAKE_MATE=false
@@ -143,6 +158,9 @@ sh_choose_required_packages() {
 	REQUIRED_PKGS+=" syslinux"
 	REQUIRED_PKGS+=" grub-i386-efi"
 	REQUIRED_PKGS+=" grub-x86_64-efi"
+	if [ "$BOOTLOADER" = "limine" ]; then
+		REQUIRED_PKGS+=" limine"
+	fi
 	REQUIRED_PKGS+=" memtest86+"
 	REQUIRED_PKGS+=" squashfs-tools"
 	REQUIRED_PKGS+=" xorriso"
@@ -205,7 +223,12 @@ sh_choose_additional_packages() {
 	ADDITIONAL_PKGS+=" eza"
 	ADDITIONAL_PKGS+=" fastfetch"
 	ADDITIONAL_PKGS+=" grub"
+	ADDITIONAL_PKGS+=" grub-i386-efi"
+	ADDITIONAL_PKGS+=" grub-x86_64-efi"
+	ADDITIONAL_PKGS+=" limine"
+	ADDITIONAL_PKGS+=" voidbr-limine-config"
 	ADDITIONAL_PKGS+=" inxi"
+	ADDITIONAL_PKGS+=" terminus-font"
 	#
 	ASKEL_PKGS+=(voidbr-base-config)
 	ASKEL_PKGS+=(voidbr-nano-config)
@@ -225,27 +248,34 @@ sh_choose_voidbr_base_packages() {
 sh_choose_voidbr_X_packages() {
 	AEXTRA_COMMON_PKGS+=" voidbr-wallpapers"
 	AEXTRA_COMMON_PKGS+=" voidbr-tokyo-theme"
-	AEXTRA_COMMON_PKGS+=" voidbr-professional-theme"
-	AEXTRA_COMMON_PKGS+=" voidbr-beauty-icons"
-	AEXTRA_COMMON_PKGS+=" voidbr-dracula-theme"
 	AEXTRA_COMMON_PKGS+=" voidbr-webapps"
 	AEXTRA_COMMON_PKGS+=" chili-iso2usb"
 	AEXTRA_COMMON_PKGS+=" voidbr-iso-writer"
 }
 
-sh_choose_packages_common_X_base() {
-	print_step "Selecionando pacotes X Common Base"
-	COMMON_PKGS+=" xorg xorg-apps xorg-fonts xorg-server-xwayland"
-	COMMON_PKGS+=" xauth xterm"
-	COMMON_PKGS+=" dbus-x11"
-	COMMON_PKGS+=" dbus-elogind elogind polkit-elogind"
-	COMMON_PKGS+=" xdg-user-dirs xdg-user-dirs-gtk"
-	COMMON_PKGS+=" xfce4-terminal"
-	COMMON_PKGS+=" libavif libheif gdk-pixbuf libheif-pixbuf-loader"
-	#
+##############################################################################
+# Temas extras que só fazem sentido em DEs X11 tradicionais (XFCE, Plasma,
+# GNOME, MATE, Cinnamon, Awesome, Enlightenment, Fluxbox, --xorg, --fullx).
+# Hyprland/Mango/Sway NÃO chamam esta função — já usam o tema próprio que
+# vem embutido no respectivo meta-pacote (voidbr-hyprland etc.).
+##############################################################################
+sh_choose_voidbr_x11_themes() {
+	AEXTRA_COMMON_PKGS+=" voidbr-professional-theme"
+	AEXTRA_COMMON_PKGS+=" voidbr-beauty-icons"
+	AEXTRA_COMMON_PKGS+=" voidbr-dracula-theme"
+}
 
-	if $MAKE_GNOME; then
-		COMMON_PKGS+=" gdm"
+##############################################################################
+# Escolha do display manager, unificada num único lugar (antes estava
+# metade em common_x11, metade em common_wayland — GNOME sempre usa gdm;
+# Hyprland/Mango/Sway (Wayland puro) usam sddm; os demais DEs X11 (XFCE,
+# Plasma, MATE, Cinnamon, Awesome, Enlightenment, Fluxbox) usam lightdm.
+##############################################################################
+sh_choose_packages_display_manager() {
+	print_step "Selecionando display manager"
+	if $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_GNOME; then
+		COMMON_PKGS+=" sddm"
+		AEXTRA_COMMON_PKGS+=" voidbr-sddm-themes"
 	else
 		COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings"
 		COMMON_PKGS+=" arc-theme"
@@ -253,11 +283,57 @@ sh_choose_packages_common_X_base() {
 		COMMON_PKGS+=" dejavu-fonts-ttf"
 		AEXTRA_COMMON_PKGS+=" voidbr-lightdm-themes"
 	fi
-	#  COMMON_PKGS+=" sddm"
 }
 
-sh_choose_packages_common_X_advanced() {
-	print_step "Selecionando pacotes X Common Advanced"
+##############################################################################
+# Pacotes comuns a QUALQUER ISO com ambiente gráfico, seja ela X11 ou
+# Wayland puro (Hyprland/Mango/Sway). Nada aqui é específico de servidor
+# gráfico — é a base de sessão (dbus/elogind/polkit), gerência de pastas
+# XDG e suporte a imagens usado por qualquer toolkit gráfico.
+##############################################################################
+sh_choose_packages_common_gui_base() {
+	print_step "Selecionando pacotes comuns de GUI (X11 + Wayland)"
+	COMMON_PKGS+=" dbus-elogind elogind polkit-elogind"
+	COMMON_PKGS+=" xdg-user-dirs xdg-user-dirs-gtk"
+	COMMON_PKGS+=" libavif libheif gdk-pixbuf libheif-pixbuf-loader"
+}
+
+##############################################################################
+# Pacotes exclusivos de ambientes que rodam sobre Xorg de verdade:
+# XFCE, Plasma, GNOME, MATE, Cinnamon, Awesome, Enlightenment, Fluxbox e o
+# modo --xorg/install (sessão X pura, sem DE). Hyprland, Mango e Sway NÃO
+# chamam esta função (exceto no modo --fullx, que precisa das duas pilhas).
+##############################################################################
+sh_choose_packages_common_x11() {
+	print_step "Selecionando pacotes X11 (Xorg)"
+	COMMON_PKGS+=" xorg xorg-apps xorg-fonts xorg-server-xwayland"
+	COMMON_PKGS+=" xauth xterm"
+	COMMON_PKGS+=" dbus-x11"
+	COMMON_PKGS+=" xfce4-terminal"
+}
+
+##############################################################################
+# CÓDIGO MORTO — mantido só como referência, não é mais chamada por
+# sh_configure_packages(). Hyprland/Sway/Mango já recebem isso via
+# depends="voidbr-gui-common voidbr-wayland-common" do próprio meta-pacote.
+##############################################################################
+sh_choose_packages_common_wayland() {
+	print_step "Selecionando pacotes Wayland (Hyprland/Mango/Sway)"
+	COMMON_PKGS+=" xorg-server-xwayland xauth"
+}
+
+##############################################################################
+# Pacotes "avançados" comuns: navegador, fontes, applet de rede, pilha de
+# áudio, utilitários (gparted/octoxbps/arquivadores/gvfs). Não dependem de
+# Xorg — servem tanto para sessões X11 quanto Wayland — por isso não têm
+# mais "_X_" no nome. Pulado no modo --xorg/install (sessão mínima).
+# OBS: função mantida só pro pipeline legado (GNOME/Cinnamon/MATE/Awesome/
+# Enlightenment), que ainda não tem meta-pacote próprio. As outras 6 DEs
+# (Hyprland/Sway/Mango/Fluxbox/Plasma/XFCE) já recebem isso via
+# depends="voidbr-gui-common ..." do próprio meta-pacote.
+##############################################################################
+sh_choose_packages_common_advanced() {
+	print_step "Selecionando pacotes Common Advanced"
 	COMMON_PKGS+=" firefox firefox-i18n-pt-BR"
 	COMMON_PKGS+=" terminus-font"
 	COMMON_PKGS+=" noto-fonts-emoji"
@@ -272,7 +348,6 @@ sh_choose_packages_common_X_advanced() {
 	COMMON_PKGS+=" network-manager-applet"
 	COMMON_PKGS+=" pulseaudio pavucontrol pasystray gst-plugins-bad1 gst-plugins-good1 gst-plugins-ugly1 gst-plugins-base1 alsa-plugins-pulseaudio alsa-utils"
 	COMMON_PKGS+=" pipewire wireplumber alsa-pipewire pulseaudio-utils pavucontrol libspa-bluetooth libjack-pipewire alsa-plugins-pulseaudio alsa-utils"
-	COMMON_PKGS+=" xfce4-pulseaudio-plugin"
 	COMMON_PKGS+=" gparted"
 	COMMON_PKGS+=" octoxbps"
 	COMMON_PKGS+=" mate-calc"
@@ -323,13 +398,11 @@ sh_choose_packages_common_X_advanced() {
 	#	COMMON_PKGS+=" remmina remmina-kwallet"
 }
 
-sh_choose_packages_awesome() {
-	print_step "Selecionando pacotes Awesome"
-	ADDITIONAL_PKGS+=" awesome"
-	ADDITIONAL_PKGS+=" polybar"
-	ADDITIONAL_PKGS+=" pcmanfm"
-}
-
+##############################################################################
+# CÓDIGO MORTO daqui até sh_choose_packages_enlightenment (exclusive) —
+# mantido só como referência. Plasma, XFCE e GNOME já têm meta-pacote
+# próprio (voidbr-plasma, voidbr-xfce, voidbr-gnome).
+##############################################################################
 sh_choose_packages_plasma() {
 	print_step "Selecionando pacotes KDE Plasma"
 	ADDITIONAL_PKGS+=" kde5"
@@ -338,28 +411,6 @@ sh_choose_packages_plasma() {
 	ADDITIONAL_PKGS+=" dolphin"
 	#
 	ASKEL_PKGS+=(voidbr-plasma-config)
-}
-
-sh_choose_packages_gnome() {
-	print_step "Selecionando pacotes GNOME"
-	ADISTRO_PKGS+=" gnome"
-	ADISTRO_PKGS+=" gnome-keyring"
-	ADISTRO_PKGS+=" accountsservice"
-	ADISTRO_PKGS+=" voidbr-change-gnome-wallpaper"
-	#
-	ASKEL_PKGS+=(voidbr-gnome-config)
-}
-
-sh_choose_packages_enlightenment() {
-	print_step "Selecionando pacotes Enlightenment"
-	ADISTRO_PKGS+=" enlightenment"
-	ADISTRO_PKGS+=" efl"
-	ADISTRO_PKGS+=" rage"
-	ADISTRO_PKGS+=" terminology"
-	ADISTRO_PKGS+=" exquisite"
-	ADISTRO_PKGS+=" connman"
-	#
-	ASKEL_PKGS+=(voidbr-enlightenment-config)
 }
 
 sh_choose_packages_xfce_base() {
@@ -377,6 +428,8 @@ sh_choose_packages_xfce() {
 	ADISTRO_PKGS+=" thunar-archive-plugin"
 	ADISTRO_PKGS+=" thunar-volman"
 	ADISTRO_PKGS+=" plank"
+	ADISTRO_PKGS+=" xfce4-pulseaudio-plugin"
+	ADISTRO_PKGS+=" labwc"
 	#	ADISTRO_PKGS+=" brother-brlaser"
 	#	ADISTRO_PKGS+=" cups-pdf"
 
@@ -384,6 +437,35 @@ sh_choose_packages_xfce() {
 	ACONFIG_PKGS+=(voidbr-dracula-theme)
 	ASKEL_PKGS+=(voidbr-xfce-config)
 
+}
+
+sh_choose_packages_gnome() {
+	print_step "Selecionando pacotes GNOME"
+	ADISTRO_PKGS+=" gnome"
+	ADISTRO_PKGS+=" gnome-keyring"
+	ADISTRO_PKGS+=" accountsservice"
+	ADISTRO_PKGS+=" voidbr-change-gnome-wallpaper"
+	#
+	ASKEL_PKGS+=(voidbr-gnome-config)
+}
+
+sh_choose_packages_awesome() {
+	print_step "Selecionando pacotes Awesome"
+	ADDITIONAL_PKGS+=" awesome"
+	ADDITIONAL_PKGS+=" polybar"
+	ADDITIONAL_PKGS+=" pcmanfm"
+}
+
+sh_choose_packages_enlightenment() {
+	print_step "Selecionando pacotes Enlightenment"
+	ADISTRO_PKGS+=" enlightenment"
+	ADISTRO_PKGS+=" efl"
+	ADISTRO_PKGS+=" rage"
+	ADISTRO_PKGS+=" terminology"
+	ADISTRO_PKGS+=" exquisite"
+	ADISTRO_PKGS+=" connman"
+	#
+	ASKEL_PKGS+=(voidbr-enlightenment-config)
 }
 
 sh_choose_packages_cinnamon() {
@@ -414,17 +496,22 @@ sh_choose_packages_mate() {
 	ASKEL_PKGS+=(voidbr-mate-config)
 }
 
+##############################################################################
+# CÓDIGO MORTO — mantido só como referência. Sway, Mango, Fluxbox e
+# Hyprland já têm meta-pacote próprio (voidbr-sway, voidbr-mango,
+# voidbr-fluxbox, voidbr-hyprland).
+##############################################################################
+sh_choose_packages_sway() {
+	print_step "Selecionando pacotes SWAY"
+	ADISTRO_PKGS+=" voidbr-sway"
+	ASKEL_PKGS+=(voidbr-sway-config)
+}
+
 sh_choose_packages_mango() {
 	print_step "Selecionando pacotes MANGO"
 	ADISTRO_PKGS+=" voidbr-mango"
 	ASKEL_PKGS+=(voidbr-mango-config)
 	return
-}
-
-sh_choose_packages_sway() {
-	print_step "Selecionando pacotes SWAY"
-	ADISTRO_PKGS+=" voidbr-sway"
-	ASKEL_PKGS+=(voidbr-sway-config)
 }
 
 sh_choose_packages_fluxbox() {
@@ -587,9 +674,9 @@ copy_autoinstaller_files() {
 }
 
 install_packages() {
-#	cmd_logger "Instalando pacote voidbr-xbps" '
-#    cmd_install -yu voidbr-xbps
-#  '
+	#	cmd_logger "Instalando pacote voidbr-xbps" '
+	#    cmd_install -yu voidbr-xbps
+	#  '
 
 	mount_pseudofs
 
@@ -657,7 +744,7 @@ EOF
 sh_reconfigure_pass1() {
 	cmd_logger "Reconfigurando o ambiente - pass 1" '
 		xbps-reconfigure -r "$ROOTFS" -f base-files >/dev/null 2>&1
-		chroot "$ROOTFS" env -i xbps-reconfigure -f base-files
+		chroot "$ROOTFS" env -i PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" xbps-reconfigure -f base-files
 
 		# Enable choosen UTF-8 locale and generate it into the target rootfs.
 		if [ -f "$ROOTFS"/etc/default/libc-locales ]; then
@@ -668,12 +755,12 @@ sh_reconfigure_pass1() {
 
 sh_reconfigure_pass2() {
 	cmd_logger "Reconfigurando o ambiente - pass 2" '
-    chroot "$ROOTFS" env -i xbps-reconfigure -a
+    chroot "$ROOTFS" env -i PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" MKISO_BUILD=1 xbps-reconfigure -a
 	'
 }
 
 finish_clean() {
-  local rootfs="${ROOTFS:?ROOTFS não definido}"
+	local rootfs="${ROOTFS:?ROOTFS não definido}"
 	# Cleanup and remove useless stuff.
 	xbps-remove -r "$rootfs" -Ooy >/dev/null 2>&1
 	rm -rf "$rootfs"/var/cache/* "$rootfs"/run/* "$rootfs"/var/run/*
@@ -693,7 +780,7 @@ configure_plymouth() {
 	print_step "Configurando tema plymouth : voidbr"
 	#chroot "$ROOTFS" env -i plymouth-set-default-theme fade-in
 	#chroot "$ROOTFS" env -i plymouth-set-default-theme voidx
-	chroot "$ROOTFS" env -i plymouth-set-default-theme voidbr
+	chroot "$ROOTFS" env -i PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" plymouth-set-default-theme voidbr
 	result="${PIPESTATUS[0]}"
 	[ $result -ne 0 ] && die "Falha ao configurar tema"
 
@@ -759,10 +846,24 @@ EOF
 configure_service_plymouth_stop() {
 	print_step "Configurando serviço plymouth-stop : $ROOTFS/etc/sv"
 	mkdir -p "$ROOTFS/etc/sv/plymouth-stop"
-	tee "$ROOTFS/etc/sv/plymouth-stop/run" >/dev/null <<EOF
+  tee "$ROOTFS/etc/sv/plymouth-stop/run" >/dev/null <<'EOF'
 #!/bin/sh
 [ -r ./conf ] && . ./conf
-exec /usr/bin/plymouth --quit
+/usr/bin/plymouth --quit
+# "plymouth --quit" às vezes retorna antes do daemon (plymouthd) ter
+# terminado de verdade -- e ao morrer, ele reseta a fonte/console,
+# sobrescrevendo qualquer coisa que a gente aplique logo em seguida.
+# Espera o processo sumir de fato antes de mexer na fonte.
+for i in $(seq 1 20); do
+    pgrep -x plymouthd >/dev/null 2>&1 || break
+    sleep 0.1
+done
+# O plymouth, ao sair do modo gráfico, costuma resetar a fonte do
+# console pro padrão embutido do kernel -- reaplica a fonte configurada
+# no rc.conf (ex: terminus via vconsole.font=/locale.sh) depois dele.
+. /etc/rc.conf 2>/dev/null
+[ -n "$FONT" ] && setfont "$FONT" 2>/dev/null
+exit 0
 EOF
 	chmod +x "$ROOTFS/etc/sv/plymouth-stop/run"
 	ln -sf "/etc/sv/plymouth-stop" "$ROOTFS/etc/runit/runsvdir/default/"
@@ -770,11 +871,24 @@ EOF
 
 configure_etc_runit_core_services_quit_plymouth() {
 	print_step "Configurando script plymouth-stop : $ROOTFS/etc/runit/core-services/"
-	tee "$ROOTFS/etc/runit/core-services/99-voidbr-plymouth-quit.sh" >/dev/null <<EOF
+	tee "$ROOTFS/etc/runit/core-services/99-voidbr-plymouth-quit.sh" >/dev/null <<'EOF'
 #!/bin/sh
 if command -v plymouth >/dev/null; then
     plymouth quit
+    # "plymouth quit" às vezes retorna antes do daemon (plymouthd) ter
+    # terminado de verdade -- e ao morrer, ele reseta a fonte/console,
+    # sobrescrevendo qualquer coisa que a gente aplique logo em seguida.
+    # Espera o processo sumir de fato antes de mexer na fonte.
+    for i in $(seq 1 20); do
+        pgrep -x plymouthd >/dev/null 2>&1 || break
+        sleep 0.1
+    done
 fi
+# O plymouth, ao sair do modo gráfico, costuma resetar a fonte do
+# console pro padrão embutido do kernel -- reaplica a fonte configurada
+# no rc.conf (ex: terminus via vconsole.font=/locale.sh) depois dele.
+. /etc/rc.conf 2>/dev/null
+[ -n "$FONT" ] && setfont "$FONT" 2>/dev/null
 EOF
 	chmod +x "$ROOTFS/etc/runit/core-services/99-voidbr-plymouth-quit.sh"
 }
@@ -935,6 +1049,45 @@ generate_isolinux_boot() {
 	run_cmd_new cp -f "$HOSTDIR"/boot/memtest86+/memtest.bin "$BOOT_DIR"
 }
 
+generate_limine_boot() {
+	print_step "Gerando suporte Limine para sistema : BIOS + UEFI"
+	{
+		run_cmd_new cp -f limine/limine.conf.in "$LIMINE_DIR"/limine.conf
+		run_cmd_new sed -i -e "s|@@KERNVER@@|${KERNELVERSION}|" \
+			-e "s|@@KEYMAP@@|${KEYMAP}|" \
+			-e "s|@@ARCH@@|$BASE_ARCH|" \
+			-e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
+			-e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
+			-e "s|@@LOCALE@@|${LOCALE}|" "$LIMINE_DIR"/limine.conf
+
+		# Wallpaper do tema (referenciado no limine.conf via
+		# "boot():/boot/limine/voidbr-tokyonight.png"). O pacote
+		# voidbr-limine-config já instala esse arquivo no ROOTFS, em
+		# /boot/efi/limine/ (pensado pro sistema instalado) -- aqui só
+		# copiamos ele de lá pro lugar novo, dentro da própria ISO.
+		if [ -f "$ROOTFS/boot/efi/limine/voidbr-tokyonight.png" ]; then
+			run_cmd_new cp -f "$ROOTFS/boot/efi/limine/voidbr-tokyonight.png" "$LIMINE_DIR"/
+		else
+			info_msg "AVISO: $ROOTFS/boot/efi/limine/voidbr-tokyonight.png não encontrado (voidbr-limine-config instalado?) -- Limine vai usar fundo padrão."
+		fi
+
+		# Binários do bootloader em si (ambos os modos, BIOS e UEFI, num
+		# único conjunto de arquivos -- Limine não separa isolinux/grub).
+		run_cmd_new cp -f "$LIMINE_DATADIR"/limine-bios.sys "$LIMINE_DIR"
+		run_cmd_new cp -f "$LIMINE_DATADIR"/limine-bios-cd.bin "$LIMINE_DIR"
+		run_cmd_new cp -f "$LIMINE_DATADIR"/limine-uefi-cd.bin "$LIMINE_DIR"
+
+		# EFI/BOOT/ pra permitir boot direto de pendrive/HD gravado cru
+		# (fora do El Torito, útil se a mídia for regravada como disco raw).
+		run_cmd_new mkdir -p "$IMAGEDIR"/EFI/BOOT
+		run_cmd_new cp -f "$LIMINE_DATADIR"/BOOTX64.EFI "$IMAGEDIR"/EFI/BOOT/
+		run_cmd_new cp -f "$LIMINE_DATADIR"/BOOTIA32.EFI "$IMAGEDIR"/EFI/BOOT/
+
+		# include memtest86+ (multiboot1, referenciado no limine.conf)
+		run_cmd_new cp -f "$HOSTDIR"/boot/memtest86+/memtest.bin "$BOOT_DIR"
+	}
+}
+
 generate_grub_efi_boot() {
 	print_step "Gerando suporte GRUB para sistema : EFI"
 	{
@@ -1046,21 +1199,16 @@ generate_squashfs() {
 		# Folga reduzida de 2x para ~1.15x + margem fixa de 256M (a imagem antiga
 		# usava o dobro do tamanho do rootfs sem necessidade real).
 		EXT3_IMG_SIZE=$(((ROOTFS_SIZE * 115 / 100) + 256))
-		run_cmd_new truncate -s "${EXT3_IMG_SIZE}M" "$BUILDDIR"/tmp/LiveOS/ext3fs.img
+		run_cmd_new truncate -s "${EXT3_IMG_SIZE}M" "$BUILDDIR"/tmp/LiveOS/rootfs.img
 		# mke2fs -d popula o filesystem DIRETO a partir do ROOTFS, sem precisar
 		# montar via loop + cp -a + umount (evita uma copia inteira do rootfs
 		# passando por I/O de mount de loop device). Journal desabilitado
 		# (^has_journal) porque essa imagem só existe para ser lida uma vez
 		# pelo mksquashfs logo em seguida e depois é apagada -- journaling é
 		# overhead puro aqui.
-		run_cmd_new mkfs.ext3 -F -q -O ^has_journal -d "$ROOTFS" -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
+		run_cmd_new mkfs.ext3 -F -q -O ^has_journal -d "$ROOTFS" -m1 "$BUILDDIR/tmp/LiveOS/rootfs.img" 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 		run_cmd_new mkdir -p "$IMAGEDIR/LiveOS"
 
-		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
-		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img "$options" || die "Failed to generate squashfs image"
-		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp xz -Xbcj x86 -Xdict-size 100% || die "Failed to generate squashfs image"
-		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp lz4 || die "Failed to generate squashfs image"
-		#run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 3 || die "Failed to generate squashfs image"
 		run_cmd_new "$HOSTDIR"/usr/bin/mksquashfs "$BUILDDIR"/tmp "$IMAGEDIR"/LiveOS/squashfs.img -noappend -b 1M -comp zstd -Xcompression-level 1 -processors "$(nproc)" || die "Failed to generate squashfs image"
 
 		run_cmd_new chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
@@ -1073,30 +1221,55 @@ generate_squashfs() {
 generate_iso_image() {
 	print_step "Gerando imagem ISO : ${yellow}$OUTPUT_FILE"
 	{
-		run_cmd_new "$HOSTDIR"/usr/bin/xorriso \
-			-as mkisofs \
-			-iso-level 3 \
-			-rock \
-			-joliet \
-			-max-iso9660-filenames \
-			-omit-period \
-			-omit-version-number \
-			-relaxed-filenames \
-			-allow-lowercase \
-			-volid "$VOL_ID" \
-			-eltorito-boot boot/isolinux/isolinux.bin \
-			-eltorito-catalog boot/isolinux/boot.cat \
-			-no-emul-boot \
-			-boot-load-size 4 -boot-info-table \
-			-eltorito-alt-boot -e boot/grub/efiboot.img \
-			-isohybrid-gpt-basdat \
-			-no-emul-boot \
-			-isohybrid-mbr "$SYSLINUX_DATADIR"/isohdpfx.bin \
-			-output "$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
+		if [ "$BOOTLOADER" = "limine" ]; then
+			run_cmd_new "$HOSTDIR"/usr/bin/xorriso \
+				-as mkisofs \
+				-iso-level 3 \
+				-rock \
+				-joliet \
+				-max-iso9660-filenames \
+				-omit-period \
+				-omit-version-number \
+				-relaxed-filenames \
+				-allow-lowercase \
+				-volid "$VOL_ID" \
+				-b boot/limine/limine-bios-cd.bin \
+				-no-emul-boot -boot-load-size 4 -boot-info-table \
+				--efi-boot boot/limine/limine-uefi-cd.bin \
+				-efi-boot-part --efi-boot-image --protective-msdos-label \
+				-output "$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
+
+			# Grava o stage BIOS/MBR direto no arquivo da ISO -- necessário
+			# pro boot funcionar de verdade quando a ISO for regravada crua
+			# num pendrive (dd/Rufus/etc), não só em CD/DVD virtual.
+			run_cmd_new "$HOSTDIR"/usr/bin/limine bios-install "$OUTPUT_FILE" || die "Failed to install Limine BIOS stage"
+		else
+			run_cmd_new "$HOSTDIR"/usr/bin/xorriso \
+				-as mkisofs \
+				-iso-level 3 \
+				-rock \
+				-joliet \
+				-max-iso9660-filenames \
+				-omit-period \
+				-omit-version-number \
+				-relaxed-filenames \
+				-allow-lowercase \
+				-volid "$VOL_ID" \
+				-eltorito-boot boot/isolinux/isolinux.bin \
+				-eltorito-catalog boot/isolinux/boot.cat \
+				-no-emul-boot \
+				-boot-load-size 4 -boot-info-table \
+				-eltorito-alt-boot -e boot/grub/efiboot.img \
+				-isohybrid-gpt-basdat \
+				-no-emul-boot \
+				-isohybrid-mbr "$SYSLINUX_DATADIR"/isohdpfx.bin \
+				-output "$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
+		fi
 	}
 	#	} 2>&1 | tee -i -a "$BOOTLOG" >$LOGGER
 	hsize=$(du -sh "$OUTPUT_FILE" | awk '{print $1}')
-  chili-make-md5-iso "$OUTPUT_FILE"
+	chili-make-md5-iso "$OUTPUT_FILE"
+	rm kernel-${name}.txt
 	info_msg "Iso file created: ${green}$(readlink -f "$OUTPUT_FILE") ($hsize) successfully.${reset}"
 }
 
@@ -1130,6 +1303,7 @@ ${bold}OPTIONS${rst}
   -C "<arg> ..."     ${cyan}Extra kernel cmdline args${rst}
   -T <title>         ${cyan}Bootloader title${rst} (default: Void Linux)
   -v linux<ver>      ${cyan}Custom kernel version${rst}
+  --bootloader=<x>    ${cyan}Bootloader${rst} (grub|limine, default: grub)
 
   -K                 ${yellow}Do not remove builddir${rst}
   -n                 ${yellow}Reuse existing squashfs${rst}
@@ -1142,6 +1316,7 @@ ${bold}Desktop presets:${rst}
   -F|fluxbox        ${green}FLUXBOX${rst}
   -G|gnome          ${green}GNOME${rst}
   -P|plasma|kde     ${green}KDE PLASMA${rst}
+  -L|plasma-louvorja-piano     ${green}PLASMA LOUVORJA-PIANO${rst}
   -X|xfce-base      ${green}XFCE (base)${rst}
   -Y|xfce           ${green}XFCE${rst}
   -M|mate           ${green}MATE${rst}
@@ -1177,6 +1352,10 @@ sh_config_distroname() {
 		title='VoidBR Linux Live KDE Plasma'
 		VOL_ID='VOIDBR_LIVE_PLASMA'
 		name='plasma'
+	elif $MAKE_PLASMA_LOUVORJA_PIANO; then
+		title='VoidBR Linux Live Plasma with LouvorJa-Piano'
+		VOL_ID='VOIDBR_LIVE_LOUVORJA'
+		name='louvorja-piano'
 	elif $MAKE_GNOME; then
 		title='VoidBR Linux Live GNOME'
 		VOL_ID='VOIDBR_LIVE_GNOME'
@@ -1230,6 +1409,7 @@ sh_print_resume() {
 	print_step "Building ISO     => ${yellow}${title}${reset}"
 	print_step "Versao app       => ${yellow}${APP} v${_VERSION_}${reset}"
 	print_step "Profile         => ${yellow}${name}${reset}"
+	print_step "Bootloader      => ${yellow}${BOOTLOADER}${reset}"
 	print_step "ROOTDIR         => ${yellow}${ROOTDIR}${reset}"
 	print_step "ROOTFS          => ${yellow}${ROOTFS}${reset}"
 	print_step "HOSTDIR         => ${yellow}${HOSTDIR}${reset}"
@@ -1247,50 +1427,70 @@ sh_configure_packages() {
 	sh_choose_packages_base
 
 	if $MAKE_X; then
-		sh_choose_packages_common_X_base
-		sh_choose_voidbr_X_packages
-		if ! $MAKE_ONLY_XORG; then
-			sh_choose_packages_common_X_advanced
-		fi
+		##########################################################################
+		# Hyprland, Sway, Mango, Fluxbox, Plasma e XFCE já têm meta-pacote próprio
+		# (voidbr-<de>), que já declara depends="voidbr-gui-common voidbr-xorg-common"
+		# ou depends="voidbr-gui-common voidbr-wayland-common" — e voidbr-gui-common
+		# por sua vez depende de voidbr-base-common. O xbps-install resolve essa
+		# cadeia inteira sozinho a partir de UM nome só; não precisa mais listar
+		# pacote solto nem chamar as funções common_* pra essas 6 DEs.
+		##########################################################################
 		if $MAKE_FULL_X; then
+			# Imagem "tudo em um": inclui todo mundo.
 			STEP_COUNT=72
-			sh_choose_packages_xfce_base
-			sh_choose_packages_xfce
-			sh_choose_packages_gnome
-			sh_choose_packages_plasma
+			ADISTRO_PKGS+=" voidbr-xfce voidbr-plasma voidbr-fluxbox voidbr-sway voidbr-mango voidbr-hyprland voidbr-gnome"
+
+			# Cinnamon, MATE, Awesome e Enlightenment ainda não têm
+			# meta-pacote — usa a seleção manual (legado) até serem criados.
+			sh_choose_packages_common_gui_base
+			sh_choose_packages_common_x11
+			sh_choose_voidbr_x11_themes
+			sh_choose_packages_display_manager
+			sh_choose_packages_common_advanced
 			sh_choose_packages_cinnamon
 			sh_choose_packages_mate
 			sh_choose_packages_awesome
 			sh_choose_packages_enlightenment
-			sh_choose_packages_fluxbox
-			sh_choose_packages_sway
-			sh_choose_packages_mango
-			sh_choose_packages_hyprland
-		elif $MAKE_ENLIGHTENMENT; then
-			sh_choose_packages_enlightenment
-		elif $MAKE_AWESOME; then
-			sh_choose_packages_awesome
-		elif $MAKE_FLUXBOX; then
-			sh_choose_packages_fluxbox
-		elif $MAKE_PLASMA; then
-			sh_choose_packages_plasma
-		elif $MAKE_GNOME; then
-			sh_choose_packages_gnome
-		elif $MAKE_XFCE_BASE; then
-			sh_choose_packages_xfce_base
-		elif $MAKE_XFCE; then
-			sh_choose_packages_xfce_base
-			sh_choose_packages_xfce
-		elif $MAKE_CINNAMON; then
-			sh_choose_packages_cinnamon
-		elif $MAKE_MATE; then
-			sh_choose_packages_mate
-		elif $MAKE_SWAY; then
-			sh_choose_packages_sway
-		elif $MAKE_MANGO; then
-			sh_choose_packages_mango
 		elif $MAKE_HYPRLAND; then
-			sh_choose_packages_hyprland
+			ADISTRO_PKGS+=" voidbr-hyprland"
+		elif $MAKE_SWAY; then
+			ADISTRO_PKGS+=" voidbr-sway"
+		elif $MAKE_MANGO; then
+			ADISTRO_PKGS+=" voidbr-mango"
+		elif $MAKE_FLUXBOX; then
+			ADISTRO_PKGS+=" voidbr-fluxbox"
+		elif $MAKE_XFCE_BASE || $MAKE_XFCE; then
+			ADISTRO_PKGS+=" voidbr-xfce"
+		elif $MAKE_GNOME; then
+			ADISTRO_PKGS+=" voidbr-gnome"
+		elif $MAKE_PLASMA; then
+			ADISTRO_PKGS+=" voidbr-plasma"
+		elif $MAKE_MATE; then
+			ADISTRO_PKGS+=" voidbr-mate"
+		elif $MAKE_PLASMA_LOUVORJA_PIANO; then
+			ADISTRO_PKGS+=" voidbr-plasma"
+      ASKEL_PKGS+=(voidbr-plasma-config-louvorja-piano)
+		elif $MAKE_CINNAMON; then
+			ADISTRO_PKGS+=" voidbr-cinnamon"
+		elif $MAKE_ONLY_XORG; then
+			# Sessão X mínima, sem DE (--xorg/install): só a base Xorg
+			# + infra comum, sem nenhum meta-pacote de DE.
+			ADISTRO_PKGS+=" voidbr-base-common voidbr-xorg-common"
+		else
+			##########################################################################
+			# Cinnamon, MATE, Awesome, Enlightenment: ainda sem meta-pacote
+			# próprio, mantém o pipeline antigo (legado) até serem criados.
+			##########################################################################
+			sh_choose_packages_common_gui_base
+			sh_choose_packages_common_x11
+			sh_choose_voidbr_x11_themes
+			sh_choose_packages_display_manager
+			sh_choose_packages_common_advanced
+			if $MAKE_ENLIGHTENMENT; then
+				sh_choose_packages_enlightenment
+			elif $MAKE_AWESOME; then
+				sh_choose_packages_awesome
+			fi
 		fi
 	fi
 }
@@ -1298,7 +1498,7 @@ sh_configure_packages() {
 sh_configure_rootfs() {
 	# Configure dracut to use overlayfs for the writable overlay.
 	print_step "Configurando rootfs : $ROOTFS"
-	BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "
+	BOOT_CMDLINE="$BOOT_CMDLINE rd.overlay=1 "
 	ARCH=$(xbps-uhelper arch)
 
 	# Set defaults
@@ -1309,7 +1509,8 @@ sh_configure_rootfs() {
 	: ${LOCALE:=pt_BR.UTF-8}
 	: ${INITRAMFS_COMPRESSION:=xz}
 	: ${SQUASHFS_COMPRESSION:=zstd}
-	: ${BASE_SYSTEM_PKG:=base-system}
+	: ${BASE_SYSTEM_PKG:=base-container-full}
+	# : ${BASE_SYSTEM_PKG:=base-system}
 	: ${BOOT_TITLE:="$title"}
 
 	# Required packages in the image for a working system.
@@ -1338,6 +1539,7 @@ sh_configure_rootfs() {
 	BOOT_DIR="$IMAGEDIR/boot"
 	ISOLINUX_DIR="$BOOT_DIR/isolinux"
 	GRUB_DIR="$BOOT_DIR/grub"
+	LIMINE_DIR="$BOOT_DIR/limine"
 	ISOLINUX_CFG="$ISOLINUX_DIR/isolinux.cfg"
 
 	sh_create_etc_xbps_d_conf_00_repository_main_conf "$ROOTFS/etc/xbps.d/00-repository-main.conf"
@@ -1347,6 +1549,7 @@ sh_configure_rootfs() {
 
 	: ${SYSLINUX_DATADIR:="$HOSTDIR"/usr/lib/syslinux}
 	: ${GRUB_DATADIR:="$HOSTDIR"/usr/share/grub}
+	: ${LIMINE_DATADIR:="$HOSTDIR"/usr/share/limine}
 	: ${SPLASH_IMAGE:=data/splash.png}
 	: ${XBPS_INSTALL_UNPACK_ONLY:=xbps-install --unpack-only --yes --ignore-file-conflicts}
 	: ${XBPS_INSTALL_CMD:=xbps-install}
@@ -1357,7 +1560,7 @@ sh_configure_rootfs() {
 	: ${XBPS_UHELPER_CMD:=xbps-uhelper}
 	: ${XBPS_RECONFIGURE_CMD:=xbps-reconfigure}
 	: ${OUTPUT_FILE="voidbr-live-$name-${BASE_ARCH}-$(uname -r)-$(sh_diahora).iso"}
-	mkdir -p "$ROOTFS" "$HOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR"
+	mkdir -p "$ROOTFS" "$HOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR" "$LIMINE_DIR"
 
 	# Validação de espaço em disco inserida antes do resumo e do início das instalações
 	verificar_espaco_livre
@@ -1524,8 +1727,8 @@ sh_make_iso() {
 	#      Você não precisa ativar os serviços deles no runit.
 	: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 dbus socklog-unix nanoklogd udevd sshd NetworkManager dhcpcd chronyd}
 	if $MAKE_X; then
-		if $MAKE_GNOME; then
-			: ${ADDITIONAL_SERVICE_LIST:=gdm}
+		if $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_GNOME; then
+			: ${ADDITIONAL_SERVICE_LIST:=sddm}
 		else
 			: ${ADDITIONAL_SERVICE_LIST:=lightdm}
 		fi
@@ -1544,24 +1747,67 @@ sh_make_iso() {
 		copy_include_directories
 	fi
 
-	for file in ./grub/grub_void.cfg.in ./isolinux/isolinux.cfg.in; do
+	# Dispara o void-install sozinho, mas SOMENTE quando a entrada
+	# "Instalar" do menu de boot foi escolhida (identificada pelo
+	# parâmetro exclusivo voidbr.autoinstall no cmdline — não usar
+	# live.autologin sozinho aqui, pois a entrada de acessibilidade
+	# (linuxa11y) também usa live.autologin e NÃO deve abrir o instalador).
+	# Qualquer outra entrada de boot (linux, linuxram, linuxa11y, sessão
+	# gráfica normal) continua se comportando exatamente como antes.
+	print_step "Configurando autoexec do void-install (tty1) : $ROOTFS/etc/skel/.bash_profile"
+	mkdir -p "$ROOTFS/etc/skel"
+	cat >"$ROOTFS/etc/skel/.bash_profile" <<-'EOF'
+		    #
+		    # ~/.bash_profile
+		    #
+
+		    [[ -f ~/.bashrc ]] && . ~/.bashrc
+
+				# Instalado pelo mkiso — dispara o void-install SOMENTE quando o
+				# boot veio da entrada "Instalar" do menu (isolinux/GRUB), marcada
+				# pelo parâmetro voidbr.autoinstall no cmdline do kernel. Qualquer
+				# outra entrada de boot cai num shell normal, como sempre foi.
+				if [ "$(tty)" = "/dev/tty1" ] && grep -qw 'voidbr.autoinstall' /proc/cmdline; then
+					sudo /usr/bin/void-install
+					echo
+					echo "Instalador encerrado. Você está num shell bash normal agora."
+					echo "Para rodar o instalador de novo: sudo void-install"
+				fi
+	EOF
+	chmod 644 "$ROOTFS/etc/skel/.bash_profile"
+
+	for file in ./grub/grub_void.cfg.in ./isolinux/isolinux.cfg.in ./limine/limine.conf.in; do
 		print_step "Ajustando CDLABEL=$VOL_ID : ${file}"
 		sudo sed -i "s/CDLABEL=[^ ]*/CDLABEL=${VOL_ID}/g" "$file"
 	done
 
-	configure_plymouth
+	#	configure_plymouth
 	#configure_service_boot_logger
 	#configure_service_plymouth_log
 	#configure_service_plymouth_stop
 	configure_etc_runit_core_services_quit_plymouth
 	generate_initramfs
-	generate_isolinux_boot
-	generate_grub_efi_boot
+	if [ "$BOOTLOADER" = "limine" ]; then
+		generate_limine_boot
+	else
+		generate_isolinux_boot
+		generate_grub_efi_boot
+	fi
 	cleanup_rootfs
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
 	sh_remove_etc_xbps_00_repository_main_conf "$conf"
 	sh_activating_pipewire
-	sh_configure_lightdm_default_session
+	if $MAKE_X && ! $MAKE_GNOME && ! $MAKE_HYPRLAND && ! $MAKE_MANGO && ! $MAKE_SWAY; then
+		sh_configure_lightdm_default_session
+	fi
+
+  sh_set_edition_os_release() {
+    local name="$1"
+    name="${name^}"
+    sed -i "s/^EDITION=.*/EDITION=\"$name\"/" "$ROOTFS"/etc/os-release
+  }
+  sh_set_edition_os_release "$name"
+
 	# generate_squashfs
 	#	generate_iso_image
 }
@@ -1660,6 +1906,10 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:s:o:p:g:v:VhXxYyQqWwNnEeFfAGOHPmMSZ:D:" opt;
 		MAKE_X=true
 		MAKE_PLASMA=true
 		;;
+	L)
+		MAKE_X=true
+		MAKE_PLASMA_LOUVORJA_PIANO=true
+		;;
 	A)
 		MAKE_X=true
 		MAKE_FULL_X=true
@@ -1706,6 +1956,10 @@ for arg in "$@"; do
 	plasma | kde)
 		MAKE_X=true
 		MAKE_PLASMA=true
+		;;
+	plasma-louvorja-piano)
+		MAKE_X=true
+		MAKE_PLASMA_LOUVORJA_PIANO=true
 		;;
 
 	gnome)

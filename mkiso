@@ -1720,8 +1720,21 @@ enable_services() {
 	done
 }
 
+cleanup_spurious_sessions() {
+	# labwc (dependência do XFCE) e weston (transitiva, via alguma
+	# dependência Wayland) aparecem como opção de sessão no
+	# SDDM/lightdm sem serem o DE principal pretendido. Remove só o
+	# .desktop (não o pacote/binário), pra não sumir da lista de
+	# sessão sem precisar desinstalar nada que outra coisa dependa.
+	for f in labwc weston; do
+		rm -f "$ROOTFS/usr/share/xsessions/${f}.desktop" \
+			"$ROOTFS/usr/share/wayland-sessions/${f}.desktop"
+	done
+}
+
 sh_make_iso() {
 	mount_pseudofs
+	cleanup_spurious_sessions
 
 	#dica: No Void, com dbus ativo, o elogind e o polkitd sobem automaticamente.
 	#      Você não precisa ativar os serviços deles no runit.

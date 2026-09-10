@@ -9,40 +9,51 @@ configure_normal_dm_autologin() {
 	USERNAME=$(getarg live.user)
 	[ -z "$USERNAME" ] && USERNAME=anon
 
-	SESSION_NAME=xfce
-	if [ -x "${NEWROOT}"/usr/bin/startxfce4 ]; then
-		SESSION_NAME=xfce
-	elif [ -x "${NEWROOT}"/usr/bin/startplasma-wayland ]; then
-		SESSION_NAME=plasma
-	elif [ -x "${NEWROOT}"/usr/bin/enlightenment_start ]; then
-		SESSION_NAME=enlightenment
-	elif [ -x "${NEWROOT}"/usr/bin/awesome ]; then
-		SESSION_NAME=awesome
-	elif [ -x "${NEWROOT}"/usr/bin/gnome-session ]; then
-		SESSION_NAME=gnome
-	elif [ -x "${NEWROOT}"/usr/bin/mate-session ]; then
-		SESSION_NAME=mate
-	elif [ -x "${NEWROOT}"/usr/bin/cinnamon-session ]; then
-		SESSION_NAME=cinnamon
-	elif [ -x "${NEWROOT}"/usr/bin/i3 ]; then
-		SESSION_NAME=i3
-	elif [ -x "${NEWROOT}"/usr/bin/startlxde ]; then
-		SESSION_NAME=startlxde
-	elif [ -x "${NEWROOT}"/usr/bin/startlxqt ]; then
-		SESSION_NAME=startlxqt
-	elif [ -x "${NEWROOT}"/usr/bin/startfluxbox ]; then
-		SESSION_NAME=startfluxbox
+	# Fonte principal: o mkiso já grava EDITION="Xfce"/"Hyprland"/...
+	# (sh_set_edition_os_release) em /etc/os-release na hora do build --
+	# é o flavor exato escolhido, sem ambiguidade nenhuma. Só usa o
+	# valor se um .desktop com esse nome realmente existir (evita
+	# confiar num EDITION que não bate com nada instalado de verdade).
+	SESSION_NAME=""
+	if [ -r "${NEWROOT}/etc/os-release" ]; then
+		# /etc/os-release é feito pra ser "sourceado" (é a própria spec
+		# do formato) -- o shell já trata aspas simples/duplas/nenhuma
+		# igual, sem precisar de sed nenhum pra extrair o valor.
+		EDITION=""
+		. "${NEWROOT}/etc/os-release"
+		_edition_lc=$(echo "$EDITION" | tr '[:upper:]' '[:lower:]')
+		case "$_edition_lc" in
+		xfce-base) _edition_lc=xfce ;;
+		esac
+		if [ -f "${NEWROOT}/usr/share/wayland-sessions/${_edition_lc}.desktop" ] ||
+			[ -f "${NEWROOT}/usr/share/xsessions/${_edition_lc}.desktop" ]; then
+			SESSION_NAME="$_edition_lc"
+		fi
 	fi
 
-	# Configure sddm autologin iso.
-	mkdir -p "${NEWROOT}/etc/sddm.conf.d"
-	cat >"${NEWROOT}/etc/sddm.conf.d/00-autologin.conf" <<EOF
+	# Fallback: EDITION ausente/sem .desktop correspondente -- varre os
+	# .desktop reais e pega o primeiro. Menos preciso quando há mais de
+	# um instalado (ex: xfce + labwc juntos), mas melhor que travar.
+	if [ -z "$SESSION_NAME" ]; then
+		for f in "${NEWROOT}"/usr/share/wayland-sessions/*.desktop "${NEWROOT}"/usr/share/xsessions/*.desktop; do
+			[ -f "$f" ] || continue
+			SESSION_NAME=$(basename "$f" .desktop)
+			break
+		done
+	fi
+	[ -z "$SESSION_NAME" ] && SESSION_NAME=xfce
+
+	# Configure sddm autologin iso (só se o SDDM estiver instalado).
+	if [ -x "${NEWROOT}"/usr/bin/sddm ]; then
+		mkdir -p "${NEWROOT}/etc/sddm.conf.d"
+		cat >"${NEWROOT}/etc/sddm.conf.d/00-autologin.conf" <<EOF
 [Autologin]
 Enable=true
 User=${USERNAME}
 #Session=xfce.desktop
 Session=${SESSION_NAME}
 EOF
+	fi
 
 	# Configure GDM autologin
 	if [ -d "${NEWROOT}"/etc/gdm ]; then
@@ -69,27 +80,20 @@ EOF
 	# Configure lxdm autologin.
 	if [ -r "${NEWROOT}"/etc/lxdm/lxdm.conf ]; then
 		sed -e "s,.*autologin.*=.*,autologin=$USERNAME," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
-		if [ -x "${NEWROOT}"/usr/bin/startxfce4 ]; then
-			sed -e "s,.*session.*=.*,session=/usr/bin/startxfce4," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
-		elif [ -x "${NEWROOT}"/usr/bin/enlightenment_start ]; then
-			sed -e "s,.*session.*=.*,session=/usr/bin/enlightenment_start," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
-		elif [ -x "${NEWROOT}"/usr/bin/awesome ]; then
-			sed -e "s,.*session.*=.*,session=/usr/bin/awesome," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
-		elif [ -x "${NEWROOT}"/usr/bin/gnome-session ]; then
-			sed -e "s,.*session.*=.*,session=/usr/bin/gnome-session," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
-		elif [ -x "${NEWROOT}"/usr/bin/mate-session ]; then
-			sed -e "s,.*session.*=.*,session=/usr/bin/mate-session," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
-		elif [ -x "${NEWROOT}"/usr/bin/cinnamon-session ]; then
-			sed -e "s,.*session.*=.*,session=/usr/bin/cinnamon-session," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
-		elif [ -x "${NEWROOT}"/usr/bin/i3 ]; then
-			sed -e "s,.*session.*=.*,session=/usr/bin/i3," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
-		elif [ -x "${NEWROOT}"/usr/bin/startlxde ]; then
-			sed -e "s,.*session.*=.*,session=/usr/bin/startlxde," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
-		elif [ -x "${NEWROOT}"/usr/bin/startlxqt ]; then
-			sed -e "s,.*session.*=.*,session=/usr/bin/startlxqt," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
-		elif [ -x "${NEWROOT}"/usr/bin/startfluxbox ]; then
-			sed -e "s,.*session.*=.*,session=/usr/bin/startfluxbox," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
-		fi
+		case "$SESSION_NAME" in
+		xfce) LXDM_BIN=/usr/bin/startxfce4 ;;
+		enlightenment) LXDM_BIN=/usr/bin/enlightenment_start ;;
+		awesome) LXDM_BIN=/usr/bin/awesome ;;
+		gnome) LXDM_BIN=/usr/bin/gnome-session ;;
+		mate) LXDM_BIN=/usr/bin/mate-session ;;
+		cinnamon) LXDM_BIN=/usr/bin/cinnamon-session ;;
+		i3) LXDM_BIN=/usr/bin/i3 ;;
+		startlxde) LXDM_BIN=/usr/bin/startlxde ;;
+		startlxqt) LXDM_BIN=/usr/bin/startlxqt ;;
+		startfluxbox) LXDM_BIN=/usr/bin/startfluxbox ;;
+		*) LXDM_BIN="" ;;
+		esac
+		[ -n "$LXDM_BIN" ] && sed -e "s,.*session.*=.*,session=$LXDM_BIN," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
 	fi
 }
 
