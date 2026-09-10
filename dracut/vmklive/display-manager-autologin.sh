@@ -43,57 +43,67 @@ configure_normal_dm_autologin() {
 	fi
 	[ -z "$SESSION_NAME" ] && SESSION_NAME=xfce
 
-	# Configure sddm autologin iso (só se o SDDM estiver instalado).
-	if [ -x "${NEWROOT}"/usr/bin/sddm ]; then
-		mkdir -p "${NEWROOT}/etc/sddm.conf.d"
-		cat >"${NEWROOT}/etc/sddm.conf.d/00-autologin.conf" <<EOF
+	# Configura os quatro DMs SEMPRE, incondicional -- não dá pra saber
+	# com certeza qual está de fato habilitado no runit (pode ter mais
+	# de um instalado no mesmo rootfs). Escrever pra todos é inofensivo:
+	# só o que estiver de fato ativado em
+	# /etc/runit/runsvdir/default/<dm> vai ler essa config.
+
+	# SDDM
+	mkdir -p "${NEWROOT}/etc/sddm.conf.d"
+	cat >"${NEWROOT}/etc/sddm.conf.d/00-autologin" <<EOF
 [Autologin]
 Enable=true
 User=${USERNAME}
-#Session=xfce.desktop
 Session=${SESSION_NAME}
 EOF
-	fi
 
-	# Configure GDM autologin
-	if [ -d "${NEWROOT}"/etc/gdm ]; then
-		GDMCustomFile="${NEWROOT}"/etc/gdm/custom.conf
-		AutologinParameters="AutomaticLoginEnable=true\nAutomaticLogin=$USERNAME"
-
-		# Prevent from updating if parameters already present (persistent usb key)
-		#       if ! `grep -qs 'AutomaticLoginEnable' "$GDMCustomFile"` ; then
-		if ! grep -qs 'AutomaticLoginEnable' "$GDMCustomFile"; then
-			#           if ! `grep -qs '\[daemon\]' "$GDMCustomFile"` ; then
-			if ! grep -qs '\[daemon\]' "$GDMCustomFile"; then
-				echo '[daemon]' >>"$GDMCustomFile"
-			fi
-			sed -i "s/\[daemon\]/\[daemon\]\n$AutologinParameters/" "$GDMCustomFile"
+	# GDM
+	mkdir -p "${NEWROOT}/etc/gdm"
+	GDMCustomFile="${NEWROOT}/etc/gdm/custom.conf"
+	AutologinParameters="AutomaticLoginEnable=true\nAutomaticLogin=$USERNAME"
+	if ! grep -qs 'AutomaticLoginEnable' "$GDMCustomFile"; then
+		if ! grep -qs '\[daemon\]' "$GDMCustomFile"; then
+			echo '[daemon]' >>"$GDMCustomFile"
 		fi
+		sed -i "s/\[daemon\]/\[daemon\]\n$AutologinParameters/" "$GDMCustomFile"
 	fi
 
-	# Configure lightdm autologin.
-	if [ -r "${NEWROOT}"/etc/lightdm.conf ]; then
-		sed -i -e "s|^\#\(default-user=\).*|\1$USERNAME|" "${NEWROOT}"/etc/lightdm.conf
-		sed -i -e "s|^\#\(default-user-timeout=\).*|\10|" "${NEWROOT}"/etc/lightdm.conf
-	fi
+	# lightdm -- drop-in em conf.d, não depende de um lightdm.conf
+	# pré-existente com linhas comentadas específicas (jeito antigo,
+	# quebrava se o pacote não estivesse instalado ainda nesse ponto).
+	mkdir -p "${NEWROOT}/etc/lightdm/lightdm.conf.d"
+	cat >"${NEWROOT}/etc/lightdm/lightdm.conf.d/50-voidbr-autologin.conf" <<EOF
+[Seat:*]
+autologin-user=${USERNAME}
+autologin-user-timeout=0
+EOF
 
-	# Configure lxdm autologin.
-	if [ -r "${NEWROOT}"/etc/lxdm/lxdm.conf ]; then
-		sed -e "s,.*autologin.*=.*,autologin=$USERNAME," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
-		case "$SESSION_NAME" in
-		xfce) LXDM_BIN=/usr/bin/startxfce4 ;;
-		enlightenment) LXDM_BIN=/usr/bin/enlightenment_start ;;
-		awesome) LXDM_BIN=/usr/bin/awesome ;;
-		gnome) LXDM_BIN=/usr/bin/gnome-session ;;
-		mate) LXDM_BIN=/usr/bin/mate-session ;;
-		cinnamon) LXDM_BIN=/usr/bin/cinnamon-session ;;
-		i3) LXDM_BIN=/usr/bin/i3 ;;
-		startlxde) LXDM_BIN=/usr/bin/startlxde ;;
-		startlxqt) LXDM_BIN=/usr/bin/startlxqt ;;
-		startfluxbox) LXDM_BIN=/usr/bin/startfluxbox ;;
-		*) LXDM_BIN="" ;;
-		esac
-		[ -n "$LXDM_BIN" ] && sed -e "s,.*session.*=.*,session=$LXDM_BIN," -i "${NEWROOT}"/etc/lxdm/lxdm.conf
+	# lxdm -- mesmo raciocínio: cria o arquivo do zero se não existir,
+	# em vez de só tentar um sed que não acha nada pra substituir.
+	case "$SESSION_NAME" in
+	xfce) LXDM_BIN=/usr/bin/startxfce4 ;;
+	enlightenment) LXDM_BIN=/usr/bin/enlightenment_start ;;
+	awesome) LXDM_BIN=/usr/bin/awesome ;;
+	gnome) LXDM_BIN=/usr/bin/gnome-session ;;
+	mate) LXDM_BIN=/usr/bin/mate-session ;;
+	cinnamon) LXDM_BIN=/usr/bin/cinnamon-session ;;
+	i3) LXDM_BIN=/usr/bin/i3 ;;
+	startlxde) LXDM_BIN=/usr/bin/startlxde ;;
+	startlxqt) LXDM_BIN=/usr/bin/startlxqt ;;
+	startfluxbox) LXDM_BIN=/usr/bin/startfluxbox ;;
+	*) LXDM_BIN=/usr/bin/startxfce4 ;;
+	esac
+	mkdir -p "${NEWROOT}/etc/lxdm"
+	if [ -f "${NEWROOT}/etc/lxdm/lxdm.conf" ]; then
+		sed -e "s,.*autologin.*=.*,autologin=$USERNAME," -i "${NEWROOT}/etc/lxdm/lxdm.conf"
+		sed -e "s,.*session.*=.*,session=$LXDM_BIN," -i "${NEWROOT}/etc/lxdm/lxdm.conf"
+	else
+		cat >"${NEWROOT}/etc/lxdm/lxdm.conf" <<EOF
+[base]
+autologin=${USERNAME}
+session=${LXDM_BIN}
+EOF
 	fi
 }
 
