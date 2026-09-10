@@ -83,12 +83,12 @@ ${yellow}Available flavors:${reset}
     ${green}cinnamon${reset}        Build Cinnamon ISO
     ${green}fluxbox${reset}         Build FLUXBOX ISO
     ${green}gnome${reset}           Build GNOME ISO
-    ${green}hyprland/hypr${reset}   Build Hyprland ISO
+    ${green}hyprland${reset}        Build Hyprland ISO
     ${green}install${reset}         Build Installer ISO
     ${green}mango${reset}           Build Mango ISO
     ${green}mate${reset}            Build MATE ISO
     ${green}plasma${reset}          Build KDE Plasma ISO
-    ${green}plasma-louvorja-piano${reset}          Build KDE Plasma LouvorJa-Piano ISO
+    ${green}louvor${reset}          Build KDE Plasma LouvorJa-Piano ISO
     ${green}sway${reset}            Build Sway ISO
     ${green}xfce${reset}            Build XFCE ISO
     ${green}fullx${reset}           Build FullX ISO
