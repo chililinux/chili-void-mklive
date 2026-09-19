@@ -4,11 +4,13 @@
 #
 #  rmake
 #  Created: 2023/09/18 - 09:05
-#  Updated: sex 24 jul 2026 12:02:29 -04
+#  Updated: qua 16 set 2026 00:52:14 -04
 #
 #  Copyright (c) 2019-2026, Vilmar Catafesta <vcatafesta@gmail.com>
 #  Copyright (c) 2019-2026, ChiliLinux Development Team <https://chililinux.com> <https://github.com/chililinux>
+#  Copyright (c) 2026-2026, VoidBR Development Team <https://voidbr.org> <https://github.com/voidlinuxbr>
 #  Assembled By Vilmar Catafesta for the ChiliLinux project.
+#  Assembled By Vilmar Catafesta for the VoidBR project.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -31,82 +33,67 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 #  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##############################################################################
-
-#!/usr/bin/env bash
-
 red="$(printf '\033[1;31m')"
 green="$(printf '\033[1;32m')"
 yellow="$(printf '\033[1;33m')"
 cyan="$(printf '\033[1;36m')"
 reset="$(printf '\033[0m')"
-rst="$(printf '\033[0m')"
 
 VERSION="linux7.2"
 
+FLAVORS=(
+	base
+	bspwm
+	cinnamon
+	enlightenment
+	fluxbox
+	fullx
+	gnome
+	hyprland
+	i3
+	install
+	lxde
+	mango
+	mate
+	plasma
+	plasma-louvorja-piano
+	river
+	sway
+	xfce
+)
+
 msg() {
-	echo -e "[rmake]$*"
+	printf '[rmake] %s\n' "$*"
 }
 
 usage() {
 	cat <<EOF
-
 ${cyan}VoidBR ISO Builder${reset}
 
 ${yellow}Usage:${reset}
     $0 ${green}<flavor> [flavor ...] [--flag=valor ...]${reset}
 
 ${yellow}Examples:${reset}
-    $0 all
     $0 base
-    $0 cinnamon
-    $0 fluxbox
-    $0 gnome
-    $0 hypr
-    $0 install
-    $0 plasma
-    $0 plasma-louvorja-piano
-    $0 mango
-    $0 mate
-    $0 sway
-    $0 xfce
-    #
-    $0 hypr plasma
-    $0 sway plasma xfce
-    #
     $0 base --bootloader=limine
-    $0 base cinnamon fluxbox gnome hyprland install mango plasma sway xfce --bootloader=limine
-    $0 all --bootloader=limine
+    $0 xfce --bootloader=grub
+    $0 xfce lxde plasma --bootloader=limine
 
 ${yellow}Available flavors:${reset}
-    ${green}all${reset}             Build all images
-    ${green}base${reset}            Build Base ISO
-    ${green}cinnamon${reset}        Build Cinnamon ISO
-    ${green}fluxbox${reset}         Build FLUXBOX ISO
-    ${green}gnome${reset}           Build GNOME ISO
-    ${green}hyprland${reset}        Build Hyprland ISO
-    ${green}install${reset}         Build Installer ISO
-    ${green}mango${reset}           Build Mango ISO
-    ${green}mate${reset}            Build MATE ISO
-    ${green}plasma${reset}          Build KDE Plasma ISO
-    ${green}louvor${reset}          Build KDE Plasma LouvorJa-Piano ISO
-    ${green}sway${reset}            Build Sway ISO
-    ${green}xfce${reset}            Build XFCE ISO
-    ${green}fullx${reset}           Build FullX ISO
+    ${green}all ${FLAVORS[*]}${reset}
 
 ${yellow}Flags (repassadas direto pro mkiso):${reset}
-    ${green}--bootloader=grub|limine${reset}   Bootloader da ISO (default: grub)
+    ${green}--automatic --bootloader=grub|limine${reset}   Bootloader da ISO
 EOF
 	exit 1
 }
 
 [[ $# -eq 0 ]] && usage
 
-FLAVORS=()
+REQUESTED=()
 EXTRA_ARGS=()
 
 for arg in "$@"; do
-	# Qualquer coisa começando com "--" é repassada direto pro mkiso,
-	# sem entrar na validação de flavor (ex: --bootloader=limine).
 	if [[ "$arg" == --* ]]; then
 		EXTRA_ARGS+=("$arg")
 		continue
@@ -115,51 +102,42 @@ for arg in "$@"; do
 	flavor="${arg,,}"
 
 	case "$flavor" in
-	all)
-		FLAVORS=(
-			base
-			cinnamon
-			fluxbox
-			gnome
-			hyprland
-			install
-			mango
-			mate
-			plasma
-			plasma-louvorja-piano
-			sway
-			xfce
-			fullx
-		)
-		break
-		;;
-	base|install|xfce|fluxbox|gnome|plasma|plasma-louvorja-piano|louvor|cinnamon|mate|mango|sway|hypr|hyprland|fullx)
-		[[ "$flavor" == "hypr" ]] && flavor="hyprland"
-		[[ "$flavor" == "louvor" ]] && flavor="plasma-louvorja-piano"
-		FLAVORS+=("$flavor")
-		;;
-	*)
+		hypr) flavor="hyprland" ;;
+		louvor) flavor="plasma-louvorja-piano" ;;
+		all)
+			REQUESTED=("${FLAVORS[@]}")
+			break
+			;;
+	esac
+
+	if [[ ! " ${FLAVORS[*]} " =~ " ${flavor} " ]]; then
 		msg "${red}Error:${reset} Invalid flavor '${yellow}${arg}${reset}'."
 		echo
-		# usage
-    exit 1
-		;;
-	esac
+		usage
+	fi
+
+	REQUESTED+=("$flavor")
 done
 
-msg "${cyan}Kernel   :${rst} ${green}${VERSION}${rst}"
-[[ ${#EXTRA_ARGS[@]} -gt 0 ]] && msg "${cyan}Flags    :${rst} ${green}${EXTRA_ARGS[*]}${rst}"
+BUILD_ARGS=(
+	'--automatic'
+	'--bootloader=limine'
+	"${EXTRA_ARGS[@]}"
+)
 
-for flavor in "${FLAVORS[@]}"; do
-	msg "${cyan}Building :${rst} ${green}${flavor}${rst}"
-	EXTRA_ARGS+=('--automatic')
-	EXTRA_ARGS+=('--bootloader=limine')
-	msg "${cyan}Running  :${rst} ${green}sudo bash mkiso ${EXTRA_ARGS[*]} -v ${VERSION} ${flavor}${rst}"
+msg "${cyan}Kernel   :${reset} ${green}${VERSION}${reset}"
+[[ ${#EXTRA_ARGS[@]} -gt 0 ]] &&
+	msg "${cyan}Flags    :${reset} ${green}${EXTRA_ARGS[*]}${reset}"
+
+for flavor in "${REQUESTED[@]}"; do
+	msg "${cyan}Building :${reset} ${green}${flavor}${reset}"
 
 	build_flavor="$flavor"
 	[[ "$build_flavor" == "base" ]] && build_flavor=""
 
-	if sudo bash mkiso "${EXTRA_ARGS[@]}" -v "${VERSION}" "${build_flavor}"; then
+	msg "${cyan}Running  :${reset} ${green}sudo bash mkiso ${BUILD_ARGS[*]} -v ${VERSION} ${build_flavor}${reset}"
+
+	if sudo bash mkiso "${BUILD_ARGS[@]}" -v "${VERSION}" "${build_flavor}"; then
 		echo
 		msg "${green}✓ ${flavor} completed.${reset}"
 	else

@@ -53,39 +53,58 @@ usage() {
 ${cyan}VoidBR ISO Builder${reset}
 
 ${yellow}Usage:${reset}
-    $0 ${green}<flavor> [flavor ...]${reset}
+    $0 ${green}<flavor> [flavor ...] [--flag=valor ...]${reset}
 
 ${yellow}Examples:${reset}
     $0 all
     $0 base
+    $0 bspwm
     $0 cinnamon
+    $0 enlightenment
     $0 fluxbox
     $0 gnome
     $0 hypr
     $0 install
-    $0 plasma
+    $0 i3wm
+    $0 lxde
     $0 mango
     $0 mate
+    $0 plasma
+    $0 plasma-louvorja-piano
     $0 sway
+    $0 river
     $0 xfce
     #
     $0 hypr plasma
     $0 sway plasma xfce
+    #
+    $0 base --bootloader=limine
+    $0 base cinnamon fluxbox gnome hyprland install mango plasma sway xfce --bootloader=limine
+    $0 all --bootloader=limine
 
 ${yellow}Available flavors:${reset}
-    ${green}all${reset}             Build all images
-    ${green}base${reset}            Build Base ISO
-    ${green}cinnamon${reset}        Build Cinnamon ISO
+    ${green}all${reset}             Build ALL images
+    ${green}base${reset}            Build BASE ISO
+    ${green}bspwm${reset}           Build BSPWM ISO
+    ${green}enlightenment${reset}   Build ENLIGHTENMENT ISO
+    ${green}cinnamon${reset}        Build CINNAMON ISO
     ${green}fluxbox${reset}         Build FLUXBOX ISO
     ${green}gnome${reset}           Build GNOME ISO
-    ${green}hyprland/hypr${reset}   Build Hyprland ISO
-    ${green}install${reset}         Build Installer ISO
+    ${green}hyprland${reset}        Build HYPRLAND ISO
+    ${green}install${reset}         Build INSTALL ISO
+    ${green}i3wm${reset}            Build I3WM ISO
+    ${green}lxde${reset}            Build LXDE ISO
     ${green}mango${reset}           Build Mango ISO
     ${green}mate${reset}            Build MATE ISO
     ${green}plasma${reset}          Build KDE Plasma ISO
-    ${green}sway${reset}            Build Sway ISO
+    ${green}louvor${reset}          Build KDE Plasma LouvorJa-Piano ISO
+    ${green}sway${reset}            Build SWAY ISO
+    ${green}river${reset}           Build RIVER ISO
     ${green}xfce${reset}            Build XFCE ISO
     ${green}fullx${reset}           Build FullX ISO
+
+${yellow}Flags (repassadas direto pro mkiso):${reset}
+    ${green}--bootloader=grub|limine${reset}   Bootloader da ISO (default: grub)
 EOF
 	exit 1
 }
@@ -93,50 +112,69 @@ EOF
 [[ $# -eq 0 ]] && usage
 
 FLAVORS=()
+EXTRA_ARGS=()
 
 for arg in "$@"; do
+	# Qualquer coisa começando com "--" é repassada direto pro mkiso,
+	# sem entrar na validação de flavor (ex: --bootloader=limine).
+	if [[ "$arg" == --* ]]; then
+		EXTRA_ARGS+=("$arg")
+		continue
+	fi
+
 	flavor="${arg,,}"
 
 	case "$flavor" in
 	all)
 		FLAVORS=(
 			base
+			bspwm
 			cinnamon
+			enlightenment
 			fluxbox
 			gnome
 			hyprland
 			install
+			i3wm
+			lxde
 			mango
 			mate
 			plasma
+			plasma-louvorja-piano
 			sway
+			river
 			xfce
 			fullx
 		)
 		break
 		;;
-	base|install|xfce|fluxbox|gnome|plasma|cinnamon|mate|mango|sway|hypr|hyprland|fullx)
+	base|bspwm|install|i3wm|lxde|enlightenment|fluxbox|gnome|plasma|plasma-louvorja-piano|louvor|cinnamon|mate|mango|river|sway|hyprland|xfce|fullx)
 		[[ "$flavor" == "hypr" ]] && flavor="hyprland"
+		[[ "$flavor" == "louvor" ]] && flavor="plasma-louvorja-piano"
 		FLAVORS+=("$flavor")
 		;;
 	*)
 		msg "${red}Error:${reset} Invalid flavor '${yellow}${arg}${reset}'."
 		echo
-		usage
+		# usage
+    exit 1
 		;;
 	esac
 done
 
 msg "${cyan}Kernel   :${rst} ${green}${VERSION}${rst}"
+[[ ${#EXTRA_ARGS[@]} -gt 0 ]] && msg "${cyan}Flags    :${rst} ${green}${EXTRA_ARGS[*]}${rst}"
 
 for flavor in "${FLAVORS[@]}"; do
 	msg "${cyan}Building :${rst} ${green}${flavor}${rst}"
-	msg "${cyan}Running  :${rst} ${green}sudo bash mkiso --automatic -v ${VERSION} ${flavor}${rst}"
+	EXTRA_ARGS+=('--automatic')
+	EXTRA_ARGS+=('--bootloader=limine')
+	msg "${cyan}Running  :${rst} ${green}sudo bash mkiso ${EXTRA_ARGS[*]} -v ${VERSION} ${flavor}${rst}"
 
 	build_flavor="$flavor"
 	[[ "$build_flavor" == "base" ]] && build_flavor=""
 
-	if sudo bash mkiso --automatic -v "${VERSION}" "${build_flavor}"; then
+	if sudo bash mkiso "${EXTRA_ARGS[@]}" -v "${VERSION}" "${build_flavor}"; then
 		echo
 		msg "${green}✓ ${flavor} completed.${reset}"
 	else
