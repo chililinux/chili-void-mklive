@@ -9,7 +9,7 @@
 #
 #  mkrootfs
 #  Created: seg 23 fev 2026 13:26:23 -04
-#  Updated: sáb 29 ago 2026 01:05:54 -04
+#  Updated: sab 19 set 2026 07:56:22 -04
 #
 #  NOTA: script único — antes dividido em mkrootfs + lib.mkrootfs.sh,
 #  agora mesclado num arquivo só (mesma ordem de execução de antes).
@@ -62,31 +62,33 @@ declare APP="${0##*/}"
 declare _VERSION_="0.08.28-20260828"
 declare APPDESC="$APP - Builds a tarball rootfs image for VoidBR"
 readonly ARCH=$(uname -m)
-readonly REQTOOLS="xbps-install xbps-reconfigure tar xz chroot dialog curl sed gettext"
+readonly REQTOOLS="xbps-install xbps-reconfigure tar xz chroot"
 readonly aSysPkg=(base-minimal base-voidstrap base-system base-custom base-container-full)
 readonly XBPS_CMD='xbps-install'
 
 LCUSTOM=false
 #SYSPKG="base-minimal"
 #SYSPKG="base-system"
+#SYSPKG="base-voidstrap"
 #SYSPKG="base-container-full"
-SYSPKG="base-voidstrap voidbr-vinstall voidbr-xbps"
+SYSPKG="base-voidstrap voidbr-xbps voidbr-vinstall"
 
 # MÍNIMO
 declare -a ADDITIONAL_PKGS=(
 	bash-completion
-	dracut
-	voidbr-base-config
-	voidbr-vinstall
-	fzf
-	eza
+	#	voidbr-base-config
+	#	dracut
+	#	voidbr-vinstall
+	#	fzf
+	#	eza
 )
 declare -a AEXTRA_PKGS=(
-	dialog
-	pv
-	gettext
-	parted
-	gptfdisk
+	#	dialog
+	#	pv
+	#	gettext
+	#	parted
+	#	gptfdisk
+	dosfstools
 )
 
 automatic=false
@@ -271,22 +273,22 @@ sh_diahora() {
 
 sh_copyright() {
 	cat <<-EOF-COPY
-	${bold}${cyan}${0##*/} v${_VERSION_}${rst}
-	${bold}${cyan}${APPDESC}${rst}
-	${bold}${orange}Copyright (c) 2019-2026, ${reset}ChiliLinux Development Team <https://chililinux.com> <https://github.com/chililinux>
-	${bold}${orange}Copyright (c) 2019-2026, ${reset}Vilmar Catafesta <vcatafesta@gmail.com>${black}
+		${bold}${cyan}${0##*/} v${_VERSION_}${rst}
+		${bold}${cyan}${APPDESC}${rst}
+		${bold}${orange}Copyright (c) 2019-2026, ${reset}ChiliLinux Development Team <https://chililinux.com> <https://github.com/chililinux>
+		${bold}${orange}Copyright (c) 2019-2026, ${reset}Vilmar Catafesta <vcatafesta@gmail.com>${black}
 	EOF-COPY
 }
 
 sh_version() {
 	cat <<-EOF-VERSION
-	$(sh_copyright)
-	      $(gettext "Este é um software livre: você é livre para alterá-lo e redistribuí-lo.")
-	      $(gettext "O $APP é disponibilizado para você sob a ${yellow}Licença MIT${black}, e")
-	      $(gettext "inclui software de código aberto sob uma variedade de outras licenças.")
-	      $(gettext "Você pode ler instruções sobre como baixar e criar para você mesmo")
-	      $(gettext "o código fonte específico usado para criar esta cópia.")
-	      ${red}$(gettext "Este programa vem com absolutamente NENHUMA garantia.")${reset}
+		$(sh_copyright)
+		      $(gettext "Este é um software livre: você é livre para alterá-lo e redistribuí-lo.")
+		      $(gettext "O $APP é disponibilizado para você sob a ${yellow}Licença MIT${black}, e")
+		      $(gettext "inclui software de código aberto sob uma variedade de outras licenças.")
+		      $(gettext "Você pode ler instruções sobre como baixar e criar para você mesmo")
+		      $(gettext "o código fonte específico usado para criar esta cópia.")
+		      ${red}$(gettext "Este programa vem com absolutamente NENHUMA garantia.")${reset}
 	EOF-VERSION
 }
 
