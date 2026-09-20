@@ -648,7 +648,7 @@ install_skel_root() {
 }
 
 sh_configure_void_install_desktop() {
-  cmd_logger "Configurando /usr/share/xsessions/void-install.desktop" '
+	cmd_logger "Configurando /usr/share/xsessions/void-install.desktop" '
     mkdir -p "$ROOTFS/usr/share/xsessions"
 
     cat > "$ROOTFS/usr/share/xsessions/void-install.desktop" << "EOF"
@@ -786,7 +786,7 @@ EOF
 configure_service_plymouth_stop() {
 	print_step "Configurando serviço plymouth-stop : $ROOTFS/etc/sv"
 	mkdir -p "$ROOTFS/etc/sv/plymouth-stop"
-  tee "$ROOTFS/etc/sv/plymouth-stop/run" >/dev/null <<'EOF'
+	tee "$ROOTFS/etc/sv/plymouth-stop/run" >/dev/null <<'EOF'
 #!/bin/sh
 [ -r ./conf ] && . ./conf
 /usr/bin/plymouth --quit
@@ -1282,7 +1282,7 @@ sh_config_distroname() {
 	elif $MAKE_PLASMA_LOUVORJA_PIANO; then
 		title='VoidBR Linux Live Plasma with LouvorJa-Piano'
 		VOL_ID='VOIDBR_LIVE_LOUVORJA'
-		name='louvorja-piano'
+		name='plasma-louvorja-piano'
 	elif $MAKE_GNOME; then
 		title='VoidBR Linux Live GNOME'
 		VOL_ID='VOIDBR_LIVE_GNOME'
@@ -1367,7 +1367,7 @@ sh_print_resume() {
 sh_configure_packages() {
 	#	sh_config_distroname
 
-  sh_choose_packages_base
+	sh_choose_packages_base
 
 	if $MAKE_X; then
 		##########################################################################
@@ -1416,19 +1416,19 @@ sh_configure_packages() {
 			ADISTRO_PKGS+=" voidbr-mate"
 		elif $MAKE_PLASMA_LOUVORJA_PIANO; then
 			ADISTRO_PKGS+=" voidbr-plasma"
-      ASKEL_PKGS+=(voidbr-plasma-config-louvorja-piano)
+			ASKEL_PKGS+=(voidbr-louvorja-piano-config)
 		elif $MAKE_CINNAMON; then
 			ADISTRO_PKGS+=" voidbr-cinnamon"
 		elif $MAKE_ENLIGHTENMENT; then
 			ADISTRO_PKGS+=" voidbr-enlightenment"
-  	elif $MAKE_ONLY_XORG; then
+		elif $MAKE_ONLY_XORG; then
 			# Sessão X mínima, sem DE (--xorg/install): só a base Xorg
 			# + infra comum, sem nenhum meta-pacote de DE.
 			ADISTRO_PKGS+=" voidbr-base-common voidbr-xorg-common"
 		else
 			# ainda sem meta-pacote próprio, mantém o pipeline antigo (legado) até serem criados.
 			##########################################################################
-	  	sh_choose_packages_common_gui_base
+			sh_choose_packages_common_gui_base
 			sh_choose_packages_common_x11
 			sh_choose_voidbr_x11_themes
 			sh_choose_packages_display_manager
@@ -1759,12 +1759,17 @@ sh_make_iso() {
 		sh_configure_lightdm_default_session
 	fi
 
-  sh_set_edition_os_release() {
-    local name="$1"
-    name="${name^}"
-    sed -i "s/^EDITION=.*/EDITION=\"$name\"/" "$ROOTFS"/etc/os-release
-  }
-  sh_set_edition_os_release "$name"
+	sh_set_edition_os_release() {
+		local name="$1"
+
+		if [[ "$name" == "plasma-louvorja-piano" ]]; then
+			name="plasma"
+		fi
+		name="${name^}"
+		sed -i "s/^EDITION=.*/EDITION=\"$name\"/" "$ROOTFS"/etc/os-release
+	}
+
+	sh_set_edition_os_release "$name"
 
 	# generate_squashfs
 	#	generate_iso_image

@@ -1,0 +1,176 @@
+# Maintainer: Vilmar Catafesta <vcatafesta@gmail.com>
+
+pkgname=bun
+pkgver=1.4.2
+# From https://github.com/oven-sh/bun/blob/main/scripts/build/deps/webkit.ts#L6
+_webkitver=2e2aa2290fac856d6f451ceacb58f7f5b44dd057
+pkgrel=3
+pkgdesc="Incredibly fast JavaScript runtime, bundler, test runner, and package manager – all in one"
+arch=(x86_64 aarch64)
+url="https://github.com/oven-sh/bun"
+license=('MIT')
+
+depends=(
+	glibc
+	icu
+)
+
+makedepends=(
+	# Packaging requirements
+	git
+	unzip
+
+	# bun make dependencies
+	clang21
+	cmake
+	lld21
+	llvm21
+	nasm
+	ninja
+	rustup
+
+	# WebKit make dependencies
+	python
+	ruby
+	ruby-erb
+	ruby-getoptlong
+)
+
+options=('!lto')
+
+source=(
+	"git+$url.git#tag=bun-v$pkgver"
+	"$pkgname-WebKit::git+https://github.com/oven-sh/WebKit.git#commit=$_webkitver"
+	"$pkgname-webkit-typed-array-int32-conversion.patch"
+	"$pkgname-41386.patch::https://github.com/oven-sh/bun/pull/41386.patch"
+)
+
+source_x86_64=(
+	"$pkgname-bootstrap-x64-$pkgver.zip::https://github.com/oven-sh/bun/releases/download/bun-v$pkgver/bun-linux-x64.zip"
+)
+
+source_aarch64=(
+	"$pkgname-bootstrap-aarch64-$pkgver.zip::https://github.com/oven-sh/bun/releases/download/bun-v$pkgver/bun-linux-aarch64.zip"
+)
+
+b2sums=(
+	'1215fa3ce42744aa2f6ebfd83d267152470f8ba0565cc6a69d79bc1645fba39f62ca82a1a121d505fd2cf541c3946ce3ccf62ccf786b6d1f6ac9d1c1c992fdc6'
+	'd04baec524595653bdf7b10174b8025726191ec66e50144bc28f4e3fd6e38ec4e9bfb7e500c13aaf73ebec7edd470e6e608eca5bfe582dd8c0b9b25187a50330'
+	'f7b41bee31d26968154501ad62d8fdc157cac9e0f895035ba9a1ddd30caa2beb83b5cf80f6a0e52dcc1acac874fb07ef7974761764929e6e782866f1aacf35c2'
+	'78bdac9418c5eb7bcb29e6c74427799b7a09df6e3c574e614c2a9bff7d91384e4928ed0b47d7450ccd28b4c7b5babe483075cb259fbe19a3b8cb020c46d094aa'
+)
+
+b2sums_x86_64=(
+	'5a0207da75420038a27e07181adbc72cf2bdb012ab633cd41263242123bce467ff222405ea583edc9411fbb23934a3471d50af8270db4bd73e6ba8a9bd7e013d'
+)
+
+b2sums_aarch64=(
+	'125cf93108d6780ffb68807e3ff4b8de32f88d09aca425e042755f4acb5a1283a9a80803f077051eb0cb905b7bffff507590a5572a1114550bbfbfe6eeefbcee'
+)
+
+prepare() {
+	# Fix UB in JSC typed array int32 conversion that causes wrong values
+	# to be stored for numbers > INT32_MAX (https://github.com/oven-sh/bun/issues/28607)
+	patch -Np1 -d "$pkgname-WebKit" <"$pkgname-webkit-typed-array-int32-conversion.patch"
+
+	# Fix https://gitlab.archlinux.org/archlinux/packaging/packages/bun/-/work_items/11
+	patch -Np1 -d "$pkgname" <"$pkgname-41386.patch"
+
+	cd "$pkgname"
+
+	grep -q "WEBKIT_VERSION = \"$_webkitver\"" scripts/build/deps/webkit.ts ||
+		(
+			echo "WebKit version mismatch"
+			exit 1
+		)
+
+	# Fix compatibility with older CPUs; see
+	# https://gitlab.archlinux.org/archlinux/packaging/packages/bun/-/merge_requests/4.
+	sed -i 's/-march=nehalem/-march=x86-64/' scripts/build/flags.ts
+
+	# libspng unconditionally compiles its SSE4.1 defilter paths, which fails to
+	# build against the x86-64 baseline set above. Drop down to the SSE2 paths.
+	sed -i 's/SPNG_SSE: 4/SPNG_SSE: 1/' scripts/build/deps/libspng.ts
+
+	# Place the WebKit checkout where bun's build system expects local WebKit sources
+	# See also https://bun.sh/docs/project/contributing#building-webkit-locally-+-debug-mode-of-jsc
+	mkdir -p vendor
+	cp -r "$srcdir/$pkgname-WebKit" vendor/WebKit
+}
+
+build() {
+	cd "$pkgname"
+
+	export PATH="/usr/lib/llvm21/bin:$PATH"
+
+	case "$CARCH" in
+		x86_64)
+			_bundir="bun-linux-x64"
+			;;
+		aarch64)
+			_bundir="bun-linux-aarch64"
+			;;
+	esac
+
+	export PATH="$srcdir/$_bundir:$PATH"
+
+	local bun_options=(
+		--profile=release-local
+		--canary=0
+		--build-dir=build/release
+		--cache-dir="$srcdir/build-cache"
+	)
+
+	if [[ ${CARCH} == x86_64* ]]; then
+		bun_options+=(--baseline=on)
+	fi
+
+	bun scripts/build.ts "${bun_options[@]}"
+}
+
+check() {
+	cd "$pkgname"
+
+	./build/release/bun --version
+	echo 'console.log("ok")' | ./build/release/bun run -
+}
+
+package() {
+	cd "$pkgname"
+
+	install -vDm755 build/release/bun "$pkgdir/usr/bin/bun"
+
+	ln -vs /usr/bin/bun "$pkgdir/usr/bin/bunx"
+
+	install -vDm644 \
+		-t "$pkgdir/usr/share/licenses/$pkgname" \
+		LICENSE.md
+
+	install -vDm644 \
+		completions/bun.bash \
+		"$pkgdir/usr/share/bash-completion/completions/bun"
+
+	install -vDm644 \
+		completions/bun.fish \
+		"$pkgdir/usr/share/fish/vendor_completions.d/bun.fish"
+
+	install -vDm644 \
+		completions/bun.zsh \
+		"$pkgdir/usr/share/zsh/site-functions/_bun"
+}
+
+pre_install() {
+	log "Iniciando instalação"
+}
+
+post_install() {
+	log "Finalizando instalação"
+}
+
+pre_upgrade() {
+	log "Iniciando upgrade"
+}
+
+post_upgrade() {
+	log "Finalizando upgrade"
+}
