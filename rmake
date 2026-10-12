@@ -59,6 +59,7 @@ FLAVORS=(
 	plasma-louvorja-piano
 	river
 	sway
+  umbriel
 	xfce
 )
 
