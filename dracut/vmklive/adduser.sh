@@ -3,7 +3,11 @@
 # ex: ts=8 sw=4 sts=4 et filetype=sh
 
 type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
-echo voidbr-live >${NEWROOT}/etc/hostname
+
+# Hostname vem do cmdline (live.hostname=voidbr-<flavor>-live), definido pelo mkiso.
+LIVEHOSTNAME=$(getarg live.hostname)
+[ -z "$LIVEHOSTNAME" ] && LIVEHOSTNAME=voidbr-live
+echo "$LIVEHOSTNAME" >${NEWROOT}/etc/hostname
 
 AUTOLOGIN=$(getarg live.autologin)
 USERNAME=$(getarg live.user)
