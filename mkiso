@@ -1455,7 +1455,10 @@ sh_configure_packages() {
 sh_configure_rootfs() {
 	# Configure dracut to use overlayfs for the writable overlay.
 	print_step "Configurando rootfs : $ROOTFS"
-	BOOT_CMDLINE="$BOOT_CMDLINE rd.overlay=1 "
+	# hostname do live: voidbr-<flavor>-live (lido pelo dracut/vmklive/adduser.sh)
+	local livehostname="voidbr-${name,,}-live"
+	[[ $name == plasma-louvorja-piano ]] && livehostname="voidbr-louvorja-live"
+	BOOT_CMDLINE="$BOOT_CMDLINE rd.overlay=1 live.hostname=${livehostname} "
 	ARCH=$(xbps-uhelper arch)
 
 	# Set defaults
