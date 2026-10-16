@@ -55,6 +55,7 @@ export PS4='${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset}'
 set -o pipefail
 shopt -s extglob
 
+export XBPS_PARALLEL_DOWNLOADS=16
 declare -g quiet=false
 declare -i njobs=12
 declare -i ncontador=0
