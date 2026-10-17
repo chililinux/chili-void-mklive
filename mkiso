@@ -38,6 +38,7 @@ export LANGUAGE="${LANGUAGE:-pt_BR}"
 export TEXTDOMAINDIR=/usr/share/locale
 export TEXTDOMAIN=mkiso
 export TERM=${TERM:-xterm-256color}
+export XBPS_PARALLEL_DOWNLOADS=16
 
 # Armazenar os aliases atuais em uma variável
 OLD_ALIASES=$(alias)
