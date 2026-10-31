@@ -45,6 +45,7 @@ FLAVORS=(
 	base
 	bspwm
 	cinnamon
+	cosmic
 	enlightenment
 	fluxbox
 	fullx

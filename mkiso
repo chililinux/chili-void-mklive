@@ -122,6 +122,7 @@ declare -g MAKE_PLASMA_LOUVORJA_PIANO=false
 declare -g MAKE_MATE=false
 declare -g MAKE_SWAY=false
 declare -g MAKE_UMBRIEL=false
+declare -g MAKE_COSMIC=false
 declare -g MAKE_MANGO=false
 declare -g MAKE_RIVER=false
 declare -g MAKE_I3=false
@@ -1258,6 +1259,7 @@ ${bold}Desktop presets:${rst}
   -M|mate           ${green}MATE${rst}
   -S|sway           ${green}SWAY${rst}
   -U|umbriel        ${green}UMBRIEL${rst}
+  cosmic            ${green}COSMIC${rst}
   -O|mango          ${green}MANGO${rst}
   -H|hyprland       ${green}HYPRLAND${rst}
   -A|fullx          ${green}ALL X${rst}
@@ -1329,6 +1331,10 @@ sh_config_distroname() {
 		title='VoidBR Linux Live Umbriel'
 		VOL_ID='VOIDBR_LIVE_UMBRIEL'
 		name='umbriel'
+	elif $MAKE_COSMIC; then
+		title='VoidBR Linux Live COSMIC'
+		VOL_ID='VOIDBR_LIVE_COSMIC'
+		name='cosmic'
 	elif $MAKE_MANGO; then
 		title='VoidBR Linux Live Mango'
 		VOL_ID='VOIDBR_LIVE_MANGO'
@@ -1407,6 +1413,8 @@ sh_configure_packages() {
 			ADISTRO_PKGS+=" voidbr-sway"
 		elif $MAKE_UMBRIEL; then
 			ADISTRO_PKGS+=" voidbr-umbriel"
+		elif $MAKE_COSMIC; then
+			ADISTRO_PKGS+=" voidbr-cosmic"
 		elif $MAKE_MANGO; then
 			ADISTRO_PKGS+=" voidbr-mango"
 		elif $MAKE_RIVER; then
@@ -1705,6 +1713,8 @@ sh_make_iso() {
 			: ${ADDITIONAL_SERVICE_LIST:=sddm}
 		elif $MAKE_UMBRIEL; then
 			: ${ADDITIONAL_SERVICE_LIST:=greetd}
+		elif $MAKE_COSMIC; then
+			: ${ADDITIONAL_SERVICE_LIST:=cosmic-greeter-daemon greetd}
 		else
 			: ${ADDITIONAL_SERVICE_LIST:=lightdm}
 		fi
@@ -1970,6 +1980,10 @@ for arg in "$@"; do
 	umbriel)
 		MAKE_X=true
 		MAKE_UMBRIEL=true
+		;;
+	cosmic)
+		MAKE_X=true
+		MAKE_COSMIC=true
 		;;
 	mango)
 		MAKE_X=true
