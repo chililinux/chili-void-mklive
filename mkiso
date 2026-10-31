@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: qua 09 set 2026 18:38:32 -04
+# Updated: sáb 31 out 2026 01:03:44 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.08.28-20260828'
+readonly _VERSION_='0.10.31-20261031'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
