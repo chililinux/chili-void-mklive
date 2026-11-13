@@ -131,7 +131,7 @@ declare -g MAKE_ONLY_XORG=false
 declare -g MAKE_FULL_X=false
 #
 declare -g LBIND=false
-declare -gi STEP_COUNT=59
+declare -gi STEP_COUNT=60
 declare -gi njobs=59
 declare -g VOL_ID='VOIDBR_LIVE'
 declare -g title
@@ -619,6 +619,12 @@ install_packages() {
 
 	mount_pseudofs
 
+	# xbps roda todos os scripts "pre" antes de desempacotar qualquer pacote;
+	# sem isso, o pre-install do kernel chama kernel-hooks antes dele existir.
+	cmd_logger "Instalando pacote xbps-triggers -> $ROOTFS" '
+    cmd_install xbps-triggers
+  '
+
 	local ALL_NORMAL_PKGS="$PACKAGE_LIST $INITRAMFS_PKGS $ADDITIONAL_PKGS $COMMON_PKGS $ADISTRO_PKGS $AEXTRA_COMMON_PKGS ${ACONFIG_PKGS[*]} $AEXTRA_PKGS"
 	cmd_logger "Instalando pacotes (grupo unificado: PACKAGE_LIST+INITRAMFS_PKGS+ADDITIONAL_PKGS+COMMON_PKGS+ADISTRO_PKGS+AEXTRA_COMMON_PKGS+ACONFIG_PKGS+AEXTRA_PKGS) -> $ROOTFS" '
     cmd_install $ALL_NORMAL_PKGS
@@ -715,7 +721,7 @@ finish_clean() {
 copy_include_directories() {
 	for includedir in "${INCLUDE_DIRS[@]}"; do
 		info_msg "=> copying include directory '$includedir' ..."
-		find "$includedir" -mindepth 1 -maxdepth 1 -exec cp -rfpPv {} "$ROOTFS"/ \;
+		find "$includedir" -mindepth 1 -maxdepth 1 -exec cp -rfpPv {} "$ROOTFS"/ \; >>"$BOOTLOG" 2>&1
 	done
 }
 
@@ -944,7 +950,7 @@ generate_initramfs() {
 
 	mv "$ROOTFS"/boot/initrd "$BOOT_DIR"
 	cp "$ROOTFS"/boot/vmlinuz-$KERNELVERSION "$BOOT_DIR"/vmlinuz
-	cp -Rpva "$ROOTFS"/boot/grub/themes "$BOOT_DIR/grub/"
+	cp -Rpva "$ROOTFS"/boot/grub/themes "$BOOT_DIR/grub/" >>"$BOOTLOG" 2>&1
 }
 
 cleanup_rootfs() {
@@ -1396,7 +1402,7 @@ sh_configure_packages() {
 		##########################################################################
 		if $MAKE_FULL_X; then
 			# Imagem "tudo em um": inclui todo mundo.
-			STEP_COUNT=72
+			STEP_COUNT=73
 			ADISTRO_PKGS+=" voidbr-xfce"
 			ADISTRO_PKGS+=" voidbr-plasma"
 			ADISTRO_PKGS+=" voidbr-fluxbox"
