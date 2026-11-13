@@ -131,7 +131,20 @@ declare -g MAKE_ONLY_XORG=false
 declare -g MAKE_FULL_X=false
 #
 declare -g LBIND=false
-declare -gi STEP_COUNT=60
+declare -gi STEP_COUNT=66
+# Total aproximado de passos de cada flavor (bootloader limine, sem -Z/-I/-g).
+# Base = 66; flavors com DM somam o serviço do DM e, quando usam lightdm,
+# o passo "Ajustando sessao default no lightdm". Ajustes dinâmicos (grub,
+# -Z, -I, -g) são somados em sh_set_step_count.
+declare -gA STEP_COUNT_FLAVOR=(
+	[base]=66
+	[gnome]=67 [hyprland]=67 [mango]=67 [sway]=67
+	[bspwm]=68 [cinnamon]=68 [fluxbox]=68 [fullx]=68 [i3]=68 [install]=68
+	[LXDE]=68 [mate]=68 [plasma]=68 [plasma-louvorja-piano]=68 [river]=68
+	[umbriel]=68 [xfce]=68 [xfce-base]=68
+	[cosmic]=69
+	[enlightenment]=70
+)
 declare -gi njobs=59
 declare -g VOL_ID='VOIDBR_LIVE'
 declare -g title
@@ -1362,7 +1375,19 @@ sh_config_distroname() {
 		VOL_ID='VOIDBR_LIVE_BASE'
 		name='base'
 	fi
+	sh_set_step_count
 	print_step "Configurando distroname : $name"
+}
+
+sh_set_step_count() {
+	local -a extra_services=($SERVICE_LIST)
+
+	STEP_COUNT=${STEP_COUNT_FLAVOR[$name]:-$STEP_COUNT}
+	# grub = isolinux + grub efi (2 passos) em vez do limine (1 passo)
+	[ "$BOOTLOADER" != "limine" ] && STEP_COUNT=$((STEP_COUNT + 1))
+	STEP_COUNT=$((STEP_COUNT + ${#extra_services[@]}))
+	[ "${#INCLUDE_DIRS[@]}" -gt 0 ] && STEP_COUNT=$((STEP_COUNT + 1))
+	[ -n "${IGNORE_PKGS}" ] && STEP_COUNT=$((STEP_COUNT + 1))
 }
 
 sh_print_resume() {
@@ -1402,7 +1427,6 @@ sh_configure_packages() {
 		##########################################################################
 		if $MAKE_FULL_X; then
 			# Imagem "tudo em um": inclui todo mundo.
-			STEP_COUNT=73
 			ADISTRO_PKGS+=" voidbr-xfce"
 			ADISTRO_PKGS+=" voidbr-plasma"
 			ADISTRO_PKGS+=" voidbr-fluxbox"
@@ -1518,9 +1542,6 @@ sh_configure_rootfs() {
 	ISOLINUX_CFG="$ISOLINUX_DIR/isolinux.cfg"
 
 	sh_create_etc_xbps_d_conf_00_repository_main_conf "$ROOTFS/etc/xbps.d/00-repository-main.conf"
-
-	[ "${#INCLUDE_DIRS[@]}" -gt 0 ] && STEP_COUNT=$((STEP_COUNT + 1))
-	[ -n "${IGNORE_PKGS}" ] && STEP_COUNT=$((STEP_COUNT + 1))
 
 	: ${SYSLINUX_DATADIR:="$HOSTDIR"/usr/lib/syslinux}
 	: ${GRUB_DATADIR:="$HOSTDIR"/usr/share/grub}
