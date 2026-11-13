@@ -1660,6 +1660,7 @@ sh_install_rootfs() {
 		LC_ALL=C XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD \
 		  -Syu \
 		  -r "$ROOTFS" \
+		  --cachedir "$XBPS_CACHEDIR" \
 		  -R ${XBPS_REPOSITORY}
 
   "
@@ -1667,6 +1668,7 @@ sh_install_rootfs() {
 		LC_ALL=C XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD \
 		  -Syu \
 		  -r "$HOSTDIR" \
+		  --cachedir "$XBPS_HOST_CACHEDIR" \
 		  -R ${XBPS_REPOSITORY}
   "
 	replicate '-'
