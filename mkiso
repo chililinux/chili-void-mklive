@@ -108,6 +108,9 @@ trap 'cleanup; exit 130' INT
 trap 'cleanup; exit 143' TERM HUP
 
 umask 022
+# Os INSTALL gerados pelo pkgmake só colorem a saída se for terminal; aqui
+# ela passa pelo tee do cmd_logger, então força as cores.
+export FORCE_COLOR=1
 declare -g MAKE_X=false
 declare -g MAKE_BSPWM=false
 declare -g MAKE_CINNAMON=false
@@ -721,7 +724,7 @@ sh_reconfigure_pass2() {
 	trap restore_kernel_hooks RETURN
 
 	cmd_logger "Reconfigurando o ambiente - pass 2" '
-    chroot "$ROOTFS" env -i PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" MKISO_BUILD=1 xbps-reconfigure -a
+    chroot "$ROOTFS" env -i PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" MKISO_BUILD=1 FORCE_COLOR=1 xbps-reconfigure -a
 	'
 
 	restore_kernel_hooks
