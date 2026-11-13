@@ -708,11 +708,15 @@ sh_reconfigure_pass2() {
 	local khooks_disabled_by_us=0
 	if [ -f "$khooks" ]; then
 		mv "$khooks" "${khooks}.disabled-mkiso"
+		# stub no lugar: o INSTALL do kernel chama o trigger e não acha nada
+		# pra reclamar; os hooks de kernel continuam sem rodar no build.
+		printf '#!/bin/sh\nexit 0\n' >"$khooks"
+		chmod 755 "$khooks"
 		khooks_disabled_by_us=1
 	fi
 	restore_kernel_hooks() {
 		[ "$khooks_disabled_by_us" -eq 1 ] && [ -f "${khooks}.disabled-mkiso" ] &&
-			mv "${khooks}.disabled-mkiso" "$khooks"
+			mv -f "${khooks}.disabled-mkiso" "$khooks"
 	}
 	trap restore_kernel_hooks RETURN
 
