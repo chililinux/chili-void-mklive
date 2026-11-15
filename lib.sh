@@ -6,7 +6,7 @@
 # lib.sh
 #
 # Created: 2023/09/18 - 09:05
-# Updated: sáb 25 jul 2026 16:48:16 -04
+# Updated: dom 15 nov 2026 09:15:46 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -293,6 +293,8 @@ copy_void_keys() {
 
 cmd_install() {
 	local PKGS="$*"
+	# --ignore-file-conflicts já ignora os conflitos, mas o xbps imprime
+	# "ERROR: ... already installed by package" mesmo assim: filtra essas linhas
 	LC_ALL=C \
 		XBPS_ARCH=$BASE_ARCH \
 		$XBPS_INSTALL_CMD \
@@ -301,11 +303,14 @@ cmd_install() {
 		--rootdir "$ROOTFS" ${XBPS_REPOSITORY} \
 		--cachedir "$XBPS_CACHEDIR" \
 		--update \
-		--yes $PKGS
+		--yes $PKGS 2>&1 | grep --line-buffered -v -- "already installed by package"
+	return "${PIPESTATUS[0]}"
 }
 
 cmd_install_force() {
 	local PKGS="$*"
+	# --ignore-file-conflicts já ignora os conflitos, mas o xbps imprime
+	# "ERROR: ... already installed by package" mesmo assim: filtra essas linhas
 	LC_ALL=C \
 		XBPS_ARCH=$BASE_ARCH \
 		$XBPS_INSTALL_CMD \
@@ -315,7 +320,8 @@ cmd_install_force() {
 		--cachedir "$XBPS_CACHEDIR" \
 		--update \
 		--force --force \
-		--yes $PKGS
+		--yes $PKGS 2>&1 | grep --line-buffered -v -- "already installed by package"
+	return "${PIPESTATUS[0]}"
 }
 
 cmd_logger() {

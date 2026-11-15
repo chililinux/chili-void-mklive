@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: sáb 31 out 2026 01:03:44 -04
+# Updated: dom 15 nov 2026 09:07:57 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.10.31-20261031'
+readonly _VERSION_='0.11.15-20261115'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -111,6 +111,10 @@ umask 022
 # Os INSTALL gerados pelo pkgmake só colorem a saída se for terminal; aqui
 # ela passa pelo tee do cmd_logger, então força as cores.
 export FORCE_COLOR=1
+# Os INSTALL dos pacotes VoidBR testam MKISO_BUILD para não mexer no usuário
+# de quem gera a ISO (cópia do skel, serviços...). Precisa valer em TODOS os
+# xbps-install/reconfigure do build, não só no xbps-reconfigure final.
+export MKISO_BUILD=1
 declare -g MAKE_X=false
 declare -g MAKE_BSPWM=false
 declare -g MAKE_CINNAMON=false
