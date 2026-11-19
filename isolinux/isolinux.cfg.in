@@ -27,7 +27,7 @@ KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin=anon voidbr.autoinstall
 
 LABEL linux
-MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@
+MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@@@AUTOLOGIN_LABEL@@
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
 
@@ -39,17 +39,17 @@ APPEND initrd=/boot/initrd root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro
 #@@NOAUTOLOGIN_END@@
 
 LABEL linuxram
-MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (RAM)
+MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (RAM)@@AUTOLOGIN_LABEL@@
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
 
 LABEL linuxa11y
-MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ com ^voz
+MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ com ^voz@@AUTOLOGIN_LABEL@@
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin
 
 LABEL linuxa11yram
-MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ com voz (^RAM)
+MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ com voz (^RAM)@@AUTOLOGIN_LABEL@@
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin rd.live.ram
 
