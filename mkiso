@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: qui 19 nov 2026 12:07:20 -04
+# Updated: qui 19 nov 2026 18:26:24 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.18-20261119'
+readonly _VERSION_='0.11.19-20261119'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -953,6 +953,11 @@ sh_configure_lightdm_default_session() {
 last-user=anon
 last-session=$name
 EOF
+	# o mkdir acima roda como root: o ~/.cache do lightdm (/var/lib/lightdm)
+	# precisa ser do usuário lightdm, senão o elephant-greeter (voidbr-
+	# lightdm-themes) morre no mkdir do próprio cache e fica tela preta.
+	# --reference evita resolver o nome "lightdm" fora do chroot.
+	chown -R --reference="${ROOTFS}/var/lib/lightdm" "${ROOTFS}/var/lib/lightdm/.cache"
 }
 
 generate_initramfs() {
