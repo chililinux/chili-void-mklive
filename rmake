@@ -4,7 +4,7 @@
 #
 #  rmake
 #  Created: 2023/09/18 - 09:05
-#  Updated: sáb 31 out 2026 01:03:44 -04
+#  Updated: qui 19 nov 2026 11:24:04 -04
 #
 #  Copyright (c) 2019-2026, Vilmar Catafesta <vcatafesta@gmail.com>
 #  Copyright (c) 2019-2026, ChiliLinux Development Team <https://chililinux.com> <https://github.com/chililinux>
@@ -80,12 +80,14 @@ ${yellow}Examples:${reset}
     $0 base --bootloader=limine
     $0 xfce --bootloader=grub
     $0 xfce lxde plasma --bootloader=limine
+    $0 cosmic --autologin=false
 
 ${yellow}Available flavors:${reset}
     ${green}all ${FLAVORS[*]}${reset}
 
 ${yellow}Flags (repassadas direto pro mkiso):${reset}
     ${green}--automatic --bootloader=grub|limine${reset}   Bootloader da ISO
+    ${green}--autologin=true|false${reset}                 Autologin gráfico no live (default: true)
 EOF
 	exit 1
 }

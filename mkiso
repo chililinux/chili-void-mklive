@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: dom 15 nov 2026 09:07:57 -04
+# Updated: qui 19 nov 2026 11:24:04 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,19 +53,20 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.15-20261115'
+readonly _VERSION_='0.11.16-20261119'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
 # o que o usuário digitou, incluindo --automatic.
 ORIGINAL_ARGS=("$@")
 
-# Pre-parse de --automatic e --bootloader: precisa acontecer ANTES do
+# Pre-parse de --automatic, --bootloader e --autologin: precisa acontecer ANTES do
 # source ./lib.sh, pois select_mirrors_dialog() (chamada automaticamente
 # ao carregar lib.sh) usa a variável $automatic internamente, e getopts
 # não lida com opções longas (por isso o filtro manual aqui).
 automatic=false
 declare -g BOOTLOADER="grub"
+declare -g AUTOLOGIN=true
 new_args=()
 for arg in "$@"; do
 	if [[ "$arg" == "--automatic" ]]; then
@@ -76,6 +77,10 @@ for arg in "$@"; do
 		BOOTLOADER="${arg#--bootloader=}"
 		continue
 	fi
+	if [[ "$arg" == --autologin=* ]]; then
+		AUTOLOGIN="${arg#--autologin=}"
+		continue
+	fi
 	new_args+=("$arg")
 done
 set -- "${new_args[@]}"
@@ -84,6 +89,14 @@ case "$BOOTLOADER" in
 grub | limine) ;;
 *)
 	echo "ERRO: --bootloader inválido: '$BOOTLOADER' (use 'grub' ou 'limine')" >&2
+	exit 1
+	;;
+esac
+
+case "$AUTOLOGIN" in
+true | false) ;;
+*)
+	echo "ERRO: --autologin inválido: '$AUTOLOGIN' (use 'true' ou 'false')" >&2
 	exit 1
 	;;
 esac
@@ -148,8 +161,8 @@ declare -gA STEP_COUNT_FLAVOR=(
 	[gnome]=67 [hyprland]=67 [mango]=67 [sway]=67
 	[bspwm]=68 [cinnamon]=68 [fluxbox]=68 [fullx]=68 [i3]=68 [install]=68
 	[LXDE]=68 [mate]=68 [plasma]=68 [plasma-louvorja-piano]=68 [river]=68
-	[umbriel]=68 [xfce]=68 [xfce-base]=68
-	[cosmic]=69
+	[xfce]=68 [xfce-base]=68
+	[umbriel]=67 [cosmic]=68
 	[enlightenment]=70
 )
 declare -gi njobs=59
@@ -285,6 +298,10 @@ sh_choose_packages_display_manager() {
 	elif $MAKE_UMBRIEL; then
 		COMMON_PKGS+=" greetd"
 		AEXTRA_COMMON_PKGS+=" noctalia-greeter"
+	elif $MAKE_COSMIC; then
+		# greeter (cosmic-greeter) e /etc/greetd/config.toml vêm do
+		# meta-pacote voidbr-cosmic (voidbr-cosmic-config)
+		COMMON_PKGS+=" greetd"
 	else
 		COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings"
 		COMMON_PKGS+=" arc-theme"
@@ -621,8 +638,12 @@ error_out() {
 copy_dracut_files() {
 	mkdir -p "$1"/usr/lib/dracut/modules.d/01vmklive
 	cp dracut/vmklive/* "$1"/usr/lib/dracut/modules.d/01vmklive/
-	# autologin none
-	if $MAKE_FULL_X; then
+	# autologin none: --autologin=false, ou fullx (sempre sem autologin).
+	# O marcador vai pro initramfs (module-setup.sh) e o hook
+	# display-manager-autologin.sh só pula o autologin gráfico -- continua
+	# desligando os DMs na entrada "Instalar" (voidbr.autoinstall).
+	rm -f "$1"/usr/lib/dracut/modules.d/01vmklive/noautologin
+	if ! $AUTOLOGIN || $MAKE_FULL_X; then
 		touch "$1"/usr/lib/dracut/modules.d/01vmklive/noautologin
 	fi
 }
@@ -1272,6 +1293,7 @@ ${bold}OPTIONS${rst}
   -T <title>         ${cyan}Bootloader title${rst} (default: Void Linux)
   -v linux<ver>      ${cyan}Custom kernel version${rst}
   --bootloader=<x>    ${cyan}Bootloader${rst} (grub|limine, default: grub)
+  --autologin=<x>     ${cyan}Autologin gráfico no live${rst} (true|false, default: true; fullx sempre false)
 
   -K                 ${yellow}Do not remove builddir${rst}
   -n                 ${yellow}Reuse existing squashfs${rst}
@@ -1411,6 +1433,11 @@ sh_print_resume() {
 	print_step "Versao app       => ${yellow}${APP} v${_VERSION_}${reset}"
 	print_step "Profile         => ${yellow}${name}${reset}"
 	print_step "Bootloader      => ${yellow}${BOOTLOADER}${reset}"
+	if ! $AUTOLOGIN || $MAKE_FULL_X; then
+		print_step "Autologin       => ${yellow}false${reset}"
+	else
+		print_step "Autologin       => ${yellow}true${reset}"
+	fi
 	print_step "ROOTDIR         => ${yellow}${ROOTDIR}${reset}"
 	print_step "ROOTFS          => ${yellow}${ROOTFS}${reset}"
 	print_step "HOSTDIR         => ${yellow}${HOSTDIR}${reset}"
@@ -1823,7 +1850,8 @@ sh_make_iso() {
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
 	sh_remove_etc_xbps_00_repository_main_conf "$conf"
 	sh_activating_pipewire
-	if $MAKE_X && ! $MAKE_GNOME && ! $MAKE_HYPRLAND && ! $MAKE_MANGO && ! $MAKE_SWAY; then
+	if $MAKE_X && ! $MAKE_GNOME && ! $MAKE_HYPRLAND && ! $MAKE_MANGO && ! $MAKE_SWAY &&
+		! $MAKE_UMBRIEL && ! $MAKE_COSMIC; then
 		sh_configure_lightdm_default_session
 	fi
 
