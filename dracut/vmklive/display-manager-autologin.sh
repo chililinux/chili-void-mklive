@@ -86,6 +86,43 @@ last-user=${USERNAME}
 last-session=${SESSION_NAME}
 EOF
 
+	# greetd -- não tem arquivo .d nem chave "Enable": o autologin é a
+	# seção [initial_session] do /etc/greetd/config.toml, que roda UMA
+	# vez por boot (controlado pelo runfile em /run). Depois do logout
+	# cai no [default_session] (o greeter: noctalia-greeter,
+	# cosmic-greeter...), que fica intacto. O greetd não lê .desktop,
+	# então o "command" é o Exec= da sessão escolhida.
+	GREETD_CMD=""
+	for f in "${NEWROOT}/usr/share/wayland-sessions/${SESSION_NAME}.desktop" \
+		"${NEWROOT}/usr/share/xsessions/${SESSION_NAME}.desktop"; do
+		[ -f "$f" ] || continue
+		GREETD_CMD=$(sed -n 's/^Exec=//p' "$f" | head -n1)
+		[ -n "$GREETD_CMD" ] && break
+	done
+	[ -z "$GREETD_CMD" ] && GREETD_CMD="$SESSION_NAME"
+	GREETD_CONF="${NEWROOT}/etc/greetd/config.toml"
+	mkdir -p "${NEWROOT}/etc/greetd"
+	if [ -f "$GREETD_CONF" ]; then
+		# remove um [initial_session] antigo (se houver), preservando o
+		# cabeçalho da seção seguinte
+		sed -i '/^\[initial_session\]/,/^\[/{/^\[initial_session\]/d;/^\[/!d;}' "$GREETD_CONF"
+	else
+		cat >"$GREETD_CONF" <<EOF
+[terminal]
+vt = 7
+
+[default_session]
+command = "agreety --cmd /bin/sh"
+user = "_greeter"
+EOF
+	fi
+	cat >>"$GREETD_CONF" <<EOF
+
+[initial_session]
+command = "${GREETD_CMD}"
+user = "${USERNAME}"
+EOF
+
 	# lxdm -- mesmo raciocínio: cria o arquivo do zero se não existir,
 	# em vez de só tentar um sed que não acha nada pra substituir.
 	case "$SESSION_NAME" in
@@ -119,7 +156,7 @@ disable_display_managers() {
 	# nenhum display manager subir, pra não competir com o autologin de
 	# texto da tty1 (adduser.sh) + o .bash_profile que dispara o
 	# void-install.
-	for dm in sddm gdm lightdm lxdm; do
+	for dm in sddm gdm lightdm lxdm greetd; do
 		rm -f "${NEWROOT}/etc/runit/runsvdir/default/$dm" 2>/dev/null
 	done
 }
