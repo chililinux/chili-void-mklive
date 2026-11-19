@@ -85,6 +85,11 @@ EOF
 last-user=${USERNAME}
 last-session=${SESSION_NAME}
 EOF
+	# o ~/.cache do lightdm tem que ser do usuário lightdm (o mkdir acima
+	# roda como root); senão o elephant-greeter morre e fica tela preta
+	if [ -d "${NEWROOT}/var/lib/lightdm" ]; then
+		chroot "${NEWROOT}" chown -R lightdm:lightdm /var/lib/lightdm/.cache 2>/dev/null || :
+	fi
 
 	# greetd -- não tem arquivo .d nem chave "Enable": o autologin é a
 	# seção [initial_session] do /etc/greetd/config.toml, que roda UMA
