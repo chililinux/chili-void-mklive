@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: qui 19 nov 2026 11:37:28 -04
+# Updated: qui 19 nov 2026 12:07:20 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.17-20261119'
+readonly _VERSION_='0.11.18-20261119'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -1017,12 +1017,16 @@ cleanup_rootfs() {
 # autologin ativo, mantém a entrada e só remove as linhas-marcador; com
 # --autologin=false (ou fullx) a entrada principal já é login normal,
 # então remove o bloco inteiro pra não ficar repetida.
+# @@AUTOLOGIN_LABEL@@ marca no nome as entradas que fazem autologin
+# (principal, RAM, com voz): " (login automático)" ou vazio.
 sh_boot_menu_noautologin_entry() {
 	local cfg="$1"
 	if ! $AUTOLOGIN || $MAKE_FULL_X; then
-		sed -i '/@@NOAUTOLOGIN_BEGIN@@/,/@@NOAUTOLOGIN_END@@/d' "$cfg"
+		sed -i -e '/@@NOAUTOLOGIN_BEGIN@@/,/@@NOAUTOLOGIN_END@@/d' \
+			-e 's/@@AUTOLOGIN_LABEL@@//g' "$cfg"
 	else
-		sed -i '/@@NOAUTOLOGIN_\(BEGIN\|END\)@@/d' "$cfg"
+		sed -i -e '/@@NOAUTOLOGIN_\(BEGIN\|END\)@@/d' \
+			-e 's/@@AUTOLOGIN_LABEL@@/ (login automático)/g' "$cfg"
 	fi
 }
 
@@ -1746,6 +1750,26 @@ sh_install_rootfs() {
 	finish_clean
 }
 
+# greetd do Void: o run é só "exec greetd", sem esperar o dbus. No boot o
+# [initial_session] (autologin) abria a sessão antes do dbus/elogind
+# estarem prontos -> sessão sem seat -> compositor em panic (cosmic-comp
+# saía com 101). Espera o dbus (que ativa o elogind) antes de subir; se o
+# dbus não estiver habilitado, não bloqueia. Mesmo conteúdo do run do
+# pacote greetd do VoidBR (voidbr-pkgmake/templates/greetd).
+sh_configure_greetd_service() {
+	[[ -d "$ROOTFS/etc/sv/greetd" ]] || return 0
+	info_msg "greetd: run aguardando o dbus ($ROOTFS/etc/sv/greetd/run)"
+	cat >"$ROOTFS/etc/sv/greetd/run" <<-'EOF'
+		#!/bin/sh
+		exec 2>&1
+		if [ -e /var/service/dbus ]; then
+			sv check dbus >/dev/null || exit 1
+		fi
+		exec greetd
+	EOF
+	chmod 755 "$ROOTFS/etc/sv/greetd/run"
+}
+
 enable_services() {
 	local SERVICE_LIST="$*"
 	local service link
@@ -1810,6 +1834,7 @@ sh_make_iso() {
 
 	replicate '-'
 	enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST} ${ADDITIONAL_SERVICE_LIST} ${EXTRA_SERVICE_LIST}
+	sh_configure_greetd_service
 	replicate '-'
 
 	if [ "${#INCLUDE_DIRS[@]}" -gt 0 ]; then

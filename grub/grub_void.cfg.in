@@ -63,7 +63,7 @@ if [ cpuid -l ]; then
 		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin=anon voidbr.autoinstall
         initrd (${voidlive})/boot/initrd
     }
-    menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@)" --class void --class gnu-linux --class gnu --class os  {
+    menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@)@@AUTOLOGIN_LABEL@@" --class void --class gnu-linux --class gnu --class os  {
         set gfxpayload="keep"
         linux (${voidlive})/boot/vmlinuz \
 		root=live:CDLABEL=VOIDBR_LIVE_XFCE ro init=/sbin/init \
@@ -83,7 +83,7 @@ if [ cpuid -l ]; then
         initrd (${voidlive})/boot/initrd
     }
 #@@NOAUTOLOGIN_END@@
-    menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) (RAM)" --class void --class gnu-linux --class gnu --class os {
+    menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) (RAM)@@AUTOLOGIN_LABEL@@" --class void --class gnu-linux --class gnu --class os {
         set gfxpayload="keep"
         linux (${voidlive})/boot/vmlinuz \
 		root=live:CDLABEL=VOIDBR_LIVE_XFCE ro init=/sbin/init \
