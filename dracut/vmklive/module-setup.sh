@@ -31,9 +31,13 @@ install() {
 	fi
 
 	inst_hook pre-pivot 01 "$moddir/adduser.sh"
-	if [ ! -e /usr/lib/dracut/modules.d/01vmklive/noautologin ]; then
-		inst_hook pre-pivot 02 "$moddir/display-manager-autologin.sh"
+	# Hook sempre instalado: além do autologin gráfico, ele desliga os
+	# DMs na entrada "Instalar" (voidbr.autoinstall). O marcador
+	# noautologin (mkiso --autologin=false / fullx) só desliga o autologin.
+	if [ -e "$moddir/noautologin" ]; then
+		inst_simple "$moddir/noautologin" /etc/vmklive-noautologin
 	fi
+	inst_hook pre-pivot 02 "$moddir/display-manager-autologin.sh"
 	inst_hook pre-pivot 02 "$moddir/getty-serial.sh"
 	inst_hook pre-pivot 03 "$moddir/locale.sh"
 	inst_hook pre-pivot 04 "$moddir/repository.sh"
