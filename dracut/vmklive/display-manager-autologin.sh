@@ -96,7 +96,9 @@ EOF
 	for f in "${NEWROOT}/usr/share/wayland-sessions/${SESSION_NAME}.desktop" \
 		"${NEWROOT}/usr/share/xsessions/${SESSION_NAME}.desktop"; do
 		[ -f "$f" ] || continue
-		GREETD_CMD=$(sed -n 's/^Exec=//p' "$f" | head -n1)
+		# só sed (instalado no initramfs pelo module-setup.sh); "head"
+		# não existe no initramfs e fazia o pipe voltar vazio
+		GREETD_CMD=$(sed -n '/^Exec=/{s/^Exec=//p;q;}' "$f")
 		[ -n "$GREETD_CMD" ] && break
 	done
 	[ -z "$GREETD_CMD" ] && GREETD_CMD="$SESSION_NAME"
