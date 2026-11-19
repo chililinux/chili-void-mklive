@@ -168,7 +168,8 @@ disable_display_managers() {
 # principal do dracut inteiro em vez de só voltar do hook.
 if getargbool 0 voidbr.autoinstall; then
 	disable_display_managers
-elif [ ! -e /etc/vmklive-noautologin ]; then
+elif [ ! -e /etc/vmklive-noautologin ] && ! getargbool 0 voidbr.noautologin; then
 	# /etc/vmklive-noautologin = mkiso --autologin=false (ou fullx)
+	# voidbr.noautologin = entrada "(login normal)" do menu de boot
 	configure_normal_dm_autologin
 fi

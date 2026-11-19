@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: qui 19 nov 2026 11:24:04 -04
+# Updated: qui 19 nov 2026 11:37:28 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.16-20261119'
+readonly _VERSION_='0.11.17-20261119'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -1012,6 +1012,20 @@ cleanup_rootfs() {
 	rm -r "$ROOTFS"/usr/lib/dracut/modules.d/01autoinstaller
 }
 
+# Entrada "(login normal)" do menu de boot (isolinux/grub/limine), marcada
+# por #@@NOAUTOLOGIN_BEGIN@@ ... #@@NOAUTOLOGIN_END@@ nos templates. Com
+# autologin ativo, mantém a entrada e só remove as linhas-marcador; com
+# --autologin=false (ou fullx) a entrada principal já é login normal,
+# então remove o bloco inteiro pra não ficar repetida.
+sh_boot_menu_noautologin_entry() {
+	local cfg="$1"
+	if ! $AUTOLOGIN || $MAKE_FULL_X; then
+		sed -i '/@@NOAUTOLOGIN_BEGIN@@/,/@@NOAUTOLOGIN_END@@/d' "$cfg"
+	else
+		sed -i '/@@NOAUTOLOGIN_\(BEGIN\|END\)@@/d' "$cfg"
+	fi
+}
+
 generate_isolinux_boot() {
 	print_step "Gerando suporte isolinux para sistema : PC-BIOS"
 	run_cmd_new cp -f "$SYSLINUX_DATADIR"/isolinux.bin "$ISOLINUX_DIR"
@@ -1033,6 +1047,7 @@ generate_isolinux_boot() {
 		-e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
 		-e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
 		"$ISOLINUX_DIR"/isolinux.cfg
+	sh_boot_menu_noautologin_entry "$ISOLINUX_DIR"/isolinux.cfg
 
 	# include memtest86+
 	#run_cmd_new cp -f "$HOSTDIR"/boot/memtest.bin "$BOOT_DIR"
@@ -1049,6 +1064,7 @@ generate_limine_boot() {
 			-e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
 			-e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
 			-e "s|@@LOCALE@@|${LOCALE}|" "$LIMINE_DIR"/limine.conf
+		sh_boot_menu_noautologin_entry "$LIMINE_DIR"/limine.conf
 
 		# Wallpaper do tema (referenciado no limine.conf via
 		# "boot():/boot/limine/voidbr-tokyonight.png"). O pacote
@@ -1090,6 +1106,7 @@ generate_grub_efi_boot() {
 			-e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
 			-e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
 			-e "s|@@LOCALE@@|${LOCALE}|" "$GRUB_DIR"/grub_void.cfg
+		sh_boot_menu_noautologin_entry "$GRUB_DIR"/grub_void.cfg
 		run_cmd_new mkdir -p "$GRUB_DIR"/fonts
 		run_cmd_new cp -f "$GRUB_DATADIR"/unicode.pf2 "$GRUB_DIR"/fonts
 

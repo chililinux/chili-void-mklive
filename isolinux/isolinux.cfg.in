@@ -31,6 +31,13 @@ MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
 
+#@@NOAUTOLOGIN_BEGIN@@
+LABEL linuxnoauto
+MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (login normal: anon/voidlinux)
+KERNEL /boot/vmlinuz
+APPEND initrd=/boot/initrd root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ voidbr.noautologin
+#@@NOAUTOLOGIN_END@@
+
 LABEL linuxram
 MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (RAM)
 KERNEL /boot/vmlinuz
