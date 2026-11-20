@@ -25,10 +25,15 @@ configure_normal_dm_autologin() {
 		case "$_edition_lc" in
 		xfce-base) _edition_lc=xfce ;;
 		esac
-		if [ -f "${NEWROOT}/usr/share/wayland-sessions/${_edition_lc}.desktop" ] ||
-			[ -f "${NEWROOT}/usr/share/xsessions/${_edition_lc}.desktop" ]; then
-			SESSION_NAME="$_edition_lc"
-		fi
+		# tenta o nome do flavor e a variante voidbr-<flavor> (ex: labwc ->
+		# voidbr-labwc.desktop, vinda do voidbr-labwc-config)
+		for _s in "$_edition_lc" "voidbr-${_edition_lc}"; do
+			if [ -f "${NEWROOT}/usr/share/wayland-sessions/${_s}.desktop" ] ||
+				[ -f "${NEWROOT}/usr/share/xsessions/${_s}.desktop" ]; then
+				SESSION_NAME="$_s"
+				break
+			fi
+		done
 	fi
 
 	# Fallback: EDITION ausente/sem .desktop correspondente -- varre os

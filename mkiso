@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: qui 19 nov 2026 18:26:24 -04
+# Updated: sex 20 nov 2026 00:35:02 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.19-20261119'
+readonly _VERSION_='0.11.20-20261120'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -144,6 +144,7 @@ declare -g MAKE_SWAY=false
 declare -g MAKE_UMBRIEL=false
 declare -g MAKE_COSMIC=false
 declare -g MAKE_MANGO=false
+declare -g MAKE_LABWC=false
 declare -g MAKE_RIVER=false
 declare -g MAKE_I3=false
 declare -g MAKE_HYPRLAND=false
@@ -158,7 +159,7 @@ declare -gi STEP_COUNT=66
 # -Z, -I, -g) são somados em sh_set_step_count.
 declare -gA STEP_COUNT_FLAVOR=(
 	[base]=66
-	[gnome]=67 [hyprland]=67 [mango]=67 [sway]=67
+	[gnome]=67 [hyprland]=67 [mango]=67 [sway]=67 [labwc]=67
 	[bspwm]=68 [cinnamon]=68 [fluxbox]=68 [fullx]=68 [i3]=68 [install]=68
 	[LXDE]=68 [mate]=68 [plasma]=68 [plasma-louvorja-piano]=68 [river]=68
 	[xfce]=68 [xfce-base]=68
@@ -292,7 +293,7 @@ sh_choose_voidbr_x11_themes() {
 
 sh_choose_packages_display_manager() {
 	print_step "Selecionando display manager"
-	if $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_GNOME; then
+	if $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_LABWC || $MAKE_GNOME; then
 		COMMON_PKGS+=" sddm"
 		AEXTRA_COMMON_PKGS+=" voidbr-sddm-themes"
 	elif $MAKE_UMBRIEL; then
@@ -1339,6 +1340,7 @@ ${bold}Desktop presets:${rst}
   -U|umbriel        ${green}UMBRIEL${rst}
   cosmic            ${green}COSMIC${rst}
   -O|mango          ${green}MANGO${rst}
+  labwc             ${green}LABWC${rst}
   -H|hyprland       ${green}HYPRLAND${rst}
   -A|fullx          ${green}ALL X${rst}
 
@@ -1417,6 +1419,10 @@ sh_config_distroname() {
 		title='VoidBR Linux Live Mango'
 		VOL_ID='VOIDBR_LIVE_MANGO'
 		name='mango'
+	elif $MAKE_LABWC; then
+		title='VoidBR Linux Live Labwc'
+		VOL_ID='VOIDBR_LIVE_LABWC'
+		name='labwc'
 	elif $MAKE_HYPRLAND; then
 		title='VoidBR Linux Live Hyprland'
 		VOL_ID='VOIDBR_LIVE_HYPRLAND'
@@ -1496,6 +1502,7 @@ sh_configure_packages() {
 			ADISTRO_PKGS+=" voidbr-fluxbox"
 			ADISTRO_PKGS+=" voidbr-sway"
 			ADISTRO_PKGS+=" voidbr-mango"
+			ADISTRO_PKGS+=" voidbr-labwc"
 			ADISTRO_PKGS+=" voidbr-hyprland"
 			ADISTRO_PKGS+=" voidbr-gnome"
 			ADISTRO_PKGS+=" voidbr-cinnamon"
@@ -1511,6 +1518,8 @@ sh_configure_packages() {
 			ADISTRO_PKGS+=" voidbr-cosmic"
 		elif $MAKE_MANGO; then
 			ADISTRO_PKGS+=" voidbr-mango"
+		elif $MAKE_LABWC; then
+			ADISTRO_PKGS+=" voidbr-labwc"
 		elif $MAKE_RIVER; then
 			ADISTRO_PKGS+=" voidbr-river"
 		elif $MAKE_FLUXBOX; then
@@ -1808,6 +1817,9 @@ cleanup_spurious_sessions() {
 	# SDDM/lightdm sem serem o DE principal pretendido. Remove só o
 	# .desktop (não o pacote/binário), pra não sumir da lista de
 	# sessão sem precisar desinstalar nada que outra coisa dependa.
+	# No flavor labwc a sessão certa é a voidbr-labwc.desktop (do
+	# voidbr-labwc-config, com dbus-run-session); a labwc.desktop crua
+	# do pacote labwc seria só uma duplicata sem a config do VoidBR.
 	for f in labwc weston; do
 		rm -f "$ROOTFS/usr/share/xsessions/${f}.desktop" \
 			"$ROOTFS/usr/share/wayland-sessions/${f}.desktop"
@@ -1822,7 +1834,7 @@ sh_make_iso() {
 	#      Você não precisa ativar os serviços deles no runit.
 	: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 dbus socklog-unix nanoklogd udevd sshd NetworkManager dhcpcd chronyd}
 	if $MAKE_X; then
-		if $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_GNOME; then
+		if $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_LABWC || $MAKE_GNOME; then
 			: ${ADDITIONAL_SERVICE_LIST:=sddm}
 		elif $MAKE_UMBRIEL; then
 			: ${ADDITIONAL_SERVICE_LIST:=greetd}
@@ -1897,7 +1909,7 @@ sh_make_iso() {
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
 	sh_remove_etc_xbps_00_repository_main_conf "$conf"
 	sh_activating_pipewire
-	if $MAKE_X && ! $MAKE_GNOME && ! $MAKE_HYPRLAND && ! $MAKE_MANGO && ! $MAKE_SWAY &&
+	if $MAKE_X && ! $MAKE_GNOME && ! $MAKE_HYPRLAND && ! $MAKE_MANGO && ! $MAKE_SWAY && ! $MAKE_LABWC &&
 		! $MAKE_UMBRIEL && ! $MAKE_COSMIC; then
 		sh_configure_lightdm_default_session
 	fi
@@ -2103,6 +2115,10 @@ for arg in "$@"; do
 	mango)
 		MAKE_X=true
 		MAKE_MANGO=true
+		;;
+	labwc)
+		MAKE_X=true
+		MAKE_LABWC=true
 		;;
 	hyprland)
 		MAKE_X=true
