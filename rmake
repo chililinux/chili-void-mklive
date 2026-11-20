@@ -4,7 +4,7 @@
 #
 #  rmake
 #  Created: 2023/09/18 - 09:05
-#  Updated: qui 19 nov 2026 11:24:04 -04
+#  Updated: sex 20 nov 2026 00:35:02 -04
 #
 #  Copyright (c) 2019-2026, Vilmar Catafesta <vcatafesta@gmail.com>
 #  Copyright (c) 2019-2026, ChiliLinux Development Team <https://chililinux.com> <https://github.com/chililinux>
@@ -53,6 +53,7 @@ FLAVORS=(
 	hyprland
 	i3
 	install
+	labwc
 	lxde
 	mango
 	mate

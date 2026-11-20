@@ -25,10 +25,23 @@ configure_normal_dm_autologin() {
 		case "$_edition_lc" in
 		xfce-base) _edition_lc=xfce ;;
 		esac
-		if [ -f "${NEWROOT}/usr/share/wayland-sessions/${_edition_lc}.desktop" ] ||
-			[ -f "${NEWROOT}/usr/share/xsessions/${_edition_lc}.desktop" ]; then
-			SESSION_NAME="$_edition_lc"
-		fi
+		# tenta o nome do flavor e a variante voidbr-<flavor> (ex: labwc ->
+		# voidbr-labwc.desktop, vinda do voidbr-labwc-config). Compara sem
+		# diferenciar maiúscula/minúscula e usa o nome REAL do arquivo: o
+		# LXDE grava EDITION="LXDE" e o .desktop é LXDE.desktop (lxde.desktop
+		# não existe). Nome do arquivo via ${f##*/}, sem basename (não existe
+		# no initramfs).
+		for _s in "$_edition_lc" "voidbr-${_edition_lc}"; do
+			for f in "${NEWROOT}"/usr/share/wayland-sessions/*.desktop "${NEWROOT}"/usr/share/xsessions/*.desktop; do
+				[ -f "$f" ] || continue
+				_b=${f##*/}
+				_b=${_b%.desktop}
+				if [ "$(echo "$_b" | tr '[:upper:]' '[:lower:]')" = "$_s" ]; then
+					SESSION_NAME="$_b"
+					break 2
+				fi
+			done
+		done
 	fi
 
 	# Fallback: EDITION ausente/sem .desktop correspondente -- varre os
@@ -37,7 +50,10 @@ configure_normal_dm_autologin() {
 	if [ -z "$SESSION_NAME" ]; then
 		for f in "${NEWROOT}"/usr/share/wayland-sessions/*.desktop "${NEWROOT}"/usr/share/xsessions/*.desktop; do
 			[ -f "$f" ] || continue
-			SESSION_NAME=$(basename "$f" .desktop)
+			# sem basename: não existe no initramfs (voltava vazio e caía
+			# sempre no "xfce" abaixo)
+			SESSION_NAME=${f##*/}
+			SESSION_NAME=${SESSION_NAME%.desktop}
 			break
 		done
 	fi
@@ -140,7 +156,7 @@ EOF
 	mate) LXDM_BIN=/usr/bin/mate-session ;;
 	cinnamon) LXDM_BIN=/usr/bin/cinnamon-session ;;
 	i3) LXDM_BIN=/usr/bin/i3 ;;
-	startlxde) LXDM_BIN=/usr/bin/startlxde ;;
+	startlxde | LXDE | lxde) LXDM_BIN=/usr/bin/startlxde ;;
 	startlxqt) LXDM_BIN=/usr/bin/startlxqt ;;
 	startfluxbox) LXDM_BIN=/usr/bin/startfluxbox ;;
 	*) LXDM_BIN=/usr/bin/startxfce4 ;;
