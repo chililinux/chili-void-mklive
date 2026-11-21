@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: sex 20 nov 2026 00:35:02 -04
+# Updated: sex 20 nov 2026 20:21:30 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.20-20261120'
+readonly _VERSION_='0.11.21-20261120'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -1832,7 +1832,13 @@ sh_make_iso() {
 
 	#dica: No Void, com dbus ativo, o elogind e o polkitd sobem automaticamente.
 	#      Você não precisa ativar os serviços deles no runit.
-	: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 dbus socklog-unix nanoklogd udevd sshd NetworkManager dhcpcd chronyd}
+	#
+	# dhcpcd NÃO entra aqui: o NetworkManager já faz o DHCP sozinho, e os dois
+	# juntos disputam as interfaces (o hook de wpa_supplicant do dhcpcd briga
+	# com o do NM no Wi-Fi -> falha de conexão mesmo com senha certa). Como o
+	# void-install copia o runsvdir da ISO (source local), o link iria parar
+	# também no sistema instalado. O pacote dhcpcd continua na ISO.
+	: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 dbus socklog-unix nanoklogd udevd sshd NetworkManager chronyd}
 	if $MAKE_X; then
 		if $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_LABWC || $MAKE_GNOME; then
 			: ${ADDITIONAL_SERVICE_LIST:=sddm}
