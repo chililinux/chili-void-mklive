@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: dom 22 nov 2026 07:13:02 -04
+# Updated: dom 22 nov 2026 11:59:58 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.26-20261122'
+readonly _VERSION_='0.11.27-20261122'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -68,8 +68,9 @@ automatic=false
 declare -g BOOTLOADER="grub"
 declare -g AUTOLOGIN=true
 # --clean-build=true: remove o diretório de build do flavor ($ROOTDIR/<flavor>,
-# ex: /lfs/voidbr/xfce) depois de gerar a ISO com sucesso. Default: false.
-declare -g CLEAN_BUILD=false
+# ex: /lfs/voidbr/xfce) depois de gerar a ISO com sucesso. Default: true
+# (use --clean-build=false para manter o build).
+declare -g CLEAN_BUILD=true
 new_args=()
 for arg in "$@"; do
 	if [[ "$arg" == "--automatic" ]]; then
@@ -1400,7 +1401,7 @@ ${bold}OPTIONS${rst}
   -v linux<ver>      ${cyan}Custom kernel version${rst}
   --bootloader=<x>    ${cyan}Bootloader${rst} (grub|limine, default: grub)
   --autologin=<x>     ${cyan}Autologin gráfico no live${rst} (true|false, default: true; fullx sempre false)
-  --clean-build=<x>   ${cyan}Remove o build do flavor (\$ROOTDIR/<flavor>) após ISO gerada com sucesso${rst} (true|false, default: false)
+  --clean-build=<x>   ${cyan}Remove o build do flavor (\$ROOTDIR/<flavor>) após ISO gerada com sucesso${rst} (true|false, default: true)
 
   -K                 ${yellow}Do not remove builddir${rst}
   -n                 ${yellow}Reuse existing squashfs${rst}

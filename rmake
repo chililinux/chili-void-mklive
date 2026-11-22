@@ -4,7 +4,7 @@
 #
 #  rmake
 #  Created: 2023/09/18 - 09:05
-#  Updated: dom 22 nov 2026 07:13:02 -04
+#  Updated: dom 22 nov 2026 11:59:58 -04
 #
 #  Copyright (c) 2019-2026, Vilmar Catafesta <vcatafesta@gmail.com>
 #  Copyright (c) 2019-2026, ChiliLinux Development Team <https://chililinux.com> <https://github.com/chililinux>
@@ -82,15 +82,16 @@ ${yellow}Examples:${reset}
     $0 xfce --bootloader=grub
     $0 xfce lxde plasma --bootloader=limine
     $0 cosmic --autologin=false
-    $0 xfce hyprland --clean-build=true
+    $0 xfce hyprland --clean-build=false
 
 ${yellow}Available flavors:${reset}
     ${green}all ${FLAVORS[*]}${reset}
+    (${cyan}all${reset} = todos, menos o ${green}fullx${reset}, que só roda chamado explicitamente)
 
 ${yellow}Flags (repassadas direto pro mkiso):${reset}
     ${green}--automatic --bootloader=grub|limine${reset}   Bootloader da ISO
     ${green}--autologin=true|false${reset}                 Autologin gráfico no live (default: true)
-    ${green}--clean-build=true|false${reset}               Remove o build do sabor (/lfs/voidbr/<sabor>) após ISO gerada com sucesso (default: false)
+    ${green}--clean-build=true|false${reset}               Remove o build do sabor (/lfs/voidbr/<sabor>) após ISO gerada com sucesso (default: true)
 EOF
 	exit 1
 }
@@ -99,6 +100,9 @@ EOF
 
 REQUESTED=()
 EXTRA_ARGS=()
+# 'all' não interrompe a leitura dos argumentos: flags depois dele
+# (ex: rmake all --clean-build=true) continuam sendo repassadas ao mkiso.
+build_all=false
 
 for arg in "$@"; do
 	if [[ "$arg" == --* ]]; then
@@ -112,8 +116,8 @@ for arg in "$@"; do
 		hypr) flavor="hyprland" ;;
 		louvor) flavor="plasma-louvorja-piano" ;;
 		all)
-			REQUESTED=("${FLAVORS[@]}")
-			break
+			build_all=true
+			continue
 			;;
 	esac
 
@@ -125,6 +129,16 @@ for arg in "$@"; do
 
 	REQUESTED+=("$flavor")
 done
+
+# 'all' = todos os flavors, menos o fullx (só com chamada explícita:
+# rmake fullx). Sabores avulsos junto com 'all' são ignorados.
+if $build_all; then
+	REQUESTED=()
+	for flavor in "${FLAVORS[@]}"; do
+		[[ "$flavor" == "fullx" ]] && continue
+		REQUESTED+=("$flavor")
+	done
+fi
 
 BUILD_ARGS=(
 	'--automatic'
