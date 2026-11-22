@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: sáb 21 nov 2026 23:38:09 -04
+# Updated: dom 22 nov 2026 04:36:09 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.22-20261121'
+readonly _VERSION_='0.11.23-20261122'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -159,8 +159,8 @@ declare -gi STEP_COUNT=66
 # -Z, -I, -g) são somados em sh_set_step_count.
 declare -gA STEP_COUNT_FLAVOR=(
 	[base]=66
-	[gnome]=67 [hyprland]=67 [mango]=67 [sway]=67 [labwc]=67
-	[bspwm]=68 [cinnamon]=68 [fluxbox]=68 [fullx]=68 [i3]=68 [install]=68
+	[gnome]=67 [hyprland]=67 [mango]=67 [sway]=67 [labwc]=67 [fullx]=67
+	[bspwm]=68 [cinnamon]=68 [fluxbox]=68 [i3]=68 [install]=68
 	[LXDE]=68 [mate]=68 [plasma]=68 [plasma-louvorja-piano]=68 [river]=68
 	[xfce]=68 [xfce-base]=68
 	[umbriel]=67 [cosmic]=68
@@ -1331,16 +1331,20 @@ ${bold}OPTIONS${rst}
   -Q                 ${yellow}Quiet mode${rst}
 
 ${bold}Desktop presets:${rst}
+  bspwm             ${green}BSPWM${rst}
   -N|cinnamon       ${green}CINNAMON${rst}
   -E|enlightenment  ${green}ENLIGHTENMENT${rst}
   -F|fluxbox        ${green}FLUXBOX${rst}
   -G|gnome          ${green}GNOME${rst}
+  i3                ${green}I3${rst}
+  lxde              ${green}LXDE${rst}
   -P|plasma|kde     ${green}KDE PLASMA${rst}
   -L|plasma-louvorja-piano     ${green}PLASMA LOUVORJA-PIANO${rst}
   -X|xfce-base      ${green}XFCE (base)${rst}
   -Y|xfce           ${green}XFCE${rst}
   -M|mate           ${green}MATE${rst}
   -S|sway           ${green}SWAY${rst}
+  river             ${green}RIVER${rst}
   -U|umbriel        ${green}UMBRIEL${rst}
   cosmic            ${green}COSMIC${rst}
   -O|mango          ${green}MANGO${rst}
@@ -1512,6 +1516,18 @@ sh_configure_packages() {
 			ADISTRO_PKGS+=" voidbr-cinnamon"
 			ADISTRO_PKGS+=" voidbr-mate"
 			ADISTRO_PKGS+=" voidbr-umbriel"
+			ADISTRO_PKGS+=" voidbr-cosmic"
+			ADISTRO_PKGS+=" voidbr-river"
+			ADISTRO_PKGS+=" voidbr-bspwm"
+			ADISTRO_PKGS+=" voidbr-i3"
+			ADISTRO_PKGS+=" voidbr-lxde"
+			ADISTRO_PKGS+=" voidbr-enlightenment"
+			# Display manager do fullx: sddm (greeter em Wayland, ver
+			# voidbr-sddm-themes/etc/sddm.conf.d/wayland.conf). Os DMs que os
+			# meta-pacotes trouxerem (lightdm, greetd) ficam instalados, mas
+			# só o sddm é habilitado no runit (sh_make_iso).
+			ADISTRO_PKGS+=" sddm"
+			AEXTRA_COMMON_PKGS+=" voidbr-sddm-themes"
 		elif $MAKE_HYPRLAND; then
 			ADISTRO_PKGS+=" voidbr-hyprland"
 		elif $MAKE_SWAY; then
@@ -1844,7 +1860,7 @@ sh_make_iso() {
 	# também no sistema instalado. O pacote dhcpcd continua na ISO.
 	: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 dbus socklog-unix nanoklogd udevd sshd NetworkManager chronyd}
 	if $MAKE_X; then
-		if $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_LABWC || $MAKE_GNOME; then
+		if $MAKE_FULL_X || $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_LABWC || $MAKE_GNOME; then
 			: ${ADDITIONAL_SERVICE_LIST:=sddm}
 		elif $MAKE_UMBRIEL; then
 			: ${ADDITIONAL_SERVICE_LIST:=greetd}
@@ -1919,7 +1935,7 @@ sh_make_iso() {
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
 	sh_remove_etc_xbps_00_repository_main_conf "$conf"
 	sh_activating_pipewire
-	if $MAKE_X && ! $MAKE_GNOME && ! $MAKE_HYPRLAND && ! $MAKE_MANGO && ! $MAKE_SWAY && ! $MAKE_LABWC &&
+	if $MAKE_X && ! $MAKE_FULL_X && ! $MAKE_GNOME && ! $MAKE_HYPRLAND && ! $MAKE_MANGO && ! $MAKE_SWAY && ! $MAKE_LABWC &&
 		! $MAKE_UMBRIEL && ! $MAKE_COSMIC; then
 		sh_configure_lightdm_default_session
 	fi
