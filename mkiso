@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: dom 22 nov 2026 05:42:12 -04
+# Updated: dom 22 nov 2026 06:11:59 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.24-20261122'
+readonly _VERSION_='0.11.25-20261122'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -155,16 +155,17 @@ declare -g LBIND=false
 declare -gi STEP_COUNT=66
 # Total aproximado de passos de cada flavor (bootloader limine, sem -Z/-I/-g).
 # Base = 66; flavors com DM somam o serviço do DM (sddm em todos, menos
-# umbriel/cosmic, que usam greetd; cosmic soma também o cosmic-greeter-daemon).
+# umbriel/cosmic, que usam greetd; cosmic soma também o cosmic-greeter-daemon)
+# e, com sddm, o passo da sessão pré-selecionada (sh_configure_sddm_last_session).
 # Ajustes dinâmicos (grub, -Z, -I, -g) são somados em sh_set_step_count.
 declare -gA STEP_COUNT_FLAVOR=(
 	[base]=66
-	[gnome]=67 [hyprland]=67 [mango]=67 [sway]=67 [labwc]=67 [fullx]=67
-	[bspwm]=67 [cinnamon]=67 [fluxbox]=67 [i3]=67 [install]=67
-	[LXDE]=67 [mate]=67 [plasma]=67 [plasma-louvorja-piano]=67 [river]=67
-	[xfce]=67 [xfce-base]=67
+	[gnome]=68 [hyprland]=68 [mango]=68 [sway]=68 [labwc]=68 [fullx]=68
+	[bspwm]=68 [cinnamon]=68 [fluxbox]=68 [i3]=68 [install]=68
+	[LXDE]=68 [mate]=68 [plasma]=68 [plasma-louvorja-piano]=68 [river]=68
+	[xfce]=68 [xfce-base]=68
 	[umbriel]=67 [cosmic]=68
-	[enlightenment]=69
+	[enlightenment]=70
 )
 declare -gi njobs=59
 declare -g VOL_ID='VOIDBR_LIVE'
@@ -959,6 +960,69 @@ EOF
 	# lightdm-themes) morre no mkdir do próprio cache e fica tela preta.
 	# --reference evita resolver o nome "lightdm" fora do chroot.
 	chown -R --reference="${ROOTFS}/var/lib/lightdm" "${ROOTFS}/var/lib/lightdm/.cache"
+}
+
+sh_configure_sddm_last_session() {
+	# Sessão pré-selecionada no campo "Sessão" do greeter do sddm.
+	# O sddm lê [Last] Session= do state.conf na home do usuário sddm
+	# (/var/lib/sddm/state.conf) e compara com o caminho ABSOLUTO do .desktop
+	# (Session::fileName() no sddm 0.21). Sem o arquivo, o greeter começa na
+	# primeira sessão da lista -- é o que o fullx usa.
+	# O flavor vem do EDITION do /etc/os-release do rootfs (gravado por
+	# sh_set_edition_os_release), a mesma fonte que o hook de autologin do
+	# dracut (display-manager-autologin.sh) usa; a busca do .desktop também é
+	# a mesma: EDITION e depois voidbr-<EDITION>, primeiro em wayland-sessions
+	# e depois em xsessions, sem diferenciar maiúsculas/minúsculas (o LXDE é
+	# LXDE.desktop). Assim greeter e autologin escolhem sempre a mesma sessão.
+	local statedir="$ROOTFS/var/lib/sddm"
+	local statefile="$statedir/state.conf"
+	local flavor="" cand f b found=""
+
+	# umbriel/cosmic usam greetd; fullx começa na primeira sessão
+	if $MAKE_UMBRIEL || $MAKE_COSMIC; then
+		return 0
+	fi
+	if $MAKE_FULL_X; then
+		rm -f "$statefile"
+		print_step "sddm: fullx sem sessão pré-selecionada (começa na primeira)"
+		return 0
+	fi
+	[[ -d "$statedir" ]] || return 0
+
+	# EDITION="Hyprland" -> hyprland (subshell: o os-release não vaza variáveis)
+	flavor=$(EDITION=""; . "$ROOTFS/etc/os-release" 2>/dev/null; echo "${EDITION,,}")
+	[[ -z "$flavor" ]] && flavor="${name,,}"
+	# mesmos ajustes do hook de autologin
+	case "$flavor" in
+	xfce-base) flavor=xfce ;;
+	install) flavor=void-install ;;
+	esac
+
+	for cand in "$flavor" "voidbr-${flavor}"; do
+		for f in "$ROOTFS"/usr/share/wayland-sessions/*.desktop "$ROOTFS"/usr/share/xsessions/*.desktop; do
+			[[ -f "$f" ]] || continue
+			b="${f##*/}"
+			b="${b%.desktop}"
+			if [[ "${b,,}" == "$cand" ]]; then
+				found="${f#"$ROOTFS"}"
+				break 2
+			fi
+		done
+	done
+
+	if [[ -z "$found" ]]; then
+		info_msg "sddm: nenhuma sessão .desktop para '$flavor'; greeter começa na primeira"
+		return 0
+	fi
+
+	print_step "sddm: sessão pré-selecionada => ${yellow}${found}${reset}"
+	cat >"$statefile" <<-EOF
+		[Last]
+		Session=${found}
+	EOF
+	# o diretório é do usuário sddm; --reference evita resolver o nome fora do chroot
+	chown --reference="$statedir" "$statefile"
+	chmod 644 "$statefile"
 }
 
 generate_initramfs() {
@@ -1951,6 +2015,12 @@ sh_make_iso() {
 	}
 
 	sh_set_edition_os_release "$name"
+
+	# Sessão pré-selecionada no greeter do sddm: lida do EDITION que acabou
+	# de ser gravado no /etc/os-release (mesma fonte do hook de autologin).
+	if $MAKE_X; then
+		sh_configure_sddm_last_session
+	fi
 
 	# generate_squashfs
 	#	generate_iso_image
