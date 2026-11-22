@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: dom 22 nov 2026 06:11:59 -04
+# Updated: dom 22 nov 2026 07:13:02 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,20 +53,23 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.25-20261122'
+readonly _VERSION_='0.11.26-20261122'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
 # o que o usuário digitou, incluindo --automatic.
 ORIGINAL_ARGS=("$@")
 
-# Pre-parse de --automatic, --bootloader e --autologin: precisa acontecer ANTES do
+# Pre-parse de --automatic, --bootloader, --autologin e --clean-build: precisa acontecer ANTES do
 # source ./lib.sh, pois select_mirrors_dialog() (chamada automaticamente
 # ao carregar lib.sh) usa a variável $automatic internamente, e getopts
 # não lida com opções longas (por isso o filtro manual aqui).
 automatic=false
 declare -g BOOTLOADER="grub"
 declare -g AUTOLOGIN=true
+# --clean-build=true: remove o diretório de build do flavor ($ROOTDIR/<flavor>,
+# ex: /lfs/voidbr/xfce) depois de gerar a ISO com sucesso. Default: false.
+declare -g CLEAN_BUILD=false
 new_args=()
 for arg in "$@"; do
 	if [[ "$arg" == "--automatic" ]]; then
@@ -79,6 +82,10 @@ for arg in "$@"; do
 	fi
 	if [[ "$arg" == --autologin=* ]]; then
 		AUTOLOGIN="${arg#--autologin=}"
+		continue
+	fi
+	if [[ "$arg" == --clean-build=* ]]; then
+		CLEAN_BUILD="${arg#--clean-build=}"
 		continue
 	fi
 	new_args+=("$arg")
@@ -97,6 +104,14 @@ case "$AUTOLOGIN" in
 true | false) ;;
 *)
 	echo "ERRO: --autologin inválido: '$AUTOLOGIN' (use 'true' ou 'false')" >&2
+	exit 1
+	;;
+esac
+
+case "$CLEAN_BUILD" in
+true | false) ;;
+*)
+	echo "ERRO: --clean-build inválido: '$CLEAN_BUILD' (use 'true' ou 'false')" >&2
 	exit 1
 	;;
 esac
@@ -1385,6 +1400,7 @@ ${bold}OPTIONS${rst}
   -v linux<ver>      ${cyan}Custom kernel version${rst}
   --bootloader=<x>    ${cyan}Bootloader${rst} (grub|limine, default: grub)
   --autologin=<x>     ${cyan}Autologin gráfico no live${rst} (true|false, default: true; fullx sempre false)
+  --clean-build=<x>   ${cyan}Remove o build do flavor (\$ROOTDIR/<flavor>) após ISO gerada com sucesso${rst} (true|false, default: false)
 
   -K                 ${yellow}Do not remove builddir${rst}
   -n                 ${yellow}Reuse existing squashfs${rst}
@@ -1538,6 +1554,7 @@ sh_print_resume() {
 	else
 		print_step "Autologin       => ${yellow}true${reset}"
 	fi
+	print_step "Limpar build    => ${yellow}${CLEAN_BUILD}${reset} (${BUILDDIR})"
 	print_step "ROOTDIR         => ${yellow}${ROOTDIR}${reset}"
 	print_step "ROOTFS          => ${yellow}${ROOTFS}${reset}"
 	print_step "HOSTDIR         => ${yellow}${HOSTDIR}${reset}"
@@ -2026,6 +2043,31 @@ sh_make_iso() {
 	#	generate_iso_image
 }
 
+sh_clean_build() {
+	# --clean-build=true: remove $BUILDDIR ($ROOTDIR/<flavor>, ex: /lfs/voidbr/xfce)
+	# depois que a ISO foi gerada com sucesso. A ISO fica no diretório atual
+	# (fora do $BUILDDIR) e o $HOSTDIR ($ROOTDIR/hostdir), compartilhado entre
+	# os flavors, não é tocado.
+	$CLEAN_BUILD || return 0
+
+	# travas: nunca apagar vazio, /, o próprio $ROOTDIR ou o hostdir
+	if [[ -z "$BUILDDIR" || "$BUILDDIR" == "/" || "$BUILDDIR" == "$(readlink -f "$ROOTDIR")" ||
+		"$BUILDDIR" == "$(readlink -f "$HOSTDIR")" ]]; then
+		info_msg "--clean-build: BUILDDIR suspeito ('$BUILDDIR'), não removido"
+		return 0
+	fi
+	[[ -d "$BUILDDIR" ]] || return 0
+
+	# nada pode continuar montado dentro do build (dev/proc/sys do rootfs)
+	if grep -q " ${BUILDDIR}/" /proc/mounts; then
+		info_msg "--clean-build: ainda há pontos de montagem em $BUILDDIR, não removido"
+		return 0
+	fi
+
+	print_step "Removendo build do flavor (--clean-build=true) : ${yellow}${BUILDDIR}${reset}"
+	rm -rf --one-file-system "$BUILDDIR" || info_msg "--clean-build: falha ao remover $BUILDDIR"
+}
+
 sh_remove_etc_xbps_00_repository_main_conf() {
 	local conf="$1"
 	cmd_logger "Removendo arquivo: $conf" '
@@ -2260,4 +2302,5 @@ sh_make_iso
 generate_squashfs
 generate_iso_image
 umount_pseudofs
+sh_clean_build
 exit 0
