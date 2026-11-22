@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: dom 22 nov 2026 11:59:58 -04
+# Updated: dom 22 nov 2026 12:26:03 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.27-20261122'
+readonly _VERSION_='0.11.28-20261122'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -1926,6 +1926,14 @@ cleanup_spurious_sessions() {
 		rm -f "$ROOTFS/usr/share/xsessions/${f}.desktop" \
 			"$ROOTFS/usr/share/wayland-sessions/${f}.desktop"
 	done
+
+	# sway: entra em todos os flavors como compositor do greeter do sddm
+	# (dependência do voidbr-sddm-themes, ver /etc/sddm/sway-greeter.conf),
+	# mas só é sessão de verdade no flavor sway e no fullx (que inclui o
+	# voidbr-sway). Nos demais, a entrada "Sway" sai da lista de sessões.
+	if ! $MAKE_SWAY && ! $MAKE_FULL_X; then
+		rm -f "$ROOTFS/usr/share/wayland-sessions/sway.desktop"
+	fi
 }
 
 sh_make_iso() {
