@@ -4,7 +4,7 @@
 #
 #  rmake
 #  Created: 2023/09/18 - 09:05
-#  Updated: dom 22 nov 2026 11:59:58 -04
+#  Updated: dom 22 nov 2026 14:51:10 -04
 #
 #  Copyright (c) 2019-2026, Vilmar Catafesta <vcatafesta@gmail.com>
 #  Copyright (c) 2019-2026, ChiliLinux Development Team <https://chililinux.com> <https://github.com/chililinux>
@@ -48,7 +48,6 @@ FLAVORS=(
 	cosmic
 	enlightenment
 	fluxbox
-	fullx
 	gnome
 	hyprland
 	i3
@@ -57,6 +56,7 @@ FLAVORS=(
 	lxde
 	mango
 	mate
+	multi
 	plasma
 	plasma-louvorja-piano
 	river
@@ -86,7 +86,7 @@ ${yellow}Examples:${reset}
 
 ${yellow}Available flavors:${reset}
     ${green}all ${FLAVORS[*]}${reset}
-    (${cyan}all${reset} = todos, menos o ${green}fullx${reset}, que só roda chamado explicitamente)
+    (${cyan}all${reset} = todos, menos o ${green}multi${reset} (antigo fullx), que só roda chamado explicitamente)
 
 ${yellow}Flags (repassadas direto pro mkiso):${reset}
     ${green}--automatic --bootloader=grub|limine${reset}   Bootloader da ISO
@@ -115,6 +115,7 @@ for arg in "$@"; do
 	case "$flavor" in
 		hypr) flavor="hyprland" ;;
 		louvor) flavor="plasma-louvorja-piano" ;;
+		fullx) flavor="multi" ;; # nome antigo do multi, mantido como apelido
 		all)
 			build_all=true
 			continue
@@ -130,12 +131,13 @@ for arg in "$@"; do
 	REQUESTED+=("$flavor")
 done
 
-# 'all' = todos os flavors, menos o fullx (só com chamada explícita:
-# rmake fullx). Sabores avulsos junto com 'all' são ignorados.
+# 'all' = todos os flavors, menos o multi (só com chamada explícita:
+# rmake multi; 'fullx' ainda é aceito como apelido). Sabores avulsos junto
+# com 'all' são ignorados.
 if $build_all; then
 	REQUESTED=()
 	for flavor in "${FLAVORS[@]}"; do
-		[[ "$flavor" == "fullx" ]] && continue
+		[[ "$flavor" == "multi" ]] && continue
 		REQUESTED+=("$flavor")
 	done
 fi
