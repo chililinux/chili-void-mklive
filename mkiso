@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: dom 22 nov 2026 12:26:03 -04
+# Updated: dom 22 nov 2026 14:51:10 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.28-20261122'
+readonly _VERSION_='0.11.29-20261122'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -165,7 +165,7 @@ declare -g MAKE_RIVER=false
 declare -g MAKE_I3=false
 declare -g MAKE_HYPRLAND=false
 declare -g MAKE_ONLY_XORG=false
-declare -g MAKE_FULL_X=false
+declare -g MAKE_MULTI=false
 #
 declare -g LBIND=false
 declare -gi STEP_COUNT=66
@@ -176,7 +176,7 @@ declare -gi STEP_COUNT=66
 # Ajustes dinâmicos (grub, -Z, -I, -g) são somados em sh_set_step_count.
 declare -gA STEP_COUNT_FLAVOR=(
 	[base]=66
-	[gnome]=68 [hyprland]=68 [mango]=68 [sway]=68 [labwc]=68 [fullx]=68
+	[gnome]=68 [hyprland]=68 [mango]=68 [sway]=68 [labwc]=68 [multi]=68
 	[bspwm]=68 [cinnamon]=68 [fluxbox]=68 [i3]=68 [install]=68
 	[LXDE]=68 [mate]=68 [plasma]=68 [plasma-louvorja-piano]=68 [river]=68
 	[xfce]=68 [xfce-base]=68
@@ -652,12 +652,12 @@ error_out() {
 copy_dracut_files() {
 	mkdir -p "$1"/usr/lib/dracut/modules.d/01vmklive
 	cp dracut/vmklive/* "$1"/usr/lib/dracut/modules.d/01vmklive/
-	# autologin none: --autologin=false, ou fullx (sempre sem autologin).
+	# autologin none: --autologin=false, ou multi (sempre sem autologin).
 	# O marcador vai pro initramfs (module-setup.sh) e o hook
 	# display-manager-autologin.sh só pula o autologin gráfico -- continua
 	# desligando os DMs na entrada "Instalar" (voidbr.autoinstall).
 	rm -f "$1"/usr/lib/dracut/modules.d/01vmklive/noautologin
-	if ! $AUTOLOGIN || $MAKE_FULL_X; then
+	if ! $AUTOLOGIN || $MAKE_MULTI; then
 		touch "$1"/usr/lib/dracut/modules.d/01vmklive/noautologin
 	fi
 }
@@ -983,7 +983,7 @@ sh_configure_sddm_last_session() {
 	# O sddm lê [Last] Session= do state.conf na home do usuário sddm
 	# (/var/lib/sddm/state.conf) e compara com o caminho ABSOLUTO do .desktop
 	# (Session::fileName() no sddm 0.21). Sem o arquivo, o greeter começa na
-	# primeira sessão da lista -- é o que o fullx usa.
+	# primeira sessão da lista -- é o que o multi usa.
 	# O flavor vem do EDITION do /etc/os-release do rootfs (gravado por
 	# sh_set_edition_os_release), a mesma fonte que o hook de autologin do
 	# dracut (display-manager-autologin.sh) usa; a busca do .desktop também é
@@ -994,13 +994,13 @@ sh_configure_sddm_last_session() {
 	local statefile="$statedir/state.conf"
 	local flavor="" cand f b found=""
 
-	# umbriel/cosmic usam greetd; fullx começa na primeira sessão
+	# umbriel/cosmic usam greetd; multi começa na primeira sessão
 	if $MAKE_UMBRIEL || $MAKE_COSMIC; then
 		return 0
 	fi
-	if $MAKE_FULL_X; then
+	if $MAKE_MULTI; then
 		rm -f "$statefile"
-		print_step "sddm: fullx sem sessão pré-selecionada (começa na primeira)"
+		print_step "sddm: multi sem sessão pré-selecionada (começa na primeira)"
 		return 0
 	fi
 	[[ -d "$statedir" ]] || return 0
@@ -1101,13 +1101,13 @@ cleanup_rootfs() {
 # Entrada "(login normal)" do menu de boot (isolinux/grub/limine), marcada
 # por #@@NOAUTOLOGIN_BEGIN@@ ... #@@NOAUTOLOGIN_END@@ nos templates. Com
 # autologin ativo, mantém a entrada e só remove as linhas-marcador; com
-# --autologin=false (ou fullx) a entrada principal já é login normal,
+# --autologin=false (ou multi) a entrada principal já é login normal,
 # então remove o bloco inteiro pra não ficar repetida.
 # @@AUTOLOGIN_LABEL@@ marca no nome as entradas que fazem autologin
 # (principal, RAM, com voz): " (login automático)" ou vazio.
 sh_boot_menu_noautologin_entry() {
 	local cfg="$1"
-	if ! $AUTOLOGIN || $MAKE_FULL_X; then
+	if ! $AUTOLOGIN || $MAKE_MULTI; then
 		sed -i -e '/@@NOAUTOLOGIN_BEGIN@@/,/@@NOAUTOLOGIN_END@@/d' \
 			-e 's/@@AUTOLOGIN_LABEL@@//g' "$cfg"
 	else
@@ -1400,7 +1400,7 @@ ${bold}OPTIONS${rst}
   -T <title>         ${cyan}Bootloader title${rst} (default: Void Linux)
   -v linux<ver>      ${cyan}Custom kernel version${rst}
   --bootloader=<x>    ${cyan}Bootloader${rst} (grub|limine, default: grub)
-  --autologin=<x>     ${cyan}Autologin gráfico no live${rst} (true|false, default: true; fullx sempre false)
+  --autologin=<x>     ${cyan}Autologin gráfico no live${rst} (true|false, default: true; multi sempre false)
   --clean-build=<x>   ${cyan}Remove o build do flavor (\$ROOTDIR/<flavor>) após ISO gerada com sucesso${rst} (true|false, default: true)
 
   -K                 ${yellow}Do not remove builddir${rst}
@@ -1427,7 +1427,7 @@ ${bold}Desktop presets:${rst}
   -O|mango          ${green}MANGO${rst}
   labwc             ${green}LABWC${rst}
   -H|hyprland       ${green}HYPRLAND${rst}
-  -A|fullx          ${green}ALL X${rst}
+  -A|multi          ${green}MULTI (todos os sabores, X11 e Wayland; fullx = apelido)${rst}
 
   -h                 Show this help and exit
   -V                 Show version and exit
@@ -1436,10 +1436,10 @@ EOF
 
 sh_config_distroname() {
 	declare -ga name
-	if $MAKE_FULL_X; then
-		title='VoidBR Linux Live Full X'
-		VOL_ID='VOIDBR_LIVE_FULLX'
-		name='fullx'
+	if $MAKE_MULTI; then
+		title='VoidBR Linux Live Multi'
+		VOL_ID='VOIDBR_LIVE_MULTI'
+		name='multi'
 	elif $MAKE_ENLIGHTENMENT; then
 		title='VoidBR Linux Live Enlightenment'
 		VOL_ID='VOIDBR_LIVE_ENLIGHTENMENT'
@@ -1550,7 +1550,7 @@ sh_print_resume() {
 	print_step "Versao app       => ${yellow}${APP} v${_VERSION_}${reset}"
 	print_step "Profile         => ${yellow}${name}${reset}"
 	print_step "Bootloader      => ${yellow}${BOOTLOADER}${reset}"
-	if ! $AUTOLOGIN || $MAKE_FULL_X; then
+	if ! $AUTOLOGIN || $MAKE_MULTI; then
 		print_step "Autologin       => ${yellow}false${reset}"
 	else
 		print_step "Autologin       => ${yellow}true${reset}"
@@ -1581,7 +1581,7 @@ sh_configure_packages() {
 		# cadeia inteira sozinho a partir de UM nome só; não precisa mais listar
 		# pacote solto nem chamar as funções common_* pra essas DEs.
 		##########################################################################
-		if $MAKE_FULL_X; then
+		if $MAKE_MULTI; then
 			# Imagem "tudo em um": inclui todo mundo.
 			ADISTRO_PKGS+=" voidbr-xfce"
 			ADISTRO_PKGS+=" voidbr-plasma"
@@ -1600,7 +1600,7 @@ sh_configure_packages() {
 			ADISTRO_PKGS+=" voidbr-i3"
 			ADISTRO_PKGS+=" voidbr-lxde"
 			ADISTRO_PKGS+=" voidbr-enlightenment"
-			# Display manager do fullx: sddm (greeter em Wayland, ver
+			# Display manager do multi: sddm (greeter em Wayland, ver
 			# voidbr-sddm-themes/etc/sddm.conf.d/wayland.conf). Os DMs que os
 			# meta-pacotes trouxerem (lightdm, greetd) ficam instalados, mas
 			# só o sddm é habilitado no runit (sh_make_iso).
@@ -1929,9 +1929,9 @@ cleanup_spurious_sessions() {
 
 	# sway: entra em todos os flavors como compositor do greeter do sddm
 	# (dependência do voidbr-sddm-themes, ver /etc/sddm/sway-greeter.conf),
-	# mas só é sessão de verdade no flavor sway e no fullx (que inclui o
+	# mas só é sessão de verdade no flavor sway e no multi (que inclui o
 	# voidbr-sway). Nos demais, a entrada "Sway" sai da lista de sessões.
-	if ! $MAKE_SWAY && ! $MAKE_FULL_X; then
+	if ! $MAKE_SWAY && ! $MAKE_MULTI; then
 		rm -f "$ROOTFS/usr/share/wayland-sessions/sway.desktop"
 	fi
 }
@@ -2177,7 +2177,7 @@ while getopts "a:b:r:c:C:T:Kk:l:i:I:s:o:p:g:v:VhXxYyQqWwNnEeFfAGOHPmMSZ:D:" opt;
 		;;
 	A)
 		MAKE_X=true
-		MAKE_FULL_X=true
+		MAKE_MULTI=true
 		;;
 	q | Q) QUIET=true ;;
 	v) LINUX_VERSION="$OPTARG" ;;
@@ -2279,13 +2279,13 @@ for arg in "$@"; do
 		MAKE_X=true
 		MAKE_ENLIGHTENMENT=true
 		;;
-	fullx)
+	multi | fullx) # fullx: nome antigo do multi, mantido como apelido
 		MAKE_X=true
-		MAKE_FULL_X=true
+		MAKE_MULTI=true
 		;;
 	*)
 		MAKE_X=false
-		MAKE_FULL_X=false
+		MAKE_MULTI=false
 		;;
 	esac
 done

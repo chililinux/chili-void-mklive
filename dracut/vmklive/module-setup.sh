@@ -33,7 +33,7 @@ install() {
 	inst_hook pre-pivot 01 "$moddir/adduser.sh"
 	# Hook sempre instalado: além do autologin gráfico, ele desliga os
 	# DMs na entrada "Instalar" (voidbr.autoinstall). O marcador
-	# noautologin (mkiso --autologin=false / fullx) só desliga o autologin.
+	# noautologin (mkiso --autologin=false / multi) só desliga o autologin.
 	if [ -e "$moddir/noautologin" ]; then
 		inst_simple "$moddir/noautologin" /etc/vmklive-noautologin
 	fi

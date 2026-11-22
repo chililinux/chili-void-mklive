@@ -193,7 +193,7 @@ disable_display_managers() {
 if getargbool 0 voidbr.autoinstall; then
 	disable_display_managers
 elif [ ! -e /etc/vmklive-noautologin ] && ! getargbool 0 voidbr.noautologin; then
-	# /etc/vmklive-noautologin = mkiso --autologin=false (ou fullx)
+	# /etc/vmklive-noautologin = mkiso --autologin=false (ou multi)
 	# voidbr.noautologin = entrada "(login normal)" do menu de boot
 	configure_normal_dm_autologin
 fi
