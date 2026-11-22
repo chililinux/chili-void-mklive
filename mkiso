@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: dom 22 nov 2026 04:36:09 -04
+# Updated: dom 22 nov 2026 05:42:12 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.23-20261122'
+readonly _VERSION_='0.11.24-20261122'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -154,17 +154,17 @@ declare -g MAKE_FULL_X=false
 declare -g LBIND=false
 declare -gi STEP_COUNT=66
 # Total aproximado de passos de cada flavor (bootloader limine, sem -Z/-I/-g).
-# Base = 66; flavors com DM somam o serviço do DM e, quando usam lightdm,
-# o passo "Ajustando sessao default no lightdm". Ajustes dinâmicos (grub,
-# -Z, -I, -g) são somados em sh_set_step_count.
+# Base = 66; flavors com DM somam o serviço do DM (sddm em todos, menos
+# umbriel/cosmic, que usam greetd; cosmic soma também o cosmic-greeter-daemon).
+# Ajustes dinâmicos (grub, -Z, -I, -g) são somados em sh_set_step_count.
 declare -gA STEP_COUNT_FLAVOR=(
 	[base]=66
 	[gnome]=67 [hyprland]=67 [mango]=67 [sway]=67 [labwc]=67 [fullx]=67
-	[bspwm]=68 [cinnamon]=68 [fluxbox]=68 [i3]=68 [install]=68
-	[LXDE]=68 [mate]=68 [plasma]=68 [plasma-louvorja-piano]=68 [river]=68
-	[xfce]=68 [xfce-base]=68
+	[bspwm]=67 [cinnamon]=67 [fluxbox]=67 [i3]=67 [install]=67
+	[LXDE]=67 [mate]=67 [plasma]=67 [plasma-louvorja-piano]=67 [river]=67
+	[xfce]=67 [xfce-base]=67
 	[umbriel]=67 [cosmic]=68
-	[enlightenment]=70
+	[enlightenment]=69
 )
 declare -gi njobs=59
 declare -g VOL_ID='VOIDBR_LIVE'
@@ -292,11 +292,10 @@ sh_choose_voidbr_x11_themes() {
 }
 
 sh_choose_packages_display_manager() {
+	# sddm em todos os flavors (greeter em Wayland, tema voidbr-modern, ver
+	# voidbr-sddm-themes); exceções: umbriel e cosmic, que usam greetd.
 	print_step "Selecionando display manager"
-	if $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_LABWC || $MAKE_GNOME; then
-		COMMON_PKGS+=" sddm"
-		AEXTRA_COMMON_PKGS+=" voidbr-sddm-themes"
-	elif $MAKE_UMBRIEL; then
+	if $MAKE_UMBRIEL; then
 		COMMON_PKGS+=" greetd"
 		AEXTRA_COMMON_PKGS+=" noctalia-greeter"
 	elif $MAKE_COSMIC; then
@@ -304,11 +303,8 @@ sh_choose_packages_display_manager() {
 		# meta-pacote voidbr-cosmic (voidbr-cosmic-config)
 		COMMON_PKGS+=" greetd"
 	else
-		COMMON_PKGS+=" lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings"
-		COMMON_PKGS+=" arc-theme"
-		COMMON_PKGS+=" papirus-icon-theme"
-		COMMON_PKGS+=" dejavu-fonts-ttf"
-		AEXTRA_COMMON_PKGS+=" voidbr-lightdm-themes"
+		COMMON_PKGS+=" sddm"
+		AEXTRA_COMMON_PKGS+=" voidbr-sddm-themes"
 	fi
 }
 
@@ -1569,6 +1565,10 @@ sh_configure_packages() {
 			# Sessão X mínima, sem DE (--xorg/install): só a base Xorg
 			# + infra comum, sem nenhum meta-pacote de DE.
 			ADISTRO_PKGS+=" voidbr-base-common voidbr-xorg-common"
+			# sem meta-pacote de DE não vem gerenciador de login: o sddm
+			# abre a sessão void-install.desktop (flavor install)
+			ADISTRO_PKGS+=" sddm"
+			AEXTRA_COMMON_PKGS+=" voidbr-sddm-themes"
 		else
 			# ainda sem meta-pacote próprio, mantém o pipeline antigo (legado) até serem criados.
 			##########################################################################
@@ -1860,14 +1860,15 @@ sh_make_iso() {
 	# também no sistema instalado. O pacote dhcpcd continua na ISO.
 	: ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 dbus socklog-unix nanoklogd udevd sshd NetworkManager chronyd}
 	if $MAKE_X; then
-		if $MAKE_FULL_X || $MAKE_HYPRLAND || $MAKE_MANGO || $MAKE_SWAY || $MAKE_LABWC || $MAKE_GNOME; then
-			: ${ADDITIONAL_SERVICE_LIST:=sddm}
-		elif $MAKE_UMBRIEL; then
+		# sddm em todos os flavors; exceções: umbriel e cosmic (greetd).
+		# O lightdm que o voidbr-gui-common ainda traz fica instalado, mas
+		# não é habilitado.
+		if $MAKE_UMBRIEL; then
 			: ${ADDITIONAL_SERVICE_LIST:=greetd}
 		elif $MAKE_COSMIC; then
 			: ${ADDITIONAL_SERVICE_LIST:=cosmic-greeter-daemon greetd}
 		else
-			: ${ADDITIONAL_SERVICE_LIST:=lightdm}
+			: ${ADDITIONAL_SERVICE_LIST:=sddm}
 		fi
 	fi
 
@@ -1935,10 +1936,9 @@ sh_make_iso() {
 	local conf="$ROOTFS/etc/xbps.d/00-repository-main.conf"
 	sh_remove_etc_xbps_00_repository_main_conf "$conf"
 	sh_activating_pipewire
-	if $MAKE_X && ! $MAKE_FULL_X && ! $MAKE_GNOME && ! $MAKE_HYPRLAND && ! $MAKE_MANGO && ! $MAKE_SWAY && ! $MAKE_LABWC &&
-		! $MAKE_UMBRIEL && ! $MAKE_COSMIC; then
-		sh_configure_lightdm_default_session
-	fi
+	# sh_configure_lightdm_default_session não é mais chamada: nenhum flavor
+	# usa lightdm (sddm em todos, greetd no umbriel/cosmic). A função continua
+	# acima caso o lightdm volte a ser usado.
 
 	sh_set_edition_os_release() {
 		local name="$1"
