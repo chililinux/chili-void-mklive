@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: sex 20 nov 2026 20:21:30 -04
+# Updated: sáb 21 nov 2026 23:38:09 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.21-20261120'
+readonly _VERSION_='0.11.22-20261121'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -945,6 +945,10 @@ EOF
 
 sh_configure_lightdm_default_session() {
 	local cpath=${ROOTFS}/var/lib/lightdm/.cache/lightdm-gtk-greeter
+	local session=$name
+
+	# flavor install: a sessão é void-install.desktop (sh_configure_void_install_desktop)
+	[[ $name == install ]] && session=void-install
 
 	print_step "Ajustando sessao default no lightdm (user e session)"
 	mkdir -p ${cpath}
@@ -952,7 +956,7 @@ sh_configure_lightdm_default_session() {
 	cat >"${cpath}/state" <<EOF
 [greeter]
 last-user=anon
-last-session=$name
+last-session=$session
 EOF
 	# o mkdir acima roda como root: o ~/.cache do lightdm (/var/lib/lightdm)
 	# precisa ser do usuário lightdm, senão o elephant-greeter (voidbr-

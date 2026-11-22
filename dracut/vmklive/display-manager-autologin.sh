@@ -24,6 +24,9 @@ configure_normal_dm_autologin() {
 		_edition_lc=$(echo "$EDITION" | tr '[:upper:]' '[:lower:]')
 		case "$_edition_lc" in
 		xfce-base) _edition_lc=xfce ;;
+		# flavor install: EDITION="Install", mas a sessão é void-install.desktop
+		# (sem isso o fallback pegava terminal.desktop, que vem antes na ordem)
+		install) _edition_lc=void-install ;;
 		esac
 		# tenta o nome do flavor e a variante voidbr-<flavor> (ex: labwc ->
 		# voidbr-labwc.desktop, vinda do voidbr-labwc-config). Compara sem
