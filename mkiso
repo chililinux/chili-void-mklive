@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: dom 22 nov 2026 14:51:10 -04
+# Updated: seg 23 nov 2026 00:15:31 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.29-20261122'
+readonly _VERSION_='0.11.30-20261123'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -172,11 +172,12 @@ declare -gi STEP_COUNT=66
 # Total aproximado de passos de cada flavor (bootloader limine, sem -Z/-I/-g).
 # Base = 66; flavors com DM somam o serviço do DM (sddm em todos, menos
 # umbriel/cosmic, que usam greetd; cosmic soma também o cosmic-greeter-daemon)
-# e, com sddm, o passo da sessão pré-selecionada (sh_configure_sddm_last_session).
+# e, com sddm, o passo da sessão pré-selecionada (sh_configure_sddm_last_session);
+# mango e multi somam o passo do tema voidbr-mango (sh_configure_sddm_theme).
 # Ajustes dinâmicos (grub, -Z, -I, -g) são somados em sh_set_step_count.
 declare -gA STEP_COUNT_FLAVOR=(
 	[base]=66
-	[gnome]=68 [hyprland]=68 [mango]=68 [sway]=68 [labwc]=68 [multi]=68
+	[gnome]=68 [hyprland]=68 [mango]=69 [sway]=68 [labwc]=68 [multi]=69
 	[bspwm]=68 [cinnamon]=68 [fluxbox]=68 [i3]=68 [install]=68
 	[LXDE]=68 [mate]=68 [plasma]=68 [plasma-louvorja-piano]=68 [river]=68
 	[xfce]=68 [xfce-base]=68
@@ -976,6 +977,27 @@ EOF
 	# lightdm-themes) morre no mkdir do próprio cache e fica tela preta.
 	# --reference evita resolver o nome "lightdm" fora do chroot.
 	chown -R --reference="${ROOTFS}/var/lib/lightdm" "${ROOTFS}/var/lib/lightdm/.cache"
+}
+
+sh_configure_sddm_theme() {
+	# Tema do greeter do sddm. O padrão é o do /etc/sddm.conf do
+	# voidbr-sddm-themes (voidbr-modern); a ISO mango e a multi usam o
+	# voidbr-mango (também do voidbr-sddm-themes). O voidbr-mango-config não
+	# troca o tema durante o build (MKISO_BUILD): quem decide aqui é o mkiso.
+	# O compositor do greeter (sway) vem do wayland.conf do voidbr-sddm-themes
+	# e vale para todos os temas.
+	local conf="$ROOTFS/etc/sddm.conf"
+	local theme="voidbr-mango"
+
+	$MAKE_MANGO || $MAKE_MULTI || return 0
+	[[ -f "$conf" ]] || return 0
+	if [[ ! -d "$ROOTFS/usr/share/sddm/themes/$theme" ]]; then
+		info_msg "sddm: tema $theme não encontrado; mantendo o padrão"
+		return 0
+	fi
+
+	print_step "sddm: tema do greeter => ${yellow}${theme}${reset}"
+	sed -i "s/^Current=.*/Current=${theme}/" "$conf"
 }
 
 sh_configure_sddm_last_session() {
@@ -2046,6 +2068,8 @@ sh_make_iso() {
 	# de ser gravado no /etc/os-release (mesma fonte do hook de autologin).
 	if $MAKE_X; then
 		sh_configure_sddm_last_session
+		# tema voidbr-mango na ISO mango e na multi
+		sh_configure_sddm_theme
 	fi
 
 	# generate_squashfs
