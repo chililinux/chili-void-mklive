@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: seg 23 nov 2026 00:15:31 -04
+# Updated: seg 23 nov 2026 19:44:58 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.30-20261123'
+readonly _VERSION_='0.11.31-20261123'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -2036,7 +2036,8 @@ sh_make_iso() {
 	#configure_service_boot_logger
 	#configure_service_plymouth_log
 	#configure_service_plymouth_stop
-	configure_etc_runit_core_services_quit_plymouth
+	# o 99-voidbr-plymouth-quit.sh vem do pacote voidbr-base-config
+	#configure_etc_runit_core_services_quit_plymouth
 	generate_initramfs
 	if [ "$BOOTLOADER" = "limine" ]; then
 		generate_limine_boot
