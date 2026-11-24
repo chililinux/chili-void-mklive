@@ -18,39 +18,39 @@ wallpaper_style: stretched
     protocol: linux
     path: boot():/boot/vmlinuz
     module_path: boot():/boot/initrd
-    cmdline: root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin=anon voidbr.autoinstall
+    cmdline: root=live:CDLABEL=VOIDBR_LIVE_MULTI init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin=anon voidbr.autoinstall
 
 /@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@)@@AUTOLOGIN_LABEL@@
     protocol: linux
     path: boot():/boot/vmlinuz
     module_path: boot():/boot/initrd
-    cmdline: root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
+    cmdline: root=live:CDLABEL=VOIDBR_LIVE_MULTI init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
 
 #@@NOAUTOLOGIN_BEGIN@@
 /@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) (login normal: anon/voidlinux)
     protocol: linux
     path: boot():/boot/vmlinuz
     module_path: boot():/boot/initrd
-    cmdline: root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ voidbr.noautologin
+    cmdline: root=live:CDLABEL=VOIDBR_LIVE_MULTI init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ voidbr.noautologin
 #@@NOAUTOLOGIN_END@@
 
 /@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) (RAM)@@AUTOLOGIN_LABEL@@
     protocol: linux
     path: boot():/boot/vmlinuz
     module_path: boot():/boot/initrd
-    cmdline: root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
+    cmdline: root=live:CDLABEL=VOIDBR_LIVE_MULTI init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
 
 /@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) com voz@@AUTOLOGIN_LABEL@@
     protocol: linux
     path: boot():/boot/vmlinuz
     module_path: boot():/boot/initrd
-    cmdline: root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin=anon
+    cmdline: root=live:CDLABEL=VOIDBR_LIVE_MULTI init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin=anon
 
 /@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) com voz (RAM)@@AUTOLOGIN_LABEL@@
     protocol: linux
     path: boot():/boot/vmlinuz
     module_path: boot():/boot/initrd
-    cmdline: root=live:CDLABEL=VOIDBR_LIVE_XFCE init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin=anon rd.live.ram
+    cmdline: root=live:CDLABEL=VOIDBR_LIVE_MULTI init=/sbin/init ro quiet splash plymouth.enable=1 rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ vconsole.font=ter-v20n locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin=anon rd.live.ram
 
 /Executar Memtest86+ (teste de RAM)
     protocol: multiboot1
