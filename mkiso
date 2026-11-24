@@ -6,7 +6,7 @@
 # mkiso
 #
 # Created: 2023/09/18 - 09:05
-# Updated: seg 23 nov 2026 19:44:58 -04
+# Updated: ter 24 nov 2026 01:49:05 -04
 #
 # Copyright (c) 2019-2026 Vilmar Catafesta <vcatafesta@gmail.com>
 # Copyright (c) 2009-2015 Juan Romero Pardines.
@@ -53,7 +53,7 @@ shopt -s extglob
 
 #system
 readonly APP="${0##*/}"
-readonly _VERSION_='0.11.31-20261123'
+readonly _VERSION_='0.11.32-20261124'
 
 # Guarda os argumentos originais ANTES de qualquer filtragem, para que uma
 # eventual re-execução via elevate_to_root() (sh_checkroot) preserve exatamente
@@ -980,24 +980,28 @@ EOF
 }
 
 sh_configure_sddm_theme() {
-	# Tema do greeter do sddm. O padrão é o do /etc/sddm.conf do
-	# voidbr-sddm-themes (voidbr-modern); a ISO mango e a multi usam o
-	# voidbr-mango (também do voidbr-sddm-themes). O voidbr-mango-config não
+	# Tema do greeter do sddm. O padrão é o do /etc/sddm.conf.d/10-theme.conf do
+	# voidbr-sddm-themes (voidbr-modern), que ninguém altera. A ISO mango e a
+	# multi usam o voidbr-mango (também do voidbr-sddm-themes) gravando o
+	# 50-voidbr-theme.conf, o mesmo arquivo que a aba "Tela de login" dos
+	# voidbr-*-tweaks grava (vale por cima do 10). O voidbr-mango-config não
 	# troca o tema durante o build (MKISO_BUILD): quem decide aqui é o mkiso.
 	# O compositor do greeter (sway) vem do wayland.conf do voidbr-sddm-themes
 	# e vale para todos os temas.
-	local conf="$ROOTFS/etc/sddm.conf"
+	local conf="$ROOTFS/etc/sddm.conf.d/50-voidbr-theme.conf"
 	local theme="voidbr-mango"
 
 	$MAKE_MANGO || $MAKE_MULTI || return 0
-	[[ -f "$conf" ]] || return 0
 	if [[ ! -d "$ROOTFS/usr/share/sddm/themes/$theme" ]]; then
 		info_msg "sddm: tema $theme não encontrado; mantendo o padrão"
 		return 0
 	fi
 
 	print_step "sddm: tema do greeter => ${yellow}${theme}${reset}"
-	sed -i "s/^Current=.*/Current=${theme}/" "$conf"
+	mkdir -p "${conf%/*}"
+	printf '# voidbr-sddm-theme: tema da tela de login (padrão da edição)\n[Theme]\nCurrent=%s\n' \
+		"$theme" >"$conf"
+	chmod 644 "$conf"
 }
 
 sh_configure_sddm_last_session() {
